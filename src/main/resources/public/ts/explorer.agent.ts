@@ -1,5 +1,5 @@
 import http from 'axios';
-import { AbstractBusAgent, ACTION, GetContextParameters, IActionParameters, IActionResult, IContext, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE } from 'ode-ts-client';
+import { AbstractBusAgent, ACTION, GetContextParameters, IActionParameters, IActionResult, IContext, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult } from 'ode-ts-client';
 import { IHandler } from 'ode-ts-client/dist/ts/explore/Agent';
 
 console.log("agent loading....")
@@ -16,6 +16,7 @@ class BlogAgent extends AbstractBusAgent {
         this.setHandler( ACTION.OPEN,   	this.onOpen as unknown as IHandler );
         this.setHandler( ACTION.CREATE,   	this.onCreate as unknown as IHandler );
         this.setHandler( ACTION.MANAGE,     this.onManage as unknown as IHandler );
+        this.setHandler( ACTION.UPD_PROPS,  this.onUpdateProps as unknown as IHandler );
     }
 
     onOpen( parameters:GetContextParameters ): void {
@@ -37,6 +38,14 @@ class BlogAgent extends AbstractBusAgent {
                 key:PROP_KEY.URL
             }]
         }
+        return Promise.resolve().then( () => res );
+    }
+
+    onUpdateProps( parameters:UpdatePropertiesParameters ): Promise<UpdatePropertiesResult> {
+        const res:UpdatePropertiesResult = {
+            resources: parameters.resources
+        }
+        alert( "TODO: update properties" );
         return Promise.resolve().then( () => res );
     }
 }
