@@ -7,14 +7,13 @@
                dragdrop="dropTo(folder, $originalEvent)">
                 <i class="arrow" ng-if="folder.children.all.length"></i> [[folder.name]]
             </a>
-            < !-- ng-if="folder.contains(currentFolder)"-- >
+            <!-- ng-if="folder.contains(currentFolder)"-->
             <ul ng-class="{ selected: folder.contains(currentFolder), closed: !folder.contains(currentFolder) }"
                 ng-include="'folder-tree'"></ul>
         </li>
     </div>
 </script>
-
-<!--TITLE -->
+<!--TITLE-->
 <div class="row">
 	<a class="button right-magnet" 
 		ng-hide="!currentFolder.ressources.all.length && !currentFolder.children.all.length && !isTrashFolder()"
@@ -29,8 +28,7 @@
 			</a></h1>
 	</app-title>
 </div>
-
-<!--TREE AND CONTENT -->
+<!--TREE AND CONTENT-->
 <div class="row rigid-grid" ng-if="!empty">
 	<section class="four cell">
 		<div class="margin-two row" 
@@ -131,7 +129,7 @@
 	</p>
 </div>
 <!--###############LIGHTBOX AND CONFIRMATION###################-->
-<!--RENAME LIGHTBOX -->
+<!--RENAME LIGHTBOX-->
 <lightbox show="displayLib.lightbox.renameFolder" on-close="lightbox('renameFolder')">
 	<h2>
 		<i18n>rename</i18n>
@@ -147,11 +145,11 @@
 
 	</div>
 </lightbox>
-<!--SHARE LIGHTBOX -->
+<!--SHARE LIGHTBOX-->
 <lightbox show="displayLib.showShare" ng-if="displayLib.showShare" on-close="displayLib.showShare = false">
 	<container template="library/share"></container>
 </lightbox>
-<!--NEW FOLDER LIGHTBOX -->
+<!--NEW FOLDER LIGHTBOX-->
 <lightbox show="displayLib.lightbox.newFolder" on-close="lightbox('newFolder')">
 	<form ng-submit="createFolder()">
 		<h2>
@@ -170,13 +168,13 @@
 		</div>
 	</form>
 </lightbox>
-<!--MOVE LIGHTBOX -->
+<!--MOVE LIGHTBOX-->
 <lightbox show="displayLib.lightbox.move" on-close="lightbox('move')">
 	<div ng-if="displayLib.lightbox.move">
 		<container template="library/move"></container>
 	</div>
 </lightbox>
-<!--CONFIRM REMOVE PUBLIC -->
+<!--CONFIRM REMOVE PUBLIC-->
 <lightbox show="display.confirmRemoveBlogPublic" on-close="display.confirmRemoveBlogPublic = false">
 	<div class="medium-block-container">
 		<h2>
@@ -195,7 +193,7 @@
 		</div>
 	</div>
 </lightbox>
-<!--CONFIRM REMOVE PUBLIC SELECTION -->
+<!--CONFIRM REMOVE PUBLIC SELECTION-->
 <lightbox show="display.confirmRemoveBlogsPublic" on-close="display.confirmRemoveBlogsPublic = false">
 	<div class="medium-block-container">
 		<h2>

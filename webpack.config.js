@@ -6,6 +6,7 @@ module.exports = {
     entry: {
         application: './ts/app.ts',
         behaviours: './ts/behaviours.ts',
+        "explorer": './ts/explorer.ts',
         "explorer.agent": './ts/explorer.agent.ts'
     },
     output: {

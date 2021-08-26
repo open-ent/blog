@@ -33,6 +33,7 @@ import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.I18n;
+import fr.wseduc.webutils.Utils;
 import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
@@ -106,6 +107,14 @@ public class BlogController extends BaseController {
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
 		renderView(request);
+		eventHelper.onAccess(request);
+	}
+
+	@Get("/explorer")
+//	TODO @SecuredAction("blog.explore")
+	public void blogExplorer(HttpServerRequest request) {
+//		String language = Utils.getOrElse(I18n.acceptLanguage(request), "fr", false);
+		renderView(request, new JsonObject()/*.put("lang",I18n.getLocale(language).getLanguage())*/, "blog-explorer.html", null);
 		eventHelper.onAccess(request);
 	}
 
