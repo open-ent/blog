@@ -28,6 +28,7 @@ public class FoldersController extends MongoDbControllerHelper {
 	@Override
 	@Get("folder/list/:filter")
 	@ApiDoc("List all user folders.")
+	@SecuredAction("blog.listFolders")
 	public void list(HttpServerRequest request) {
 		super.list(request);
 	}
