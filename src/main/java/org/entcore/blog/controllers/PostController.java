@@ -193,6 +193,9 @@ public class PostController extends BaseController {
 
 		final int pagingSize = (page == null) ? 0 : this.pagingSize;
 
+		final String withContentParam = request.params().get("content");
+		final boolean withContent = (request.params().get("content") != null) ? true : false;
+
 		final String search = request.params().get("search");
 
 		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
@@ -207,8 +210,11 @@ public class PostController extends BaseController {
 						if (!StringUtils.isEmpty(statesParam)) {
 							states.addAll(StringUtils.split(statesParam, ","));
 						}
-
-						post.list(blogId, user, page, pagingSize, search, states, arrayResponseHandler(request));
+						if (withContent) {
+							post.listWithComments(blogId, user, page, pagingSize, search, states, true, arrayResponseHandler(request));
+						} else {
+							post.list(blogId, user, page, pagingSize, search, states, arrayResponseHandler(request));
+						}
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request), user, page, pagingSize, search,
 								arrayResponseHandler(request));

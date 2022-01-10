@@ -54,6 +54,8 @@ public interface PostService {
 	}
 	void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, boolean withContent, Handler<Either<String, JsonArray>> result);
 
+	void listWithComments(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, boolean withContent, Handler<Either<String, JsonArray>> result);
+
 	void list(String blogId, StateType state, UserInfos user, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
 
 	void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);

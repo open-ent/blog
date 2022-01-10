@@ -402,6 +402,68 @@ public class DefaultPostService implements PostService {
 		}
 	}
 
+	@Override
+	public void listWithComments(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states,final boolean withContent, final Handler<Either<String, JsonArray>> result) {
+		final QueryBuilder accessQuery;
+		if (states == null || states.isEmpty()) {
+			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
+		} else {
+			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
+		}
+
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
+		final JsonObject sort = new JsonObject().put("sorted", -1);
+		final JsonObject projection = defaultKeys.copy();
+		if(!withContent) {
+			projection.remove("content");
+		}
+		projection.put("comments", 1);
+		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
+			@Override
+			public void handle(Message<JsonObject> event) {
+				result.handle(Utils.validResults(event));
+			}
+		};
+
+		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
+			public void handle(Message<JsonObject> event) {
+				JsonObject res = event.body();
+				if(res == null || !"ok".equals(res.getString("status"))){
+					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
+					return;
+				}
+				boolean isManager = 1 == res.getInteger("count", 0);
+
+				accessQuery.or(
+						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
+						QueryBuilder.start().and(
+								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
+						).get(),
+						isManager ?
+								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
+								QueryBuilder.start().and(
+										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
+								).get()
+				);
+
+				final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
+
+				if (query != null) {
+					if (limit > 0 && page == null) {
+						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
+					} else if (page == null) {
+						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+					} else {
+						final int skip = (0 == page) ? -1 : page * limit;
+						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
+					}
+				}
+			}
+		});
+	}
+
 	private QueryBuilder getQueryListBuilder(String search, Handler<Either<String, JsonArray>> result, QueryBuilder accessQuery) {
 		final QueryBuilder query;
 		if (!StringUtils.isEmpty(search)) {
