@@ -193,8 +193,7 @@ public class PostController extends BaseController {
 
 		final int pagingSize = (page == null) ? 0 : this.pagingSize;
 
-		final String withContentParam = request.params().get("content");
-		final boolean withContent = (request.params().get("content") != null) ? true : false;
+		final boolean withContent = "true".equals(request.params().get("content"));
 
 		final String search = request.params().get("search");
 
