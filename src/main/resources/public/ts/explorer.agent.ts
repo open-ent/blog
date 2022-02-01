@@ -1,11 +1,13 @@
 import http from 'axios';
 import { AbstractBusAgent, ACTION, GetContextParameters, IActionParameters, IActionResult, IContext, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE } from 'ode-ts-client';
-import { IHandler } from 'ode-ts-client/dist/ts/foundation/Agent';
+import { IHandler } from 'ode-ts-client/dist/ts/explore/Agent';
 
-class ExplorerAgent extends AbstractBusAgent {
+console.log("agent loading....")
+class BlogAgent extends AbstractBusAgent {
     constructor() {
         super( RESOURCE.BLOG );
-		this.registerHandlers();		
+		this.registerHandlers();	
+        console.log("agent initialized....")	
     }
 
     protected ctx:IContext|null = null;
@@ -39,4 +41,4 @@ class ExplorerAgent extends AbstractBusAgent {
     }
 }
 
-let agent = new ExplorerAgent();
+let agent = new BlogAgent();

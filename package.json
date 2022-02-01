@@ -18,14 +18,16 @@
     "typescript": "^4.2.3",
     "webpack": "3.1.0",
     "webpack-stream": "3.2.0",
-    "yargs": "^8.0.2"
+    "yargs": "^8.0.2",
+    "angular": "^1.7.9"
   },
   "devDependencies": {
-    "@types/jquery": "^2.0.34",
     "gulp-replace": "^1.1.3",
+    "@types/angular": "^1.8.4",
+    "@types/jquery": "^3.5.13",
     "natives": "^1.1.6",
-    "ode-ngjs-front": "^0.4.0-explorer.0",
-    "ode-ts-client": "^0.5.0-explorer.0"
+    "ode-ngjs-front": "^1.0.0-dev.202201250236",
+    "ode-ts-client": "^1.0.0-dev.202202020235"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
