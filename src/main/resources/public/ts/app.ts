@@ -13,5 +13,6 @@ angular.module("app", [OdeModules.getBase(), OdeModules.getI18n(), OdeModules.ge
 .directive("odeDominoItem", DominoItem.DirectiveFactory)
 .directive("odePropsPanel", PropsPanel.DirectiveFactory)
 .directive("odeSharePanel", SharePanel.DirectiveFactory)
+.directive("odeToaster", Toaster.DirectiveFactory)
 
 conf().Platform.apps.initialize(APP.BLOG);
