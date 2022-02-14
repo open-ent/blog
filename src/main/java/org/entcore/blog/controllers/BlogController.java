@@ -153,10 +153,10 @@ public class BlogController extends BaseController {
 				if (user != null) {
 					String visibility = data.getString("visibility");
 					if(visibility==null || "".equals(visibility)){
-						blog.update(blogId, data,  defaultResponseHandler(request));
+						blog.update(user, blogId, data, defaultResponseHandler(request));
 					}else{
 						changeResourcesVisibility(blogId, data, user, visibility).setHandler(res->{
-							blog.update(blogId, data,  defaultResponseHandler(request));
+							blog.update(user, blogId, data, defaultResponseHandler(request));
 						});
 					}
 				} else {
@@ -178,16 +178,21 @@ public class BlogController extends BaseController {
 			badRequest(request);
 			return;
 		}
-
-		blog.delete(blogId, new Handler<Either<String, JsonObject>>() {
-			@Override
-			public void handle(Either<String, JsonObject> event) {
-				if (event.isRight()) {
-					renderJson(request, event.right().getValue(), 204);
-				} else {
-					JsonObject error = new JsonObject().put("error", event.left().getValue());
-					renderJson(request, error, 400);
-				}
+		getUserInfos(eb, request, user -> {
+			if (user != null) {
+				blog.delete(user, blogId, new Handler<Either<String, JsonObject>>() {
+					@Override
+					public void handle(Either<String, JsonObject> event) {
+						if (event.isRight()) {
+							renderJson(request, event.right().getValue(), 204);
+						} else {
+							JsonObject error = new JsonObject().put("error", event.left().getValue());
+							renderJson(request, error, 400);
+						}
+					}
+				});
+			}else{
+				unauthorized(request);
 			}
 		});
 	}
@@ -637,7 +642,7 @@ public class BlogController extends BaseController {
 					if (user != null) {
 						String visibility = data.getString("visibility");
 						changeResourcesVisibility(blogId,data, user, visibility).setHandler(res->{
-							blog.update(blogId, data, defaultResponseHandler(request));
+							blog.update(user, blogId, data, defaultResponseHandler(request));
 						});
 					} else {
 						unauthorized(request);

@@ -48,9 +48,9 @@ public interface BlogService {
 
 	void create(JsonObject blog, UserInfos author, boolean isPublic, Handler<Either<String, JsonObject>> result);
 
-	void update(String blogId, JsonObject blog, Handler<Either<String, JsonObject>> result);
+	void update(UserInfos user, String blogId, JsonObject blog, Handler<Either<String, JsonObject>> result);
 
-	void delete(String blogId, Handler<Either<String, JsonObject>> result);
+	void delete(UserInfos user, String blogId, Handler<Either<String, JsonObject>> result);
 
 	void get(String blogId, Handler<Either<String, JsonObject>> result);
 

@@ -27,7 +27,8 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
-import org.entcore.blog.explorer.BlogExplorerPlugin;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
 import org.entcore.blog.services.PostService;
@@ -44,7 +45,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 
 public class DefaultBlogService implements BlogService{
-
+	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
 	protected static final String BLOG_COLLECTION = "blogs";
 
 	private final MongoDb mongo;
@@ -88,17 +89,19 @@ public class DefaultBlogService implements BlogService{
         }
 		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
-		plugin.create(author, blog, false).onComplete(e-> {
+
+		plugin.create(author,blog, false).onComplete((e) -> {
 			if(e.succeeded()){
-				result.handle(new Either.Right<>(blog));
+				result.handle(new Either.Right<>(blog.put("_id", e.result())));
 			}else{
 				result.handle(new Either.Left<>(e.cause().getMessage()));
+				log.error("Failed to create blog: ", e.cause());
 			}
 		});
 	}
 
 	@Override
-	public void update(String blogId, JsonObject blog, final Handler<Either<String, JsonObject>> result) {
+	public void update(UserInfos user, String blogId, JsonObject blog, final Handler<Either<String, JsonObject>> result) {
 		blog.put("modified", MongoDb.now());
 		if (blog.getString("comment-type") != null) {
 			try {
@@ -129,30 +132,45 @@ public class DefaultBlogService implements BlogService{
 		for (String attr: b.fieldNames()) {
 			modifier.set(attr, b.getValue(attr));
 		}
-		mongo.update(BLOG_COLLECTION, MongoQueryBuilder.build(query), modifier.build(),
-				new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> event) {
-				result.handle(Utils.validResult(event));
+		mongo.update(BLOG_COLLECTION, MongoQueryBuilder.build(query), modifier.build(),event-> {
+			final Either<String, JsonObject> either = Utils.validResult(event);
+			if(either.isLeft()){
+				log.error("Failed to update blog: ", either.left().getValue());
+				result.handle(either);
+			}else{
+				blog.put("_id", blogId);
+				plugin.notifyUpsert(user, blog).onComplete(e->{
+					if(e.failed()){
+						log.error("Failed to notify upsert blog: ", e.cause());
+					}
+					result.handle(either);
+				});
 			}
 		});
 	}
 
 	@Override
-	public void delete(final String blogId, final Handler<Either<String, JsonObject>> result) {
+	public void delete(UserInfos user, final String blogId, final Handler<Either<String, JsonObject>> result) {
 		QueryBuilder q = QueryBuilder.start("blog.$id").is(blogId);
 		mongo.delete("posts", MongoQueryBuilder.build(q), new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> res) {
 				if ("ok".equals(res.body().getString("status"))) {
 					QueryBuilder query = QueryBuilder.start("_id").is(blogId);
-					mongo.delete(BLOG_COLLECTION, MongoQueryBuilder.build(query),
-							new Handler<Message<JsonObject>>() {
-								@Override
-								public void handle(Message<JsonObject> event) {
-									result.handle(Utils.validResult(event));
+					mongo.delete(BLOG_COLLECTION, MongoQueryBuilder.build(query), event-> {
+						final Either<String, JsonObject> either = Utils.validResult(event);
+						if(either.isLeft()){
+							log.error("Failed to delete blog: ", either.left().getValue());
+							result.handle(either);
+						}else{
+							plugin.notifyDeleteById(user, blogId).onComplete(e->{
+								if(e.failed()){
+									log.error("Failed to notify delete blog: ", e.cause());
 								}
+								result.handle(either);
 							});
+						}
+					});
 				} else {
 					result.handle(Utils.validResult(res));
 				}
