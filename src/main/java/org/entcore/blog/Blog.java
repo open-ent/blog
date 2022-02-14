@@ -28,9 +28,12 @@ import org.entcore.blog.controllers.BlogController;
 import org.entcore.blog.controllers.FoldersController;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.events.BlogSearchingEvents;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.explorer.ExplorerPluginFactory;
+import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
 
@@ -59,8 +62,9 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        addController(new BlogController(MongoDb.getInstance()));
-        addController(new PostController());
+        final IExplorerPlugin plugin = BlogExplorerPlugin.create();
+        addController(new BlogController(MongoDb.getInstance(),plugin));
+        addController(new PostController(plugin));
         addController(new FoldersController("blogsFolders"));
     }
 

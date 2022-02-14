@@ -27,9 +27,11 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
 import org.entcore.blog.services.PostService;
+import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
@@ -46,24 +48,26 @@ public class DefaultBlogService implements BlogService{
 	protected static final String BLOG_COLLECTION = "blogs";
 
 	private final MongoDb mongo;
-	private int pagingSize;
-	private int searchWordMinSize;
+	private final int pagingSize;
+	private final int searchWordMinSize;
 	private final PostService postService;
+	private final IExplorerPlugin plugin;
 
-	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize) {
+	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, IExplorerPlugin plugin) {
 		this.mongo = mongo;
+		this.plugin = plugin;
 		this.pagingSize = pagingSize;
 		this.postService = postService;
 		this.searchWordMinSize = searchWordMinSize;
 	}
 
 	@Override
-	public void create(JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
+	public void create(final JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
 		CommentType commentType = Utils.stringToEnum(blog.getString("comment-type", "").toUpperCase(),
 				CommentType.NONE, CommentType.class);
 		PublishType publishType = Utils.stringToEnum(blog.getString("publish-type", "").toUpperCase(),
 				PublishType.RESTRAINT, PublishType.class);
-		JsonObject now = MongoDb.now();
+		JsonObject now = MongoDb.nowISO();
 		JsonObject owner = new JsonObject()
 				.put("userId", author.getUserId())
 				.put("username", author.getUsername())
@@ -84,10 +88,11 @@ public class DefaultBlogService implements BlogService{
         }
 		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
-		mongo.save(BLOG_COLLECTION, b, new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> res) {
-				result.handle(Utils.validResult(res));
+		plugin.create(author, blog, false).onComplete(e-> {
+			if(e.succeeded()){
+				result.handle(new Either.Right<>(blog));
+			}else{
+				result.handle(new Either.Left<>(e.cause().getMessage()));
 			}
 		});
 	}

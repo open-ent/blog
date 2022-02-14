@@ -41,6 +41,7 @@ import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -70,9 +71,11 @@ public class PostController extends BaseController {
 	private BlogTimelineService timelineService;
 	private int pagingSize;
 	private final EventHelper eventHelper;
+	private final IExplorerPlugin plugin;
 	private static final String RESOURCE_NAME = "blog_post";
 
-	public PostController(){
+	public PostController(IExplorerPlugin plugin){
+		this.plugin = plugin;
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 		this.eventHelper = new EventHelper(eventStore);
 	}
@@ -83,7 +86,7 @@ public class PostController extends BaseController {
 		MongoDb mongo = MongoDb.getInstance();
 		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), LIST_ACTION);
 		this.blogService = new DefaultBlogService(mongo, post, config.getInteger("blog-paging-size", 30),
-				config.getInteger("blog-search-word-min-size", 4));
+				config.getInteger("blog-search-word-min-size", 4), plugin);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		this.pagingSize = config.getInteger("post-paging-size", 20);
 	}

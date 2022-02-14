@@ -53,6 +53,7 @@ import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
@@ -80,11 +81,13 @@ public class BlogController extends BaseController {
 	private ShareService shareService;
 	private EventHelper eventHelper;
 	private final MongoDb mongo;
+	private final IExplorerPlugin plugin;
 	private static final String PUBLIC_RESOURCE_NAME = "blog_public";
 	private static final String PRIVATE_RESOURCE_NAME = "blog_private";
 
-	public BlogController(MongoDb mongo){
+	public BlogController(MongoDb mongo, IExplorerPlugin plugin){
 		this.mongo = mongo;
+		this.plugin = plugin;
 	}
 
 
@@ -94,7 +97,7 @@ public class BlogController extends BaseController {
 		MongoDb mongo = MongoDb.getInstance();
 		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION);
 		this.blog = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
-				config.getInteger("blog-search-word-min-size", 4));
+				config.getInteger("blog-search-word-min-size", 4), plugin);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
