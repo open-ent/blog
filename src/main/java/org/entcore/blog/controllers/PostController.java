@@ -35,13 +35,10 @@ import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
-import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
-import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
-import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -66,16 +63,16 @@ import io.vertx.core.json.JsonObject;
 public class PostController extends BaseController {
 	public static final String LIST_ACTION = "org-entcore-blog-controllers-PostController|list";
 	public static final String SUBMIT_ACTION = "org-entcore-blog-controllers-PostController|submit";
-	private PostService post;
-	private BlogService blogService;
 	private BlogTimelineService timelineService;
 	private int pagingSize;
 	private final EventHelper eventHelper;
-	private final IExplorerPlugin plugin;
+	private final PostService post;
+	private final BlogService blogService;
 	private static final String RESOURCE_NAME = "blog_post";
 
-	public PostController(IExplorerPlugin plugin){
-		this.plugin = plugin;
+	public PostController(final BlogService blogService, final PostService post){
+		this.post = post;
+		this.blogService = blogService;
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 		this.eventHelper = new EventHelper(eventStore);
 	}
@@ -84,9 +81,6 @@ public class PostController extends BaseController {
 			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.post = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), LIST_ACTION);
-		this.blogService = new DefaultBlogService(mongo, post, config.getInteger("blog-paging-size", 30),
-				config.getInteger("blog-search-word-min-size", 4), plugin);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		this.pagingSize = config.getInteger("post-paging-size", 20);
 	}
@@ -145,20 +139,28 @@ public class PostController extends BaseController {
 	@Delete("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void delete(final HttpServerRequest request) {
+		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
+		if (blogId == null || blogId.trim().isEmpty()) {
+			badRequest(request);
+			return;
+		}
 		if (postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
-		post.delete(postId, new Handler<Either<String, JsonObject>>() {
-			@Override
-			public void handle(Either<String, JsonObject> event) {
-				if (event.isRight()) {
-					renderJson(request, event.right().getValue(), 204);
-				} else {
-					JsonObject error = new JsonObject().put("error", event.left().getValue());
-					renderJson(request, error, 400);
-				}
+		UserUtils.getUserInfos(eb, request, user-> {
+			if (user != null) {
+				post.delete(user, blogId, postId, event -> {
+					if (event.isRight()) {
+						renderJson(request, event.right().getValue(), 204);
+					} else {
+						JsonObject error = new JsonObject().put("error", event.left().getValue());
+						renderJson(request, error, 400);
+					}
+				});
+			} else {
+				unauthorized(request);
 			}
 		});
 	}

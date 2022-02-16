@@ -29,8 +29,13 @@ import org.entcore.blog.controllers.FoldersController;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
+import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.security.BlogResourcesProvider;
+import org.entcore.blog.services.BlogService;
+import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
+import org.entcore.blog.services.impl.DefaultBlogService;
+import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.explorer.ExplorerPluginFactory;
 import org.entcore.common.explorer.IExplorerPlugin;
@@ -39,8 +44,12 @@ import org.entcore.common.mongodb.MongoDbConf;
 
 public class Blog extends BaseServer {
 
+    public static final String APPLICATION = "blog";
+    public static final String BLOG_TYPE = "blog";
     public static final String POSTS_COLLECTION = "posts";
     public static final String BLOGS_COLLECTION = "blogs";
+    BlogExplorerPlugin blogPlugin;
+    PostExplorerPlugin postPlugin;
 
     @Override
     public void start() throws Exception {
@@ -62,10 +71,27 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        final IExplorerPlugin plugin = BlogExplorerPlugin.create();
-        addController(new BlogController(MongoDb.getInstance(),plugin));
-        addController(new PostController(plugin));
+        blogPlugin = BlogExplorerPlugin.create();
+        postPlugin = PostExplorerPlugin.create();
+        final MongoDb mongo = MongoDb.getInstance();
+        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);
+        final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
+                config.getInteger("blog-search-word-min-size", 4), blogPlugin);
+        addController(new BlogController(mongo, blogService, postService));
+        addController(new PostController(blogService, postService));
         addController(new FoldersController("blogsFolders"));
+        blogPlugin.start();
+        postPlugin.start();
     }
 
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        if(blogPlugin != null){
+            blogPlugin.stop();
+        }
+        if(postPlugin != null){
+            postPlugin.stop();
+        }
+    }
 }

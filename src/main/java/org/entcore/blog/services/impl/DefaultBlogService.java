@@ -29,6 +29,7 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import fr.wseduc.webutils.*;
 import org.entcore.blog.services.PostService;
@@ -52,9 +53,9 @@ public class DefaultBlogService implements BlogService{
 	private final int pagingSize;
 	private final int searchWordMinSize;
 	private final PostService postService;
-	private final IExplorerPlugin plugin;
+	private final BlogExplorerPlugin plugin;
 
-	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, IExplorerPlugin plugin) {
+	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, BlogExplorerPlugin plugin) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.pagingSize = pagingSize;

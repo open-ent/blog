@@ -9,11 +9,11 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
+import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
-import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -24,8 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.testcontainers.containers.MongoDBContainer;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(VertxUnitRunner.class)
 public class BlogExplorerPluginTest {
@@ -35,15 +34,19 @@ public class BlogExplorerPluginTest {
     @ClassRule
     public static MongoDBContainer mongoDBContainer = test.database().createMongoContainer().withReuse(true);
     static BlogService blogService;
-    static IExplorerPlugin plugin;
+    static PostService postService;
+    static BlogExplorerPlugin blogPlugin;
+    static PostExplorerPlugin postPlugin;
     static final String application = BlogExplorerPlugin.APPLICATION;
     static final String resourceType = BlogExplorerPlugin.TYPE;
     static Map<String, Object> data = new HashMap<>();
-    final UserInfos user = test.directory().generateUser("user1");
-    final UserInfos user2 = test.directory().generateUser("user2");
+    static final UserInfos user = test.directory().generateUser("user1");
+    static final UserInfos user2 = test.directory().generateUser("user2");
 
     @BeforeClass
     public static void setUp(TestContext context) {
+        user.setLogin("user1");
+        user2.setLogin("user2");
         explorerTest.start(context);
         test.database().initMongo(context, mongoDBContainer);
         MongoDbConf.getInstance().setCollection("blogs");
@@ -51,25 +54,30 @@ public class BlogExplorerPluginTest {
         final int POST_SEARCH_WORD = 4;
         final int BLOG_PAGING = 30;
         final int BLOG_SEARCH_WORD = 4;
-        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION);
         final IExplorerPluginCommunication communication = explorerTest.getCommunication();
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
-        plugin = new BlogExplorerPlugin(communication, mongoClient);
-        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, plugin);
+        postPlugin = new PostExplorerPlugin(communication, mongoClient);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
+        blogPlugin = new BlogExplorerPlugin(communication, mongoClient);
+        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
     }
 
-    static JsonObject resource(final String name) {
+    static JsonObject createBlog(final String name) {
         return new JsonObject().put("title", name).put("description", "description"+name).put("slug", "slug"+name).put("thumbnail", "thumb"+name).put("comment-type", "IMMEDIATE");
+    }
+
+    static JsonObject createPost(final String name) {
+        return new JsonObject().put("title", name).put("content", "description"+name).put("state", "PUBLISHED");
     }
 
     @Test
     public void shouldCreateBlog(TestContext context) {
-        final JsonObject b1 = resource("blog1");
+        final JsonObject b1 = createBlog("blog1");
         final Async async = context.async();
         explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch0 -> {
             context.assertEquals(0, fetch0.size());
             blogService.create(b1, user, false, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(r -> {
-                plugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3->{
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3->{
                     explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
                         explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                             context.assertEquals(1, fetch1.size());
@@ -90,6 +98,7 @@ public class BlogExplorerPluginTest {
                             blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list ->{
                                 context.assertEquals(1, list.size());
                                 final JsonObject firstDb = list.getJsonObject(0);
+                                data.put("ID1", firstDb.getString("_id"));
                                 context.assertEquals(b1.getString("title"), firstDb.getString("title"));
                                 context.assertEquals(b1.getString("description"), firstDb.getString("description"));
                                 context.assertEquals(b1.getString("thumbnail"), firstDb.getString("thumbnail"));
@@ -120,9 +129,9 @@ public class BlogExplorerPluginTest {
             final JsonObject model = list0.getJsonObject(0);
             final String id = model.getString("_id");
             context.assertNotNull(id);
-            final JsonObject b2 = resource("blog2").put("trashed", true).put("visibility", "PUBLIC");
+            final JsonObject b2 = createBlog("blog2").put("trashed", true).put("visibility", "PUBLIC");
             blogService.update(user2, id, b2, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(update->{
-                plugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
                     explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
                         explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                             context.assertEquals(1, fetch1.size());
@@ -165,6 +174,140 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
+    public void shouldCreatePost(TestContext context) {
+        final Async async = context.async();
+        context.assertNotNull(data.get("ID1"));
+        final String id = (String) data.get("ID1");
+        final JsonObject post1 = createPost("post1");
+        postService.create(id, post1, user,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+            final String postId = create.getString("_id");
+            data.put("POSTID1", postId);
+            context.assertNotNull(postId);
+            postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                    explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                        context.assertEquals(1, fetch1.size());
+                        final JsonObject postES = fetch1.getJsonObject(0);
+                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        context.assertEquals(post1.getString("content"), subResource.getString("contentHtml"));
+                        postService.list(id, user, 0, 10, "", new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
+                            context.assertEquals(1, listPost.size());
+                            final JsonObject postModel = listPost.getJsonObject(0);
+                            context.assertEquals(postId, postModel.getString("_id"));
+                            context.assertEquals(post1.getString("title"), postModel.getString("title"));
+                            context.assertNotNull(postModel.getString("state"));
+                            context.assertNotNull(postModel.getValue("created"));
+                            context.assertNotNull(postModel.getValue("modified"));
+                            context.assertNotNull(postModel.getValue("author"));
+                            context.assertNotNull(postModel.getNumber("views"));
+                            postService.get(id, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
+                                context.assertEquals(post1.getString("content"), postGet.getString("content"));
+                                async.complete();
+                            })));
+                        })));
+                    }));
+                }));
+            }));
+        })));
+    }
+
+    @Test
+    public void shouldUpdatePost(TestContext context) {
+        final Async async = context.async();
+        context.assertNotNull(data.get("ID1"));
+        context.assertNotNull(data.get("POSTID1"));
+        final String blogId = (String) data.get("ID1");
+        final String postId = (String) data.get("POSTID1");
+        final JsonObject post2 = createPost("post2");
+        postService.update(postId, post2, user,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+            postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                    explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                        context.assertEquals(1, fetch1.size());
+                        final JsonObject postES = fetch1.getJsonObject(0);
+                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        context.assertEquals(post2.getString("content"), subResource.getString("contentHtml"));
+                        postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
+                            context.assertEquals(1, listPost.size());
+                            final JsonObject postModel = listPost.getJsonObject(0);
+                            context.assertEquals(postId, postModel.getString("_id"));
+                            context.assertEquals(post2.getString("title"), postModel.getString("title"));
+                            context.assertNotNull(postModel.getString("state"));
+                            context.assertNotNull(postModel.getValue("created"));
+                            context.assertNotNull(postModel.getValue("modified"));
+                            context.assertNotNull(postModel.getValue("author"));
+                            context.assertNotNull(postModel.getNumber("views"));
+                            async.complete();
+                        })));
+                    }));
+                }));
+            }));
+        })));
+    }
+
+    @Test
+    public void shouldBulkUpdatePost(TestContext context) {
+        final Async async = context.async();
+        context.assertNotNull(data.get("ID1"));
+        context.assertNotNull(data.get("POSTID1"));
+        final String blogId = (String) data.get("ID1");
+        final String postId = (String) data.get("POSTID1");
+        final JsonObject post3 = createPost("post3").put("_id", postId).put("blog", new JsonObject().put("$id", blogId));
+        final List<JsonObject> posts = new ArrayList<>();
+        posts.add(post3);
+        postService.updateAllContents(user, posts, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+            postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                    explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                        context.assertEquals(1, fetch1.size());
+                        final JsonObject postES = fetch1.getJsonObject(0);
+                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        context.assertEquals(post3.getString("content"), subResource.getString("contentHtml"));
+                        postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
+                            context.assertEquals(1, listPost.size());
+                            final JsonObject postModel = listPost.getJsonObject(0);
+                            context.assertEquals(postId, postModel.getString("_id"));
+                            context.assertNotNull(postModel.getString("state"));
+                            context.assertNotNull(postModel.getValue("created"));
+                            context.assertNotNull(postModel.getValue("modified"));
+                            context.assertNotNull(postModel.getValue("author"));
+                            context.assertNotNull(postModel.getNumber("views"));
+                            async.complete();
+                        })));
+                    }));
+                }));
+            }));
+        })));
+    }
+
+
+    @Test
+    public void shouldDeletePost(TestContext context) {
+        final Async async = context.async();
+        context.assertNotNull(data.get("ID1"));
+        context.assertNotNull(data.get("POSTID1"));
+        final String blogId = (String) data.get("ID1");
+        final String postId = (String) data.get("POSTID1");
+        final JsonObject post2 = createPost("post2");
+        postService.delete(user, blogId, postId,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+            postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                    explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                        context.assertEquals(1, fetch1.size());
+                        final JsonObject postES = fetch1.getJsonObject(0);
+                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        context.assertEquals("", subResource.getString("contentHtml"));
+                        postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
+                            context.assertEquals(0, listPost.size());
+                            async.complete();
+                        })));
+                    }));
+                }));
+            }));
+        })));
+    }
+
+    @Test
     public void shouldDeleteBlog(TestContext context) {
         final Async async = context.async();
         blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list -> {
@@ -173,7 +316,7 @@ public class BlogExplorerPluginTest {
             final String id = firstDb.getString("_id");
             context.assertNotNull(id);
             blogService.delete(user2, id, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(update->{
-                plugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
                     explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
                         explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                             context.assertEquals(0, fetch1.size());
@@ -184,5 +327,4 @@ public class BlogExplorerPluginTest {
             })));
         })));
     }
-
 }

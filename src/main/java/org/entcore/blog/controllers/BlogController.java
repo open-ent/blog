@@ -47,13 +47,10 @@ import org.entcore.blog.security.ShareAndOwnerBlog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
-import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
-import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
-import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
 import org.entcore.common.neo4j.Neo;
@@ -75,19 +72,19 @@ import static org.entcore.common.user.UserUtils.getUserInfos;
 
 public class BlogController extends BaseController {
 
-	private BlogService blog;
-	private PostService postService;
+	private final BlogService blog;
+	private final PostService postService;
 	private BlogTimelineService timelineService;
 	private ShareService shareService;
 	private EventHelper eventHelper;
 	private final MongoDb mongo;
-	private final IExplorerPlugin plugin;
 	private static final String PUBLIC_RESOURCE_NAME = "blog_public";
 	private static final String PRIVATE_RESOURCE_NAME = "blog_private";
 
-	public BlogController(MongoDb mongo, IExplorerPlugin plugin){
+	public BlogController(MongoDb mongo, final BlogService blog, final PostService post){
 		this.mongo = mongo;
-		this.plugin = plugin;
+		this.blog = blog;
+		this.postService = post;
 	}
 
 
@@ -95,9 +92,6 @@ public class BlogController extends BaseController {
 			Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
-		this.postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION);
-		this.blog = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
-				config.getInteger("blog-search-word-min-size", 4), plugin);
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
@@ -776,7 +770,7 @@ public class BlogController extends BaseController {
 				return Future.succeededFuture(new JsonArray());
 			}
 			Future<JsonArray> future = Future.future();
-			postService.updateAllContents(postsToSave,res->{
+			postService.updateAllContents(user, postsToSave, res->{
 				if(res.isRight()){
 					future.complete(res.right().getValue());
 				}else{

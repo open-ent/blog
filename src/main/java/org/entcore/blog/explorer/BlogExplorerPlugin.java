@@ -1,10 +1,12 @@
 package org.entcore.blog.explorer;
 
+import fr.wseduc.mongodb.MongoDb;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
+import org.entcore.blog.Blog;
 import org.entcore.common.explorer.*;
 import org.entcore.common.user.UserInfos;
 
@@ -12,9 +14,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
 public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
-    public static final String APPLICATION = "blog";
-    public static final String TYPE = "blog";
-    public static final String COLLECTION = "blogs";
+    public static final String APPLICATION = Blog.APPLICATION;
+    public static final String TYPE = Blog.BLOG_TYPE;
+    public static final String COLLECTION = Blog.BLOGS_COLLECTION;
     static Logger log = LoggerFactory.getLogger(BlogExplorerPlugin.class);
 
     public static BlogExplorerPlugin create() throws Exception {
@@ -58,23 +60,27 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
         }
 
         @Override
-        protected String getCreatorIdColumn() {
-            return "userId";
+        public UserInfos getCreatorForModel(JsonObject json) {
+            final JsonObject author = json.getJsonObject("author");
+            final UserInfos user = new UserInfos();
+            user.setUserId( author.getString("userId"));
+            user.setUsername(author.getString("username"));
+            user.setLogin(author.getString("login"));
+            return user;
         }
 
         @Override
-        protected String getCreatorNameColumn() {
-            return "username";
-        }
-
-        @Override
-        protected String getIdColumn() {
-            return "_id";
+        protected void setCreatorForModel(UserInfos user, JsonObject json) {
+            final JsonObject author = new JsonObject();
+            author.put("userId", user.getUserId());
+            author.put("username", user.getUsername());
+            author.put("login", user.getLogin());
+            json.put("author", author);
         }
 
         @Override
         protected Object toMongoDate(LocalDateTime date) {
-            return (new JsonObject()).put("$date", date.toInstant(ZoneOffset.UTC).toEpochMilli());
+            return MongoDb.toMongoDate(date);
         }
     }
 

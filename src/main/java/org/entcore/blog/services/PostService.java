@@ -45,7 +45,7 @@ public interface PostService {
 
 	void update(String postId, JsonObject post, UserInfos user, Handler<Either<String, JsonObject>> result);
 
-	void delete(String postId, Handler<Either<String, JsonObject>> result);
+	void delete(UserInfos user, String blogId, String postId, Handler<Either<String, JsonObject>> result);
 
 	void get(String blogId, String postId, StateType state, Handler<Either<String, JsonObject>> result);
 
@@ -86,5 +86,5 @@ public interface PostService {
 
 	void count(final String blogId, final StateType state, final Handler<Either<String, Integer>> result);
 
-	void updateAllContents(List<JsonObject>posts, Handler<Either<String,JsonArray>> handler);
+	void updateAllContents(UserInfos user, List<JsonObject> posts, Handler<Either<String, JsonArray>> handler);
 }

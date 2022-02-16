@@ -27,6 +27,9 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import fr.wseduc.webutils.*;
@@ -43,6 +46,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 
 public class DefaultPostService implements PostService {
+	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
 	private final String listPostAction;
 	private static final String MANAGER_ACTION = "org-entcore-blog-controllers-BlogController|shareResource";
 
@@ -58,10 +62,12 @@ public class DefaultPostService implements PostService {
 			.put("views", 1)
 			.put("firstPublishDate", 1);
 
-	private int searchWordMinSize;
+	private final int searchWordMinSize;
+	private final PostExplorerPlugin plugin;
 
-	public DefaultPostService(MongoDb mongo, int searchWordMinSize,String listPostAction) {
+	public DefaultPostService(MongoDb mongo, int searchWordMinSize,String listPostAction, final PostExplorerPlugin plugin) {
 		this.mongo = mongo;
+		this.plugin = plugin;
 		this.listPostAction = listPostAction;
 		this.searchWordMinSize = searchWordMinSize;
 	}
@@ -69,7 +75,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void create(String blogId, JsonObject post, UserInfos author,
 					   final Handler<Either<String, JsonObject>> result) {
-		JsonObject now = MongoDb.now();
+		JsonObject now = MongoDb.nowISO();
 		JsonObject blogRef = new JsonObject()
 				.put("$ref", "blogs")
 				.put("$id", blogId);
@@ -90,16 +96,24 @@ public class DefaultPostService implements PostService {
 		if (b.containsKey("content")) {
 			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 		}
+
 		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
 			public void handle(Either<String, JsonObject> event) {
 				if(event.isLeft()){
+					log.error("Failed to create post: ", event.left().getValue());
 					result.handle(event);
 					return;
 				}
 				//#29106 avoid fetch after save
 				final String id = event.right().getValue().getString("_id");
 				b.put("_id", id);
-				result.handle(new Either.Right<>(b));
+				//must set id before notify
+				plugin.notifyUpsert(blogId, author, b).onComplete(e->{
+					if(e.failed()){
+						log.error("Failed to notify upsert post: ", e.cause());
+					}
+					result.handle(new Either.Right<>(b));
+				});
 			}
 		}));
 	}
@@ -150,8 +164,15 @@ public class DefaultPostService implements PostService {
 								@Override
 								public void handle(Message<JsonObject> event) {
 									if ("ok".equals(event.body().getString("status"))) {
-										final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
-										result.handle(new Either.Right<String, JsonObject>(r));
+										final JsonObject blogRef = postFromDb.getJsonObject("blog");
+										final String blogId = blogRef.getString("$id");
+										plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
+											if(e.failed()){
+												log.error("Failed to notify upsert post: ", e.cause());
+											}
+											final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
+											result.handle(new Either.Right<String, JsonObject>(r));
+										});
 									} else {
 										result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
 									}
@@ -164,15 +185,17 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void delete(String postId, final Handler<Either<String, JsonObject>> result) {
+	public void delete(UserInfos user, String blogId, String postId, final Handler<Either<String, JsonObject>> result) {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId);
-		mongo.delete(POST_COLLECTION, MongoQueryBuilder.build(query),
-				new Handler<Message<JsonObject>>() {
-					@Override
-					public void handle(Message<JsonObject> event) {
-						result.handle(Utils.validResult(event));
-					}
-				});
+		mongo.delete(POST_COLLECTION, MongoQueryBuilder.build(query), event -> {
+			//must set id before notify
+			plugin.notifyUpsert(blogId, user, new JsonObject().put("_id", postId)).onComplete(e -> {
+				if (e.failed()) {
+					log.error("Failed to notify upsert post: ", e.cause());
+				}
+				result.handle(Utils.validResult(event));
+			});
+		});
 	}
 
 	@Override
@@ -805,9 +828,8 @@ public class DefaultPostService implements PostService {
 		return body.getString("error", body.getString("message", "query helper error"));
 	}
 
-	public void updateAllContents(List<JsonObject>posts, Handler<Either<String,JsonArray>> handler){
+	public void updateAllContents(UserInfos user, List<JsonObject> posts, Handler<Either<String, JsonArray>> handler){
 		JsonArray operations = new JsonArray();
-		String now = MongoDb.formatDate(new Date());
 		posts.stream().map(o -> (JsonObject) o).forEach(row -> {
 			JsonObject set = new MongoUpdateBuilder()//
 					.set("content", row.getString("content")).build();
@@ -817,6 +839,28 @@ public class DefaultPostService implements PostService {
 			operations.add(op);
 		});
 		//
-		mongo.bulk(POST_COLLECTION, operations, MongoDbResult.validResultsHandler(handler));
+		mongo.bulk(POST_COLLECTION, operations, MongoDbResult.validResultsHandler(e->{
+			if(e.isLeft()){
+				log.error("Failed to notify bulk save: ", e.left().getValue());
+				handler.handle(e);
+			}else{
+				try {
+					final Map<String, JsonObject> all = new HashMap<>();
+					for (final JsonObject post : posts) {
+						final JsonObject blogRef = post.getJsonObject("blog");
+						final String blogId = blogRef.getString("$id");
+						all.put(blogId, post);
+					}
+					plugin.notifyUpsert(user, all).onComplete(eNotif -> {
+						handler.handle(e);
+						if (eNotif.failed()) {
+							log.error("Failed to notify bulk upsert: ", eNotif.cause());
+						}
+					});
+				}catch(Exception ee){
+					log.error("Failed to notify bulk upsert: ", ee);
+				}
+			}
+		}));
 	}
 }
