@@ -53,6 +53,30 @@ public class PostExplorerPlugin extends ExplorerPluginResourceCrud {
         protected String getCollectionName() { return COLLECTION; }
 
         @Override
+        protected String getCreatedAtColumn() {
+            return "created";
+        }
+
+        @Override
+        public UserInfos getCreatorForModel(JsonObject json) {
+            final JsonObject author = json.getJsonObject("author");
+            final UserInfos user = new UserInfos();
+            user.setUserId( author.getString("userId"));
+            user.setUsername(author.getString("username"));
+            user.setLogin(author.getString("login"));
+            return user;
+        }
+
+        @Override
+        protected void setCreatorForModel(UserInfos user, JsonObject json) {
+            final JsonObject author = new JsonObject();
+            author.put("userId", user.getUserId());
+            author.put("username", user.getUsername());
+            author.put("login", user.getLogin());
+            json.put("author", author);
+        }
+
+        @Override
         protected Object toMongoDate(LocalDateTime date) {
             return MongoDb.toMongoDate(date);
         }
