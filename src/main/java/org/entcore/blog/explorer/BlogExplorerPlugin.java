@@ -42,6 +42,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
         message.withContent(source.getString("description", ""), ExplorerMessage.ExplorerContentType.Html);
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
         message.withTrashed(source.getBoolean("trashed", false));
+        message.withShared(source.getJsonArray("shared"));
         //TODO should not push if creator id not found (redis will keep it)
         //TODO push metrics from all plugins (merge it)
         return Future.succeededFuture(message);

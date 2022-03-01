@@ -43,6 +43,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.entcore.blog.Blog;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.security.ShareAndOwnerBlog;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
@@ -95,7 +96,8 @@ public class BlogController extends BaseController {
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
-		this.shareService = new MongoDbShareService(eb, mongo, "blogs", securedActions, groupedActions);
+		final BlogExplorerPlugin plugin = blog.getPlugin();
+		this.shareService = plugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, groupedActions);
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 		eventHelper = new EventHelper(eventStore);
 	}

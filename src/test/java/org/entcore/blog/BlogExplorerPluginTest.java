@@ -1,7 +1,10 @@
 package org.entcore.blog;
 
+import com.opendigitaleducation.explorer.services.ResourceService;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.webutils.security.SecuredAction;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
@@ -16,6 +19,7 @@ import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
+import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.test.TestHelper;
 import org.junit.BeforeClass;
@@ -23,12 +27,16 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.Neo4jContainer;
 
 import java.util.*;
 
 @RunWith(VertxUnitRunner.class)
 public class BlogExplorerPluginTest {
+    static final String RIGHT = "org-entcore-blog-controllers-BlogController|blog";
     private static final TestHelper test = TestHelper.helper();
+    @ClassRule
+    public static Neo4jContainer<?> neo4jContainer = test.database().createNeo4jContainer();
     @ClassRule
     public static ExplorerTestHelper explorerTest = new ExplorerTestHelper(BlogExplorerPlugin.APPLICATION);
     @ClassRule
@@ -37,6 +45,7 @@ public class BlogExplorerPluginTest {
     static PostService postService;
     static BlogExplorerPlugin blogPlugin;
     static PostExplorerPlugin postPlugin;
+    static ShareService shareService;
     static final String application = BlogExplorerPlugin.APPLICATION;
     static final String resourceType = BlogExplorerPlugin.TYPE;
     static Map<String, Object> data = new HashMap<>();
@@ -44,7 +53,8 @@ public class BlogExplorerPluginTest {
     static final UserInfos user2 = test.directory().generateUser("user2");
 
     @BeforeClass
-    public static void setUp(TestContext context) {
+    public static void setUp(TestContext context) throws Exception {
+        test.database().initNeo4j(context, neo4jContainer);
         user.setLogin("user1");
         user2.setLogin("user2");
         explorerTest.start(context);
@@ -54,12 +64,14 @@ public class BlogExplorerPluginTest {
         final int POST_SEARCH_WORD = 4;
         final int BLOG_PAGING = 30;
         final int BLOG_SEARCH_WORD = 4;
+        final Map<String, SecuredAction> securedActions = test.share().getSecuredActions(context);
         final IExplorerPluginCommunication communication = explorerTest.getCommunication();
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         postPlugin = new PostExplorerPlugin(communication, mongoClient);
         postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
+        shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }
 
     static JsonObject createBlog(final String name) {
@@ -280,6 +292,71 @@ public class BlogExplorerPluginTest {
         })));
     }
 
+    @Test
+    public void shouldExploreBlogByUser(TestContext context) {
+        final Async async = context.async(3);
+        final UserInfos user1 = test.directory().generateUser("user_share1", "group_share1");
+        user1.setLogin("user1");
+        final String blogId = (String) data.get("ID1");
+        test.directory().createActiveUser(user1).compose(e->{
+            //load documents
+            return explorerTest.fetch(user1, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                context.assertEquals(0, fetch1.size());
+            }));
+        }).compose(e->{
+            final JsonObject shareUser = test.share().createShareForUser(user1.getUserId(), Arrays.asList(RIGHT));
+            return shareService.share(user, blogId, shareUser, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(share->{
+                context.assertTrue(share.containsKey("notify-timeline-array"));
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                    explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                        explorerTest.fetch(user1, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                            context.assertEquals(1, fetch1.size());
+                            blogPlugin.getShareInfo(blogId).onComplete(context.asyncAssertSuccess(shareEvt->{
+                                context.assertEquals(1, shareEvt.size());
+                                context.assertTrue(shareEvt.getJsonObject(0).containsKey("userId"));
+                                async.complete();
+                            }));
+                        }));
+                    }));
+                }));
+            })));
+        });
+    }
+
+    @Test
+    public void shouldExploreBlogByGroup(TestContext context) {
+        final Async async = context.async(3);
+        final UserInfos user2 = test.directory().generateUser("user_share2", "group_share2");
+        user2.setLogin("user2");
+        final String blogId = (String) data.get("ID1");
+        test.directory().createActiveUser(user2).compose(e->{
+            //load documents
+            return test.directory().createGroup("group_share2", "group_share2").compose(ee->{
+                return test.directory().attachUserToGroup("user_share2", "group_share2");
+            }).compose(ee->{
+                return explorerTest.fetch(user2, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                    context.assertEquals(0, fetch1.size());
+                }));
+            });
+        }).compose(e->{
+            final JsonObject shareUser = test.share().createShareForGroup("group_share2", Arrays.asList(RIGHT));
+            return shareService.share(user, blogId, shareUser, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(share->{
+                context.assertTrue(share.containsKey("notify-timeline-array"));
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
+                    explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                        explorerTest.fetch(user2, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                            context.assertEquals(1, fetch1.size());
+                            blogPlugin.getShareInfo(blogId).onComplete(context.asyncAssertSuccess(shareEvt->{
+                                context.assertEquals(1, shareEvt.size());
+                                context.assertTrue(shareEvt.getJsonObject(0).containsKey("groupId"));
+                                async.complete();
+                            }));
+                        }));
+                    }));
+                }));
+            })));
+        });
+    }
 
     @Test
     public void shouldDeletePost(TestContext context) {

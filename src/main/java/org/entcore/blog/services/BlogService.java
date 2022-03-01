@@ -24,6 +24,7 @@ package org.entcore.blog.services;
 
 
 import fr.wseduc.webutils.Either;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -45,6 +46,8 @@ public interface BlogService {
 
 	List<String> UPDATABLE_FIELDS = Arrays.asList("title", "description",
 			"thumbnail", "comment-type", "modified", "publish-type", "trashed", "visibility", "slug");
+
+	BlogExplorerPlugin getPlugin();
 
 	void create(JsonObject blog, UserInfos author, boolean isPublic, Handler<Either<String, JsonObject>> result);
 

@@ -64,6 +64,11 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	@Override
+	public BlogExplorerPlugin getPlugin() {
+		return plugin;
+	}
+
+	@Override
 	public void create(final JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
 		CommentType commentType = Utils.stringToEnum(blog.getString("comment-type", "").toUpperCase(),
 				CommentType.NONE, CommentType.class);
