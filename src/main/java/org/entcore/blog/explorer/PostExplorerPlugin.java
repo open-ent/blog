@@ -8,33 +8,38 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import org.entcore.blog.Blog;
 import org.entcore.common.explorer.*;
+import org.entcore.common.explorer.impl.ExplorerDbMongo;
+import org.entcore.common.explorer.impl.ExplorerSubResourceDb;
 import org.entcore.common.user.UserInfos;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
-public class PostExplorerPlugin extends ExplorerPluginResourceCrud {
+public class PostExplorerPlugin extends ExplorerSubResourceDb {
     public static final String APPLICATION = Blog.APPLICATION;
     public static final String TYPE = Blog.BLOG_TYPE;
     public static final String COLLECTION = Blog.POSTS_COLLECTION;
     static Logger log = LoggerFactory.getLogger(PostExplorerPlugin.class);
 
-    public static PostExplorerPlugin create() throws Exception {
-        final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
-            return new PostExplorerPlugin(params.getCommunication(), params.getDb());
-        });
-        return (PostExplorerPlugin) plugin;
-    }
-
-    public PostExplorerPlugin(final IExplorerPluginCommunication communication, final MongoClient mongoClient) {
-        super(communication, new PostResourceCrud(mongoClient));
+    public PostExplorerPlugin(final BlogExplorerPlugin plugin) {
+        super(plugin, new PostResourceCrud(plugin.getMongoClient()));
     }
 
     @Override
-    protected String getApplication() { return APPLICATION; }
+    protected UserInfos getCreatorForModel(final JsonObject json) {
+        final JsonObject author = json.getJsonObject("author");
+        final UserInfos user = new UserInfos();
+        user.setUserId( author.getString("userId"));
+        user.setUsername(author.getString("username"));
+        user.setLogin(author.getString("login"));
+        return user;
+    }
 
     @Override
-    protected String getResourceType() { return TYPE; }
+    protected String getParentId(JsonObject jsonObject) {
+        final JsonObject blogRef = jsonObject.getJsonObject("blog");
+        final String blogId = blogRef.getString("$id");
+        return blogId;
+    }
 
     @Override
     protected Future<ExplorerMessage> toMessage(final ExplorerMessage message, final JsonObject source) {
@@ -43,7 +48,7 @@ public class PostExplorerPlugin extends ExplorerPluginResourceCrud {
         return Future.succeededFuture(message);
     }
 
-    static class PostResourceCrud extends ExplorerResourceCrudMongo {
+    static class PostResourceCrud extends ExplorerDbMongo {
 
         public PostResourceCrud(final MongoClient mongoClient) {
             super(mongoClient);
@@ -51,30 +56,6 @@ public class PostExplorerPlugin extends ExplorerPluginResourceCrud {
 
         @Override
         protected String getCollectionName() { return COLLECTION; }
-
-        @Override
-        protected String getCreatedAtColumn() {
-            return "created";
-        }
-
-        @Override
-        public UserInfos getCreatorForModel(JsonObject json) {
-            final JsonObject author = json.getJsonObject("author");
-            final UserInfos user = new UserInfos();
-            user.setUserId( author.getString("userId"));
-            user.setUsername(author.getString("username"));
-            user.setLogin(author.getString("login"));
-            return user;
-        }
-
-        @Override
-        protected void setCreatorForModel(UserInfos user, JsonObject json) {
-            final JsonObject author = new JsonObject();
-            author.put("userId", user.getUserId());
-            author.put("username", user.getUsername());
-            author.put("login", user.getLogin());
-            json.put("author", author);
-        }
 
         @Override
         protected Object toMongoDate(LocalDateTime date) {

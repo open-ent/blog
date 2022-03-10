@@ -8,16 +8,19 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import org.entcore.blog.Blog;
 import org.entcore.common.explorer.*;
+import org.entcore.common.explorer.impl.ExplorerDbMongo;
+import org.entcore.common.explorer.impl.ExplorerPluginResourceDb;
 import org.entcore.common.user.UserInfos;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
+public class BlogExplorerPlugin extends ExplorerPluginResourceDb {
     public static final String APPLICATION = Blog.APPLICATION;
     public static final String TYPE = Blog.BLOG_TYPE;
     public static final String COLLECTION = Blog.BLOGS_COLLECTION;
     static Logger log = LoggerFactory.getLogger(BlogExplorerPlugin.class);
+    private final MongoClient mongoClient;
 
     public static BlogExplorerPlugin create() throws Exception {
         final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
@@ -26,8 +29,15 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
         return (BlogExplorerPlugin) plugin;
     }
 
+    public PostExplorerPlugin postPlugin(){
+        return new PostExplorerPlugin(this);
+    }
+
+    public MongoClient getMongoClient() {return mongoClient;}
+
     public BlogExplorerPlugin(final IExplorerPluginCommunication communication, final MongoClient mongoClient) {
-        super(communication, new BlogResourceCrud(mongoClient));
+        super(communication, new BlogResourceMongo(mongoClient));
+        this.mongoClient = mongoClient;
     }
 
     @Override
@@ -43,14 +53,12 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceCrud {
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
         message.withTrashed(source.getBoolean("trashed", false));
         message.withShared(source.getJsonArray("shared"));
-        //TODO should not push if creator id not found (redis will keep it)
-        //TODO push metrics from all plugins (merge it)
         return Future.succeededFuture(message);
     }
 
-    static class BlogResourceCrud extends ExplorerResourceCrudMongo {
+    static class BlogResourceMongo extends ExplorerDbMongo {
 
-        public BlogResourceCrud(final MongoClient mongoClient) {
+        public BlogResourceMongo(final MongoClient mongoClient) {
             super(mongoClient);
         }
 

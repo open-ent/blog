@@ -67,9 +67,9 @@ public class BlogExplorerPluginTest {
         final Map<String, SecuredAction> securedActions = test.share().getSecuredActions(context);
         final IExplorerPluginCommunication communication = explorerTest.getCommunication();
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
-        postPlugin = new PostExplorerPlugin(communication, mongoClient);
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient);
+        postPlugin = blogPlugin.postPlugin();
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }

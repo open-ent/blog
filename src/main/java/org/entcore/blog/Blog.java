@@ -49,7 +49,6 @@ public class Blog extends BaseServer {
     public static final String POSTS_COLLECTION = "posts";
     public static final String BLOGS_COLLECTION = "blogs";
     BlogExplorerPlugin blogPlugin;
-    PostExplorerPlugin postPlugin;
 
     @Override
     public void start() throws Exception {
@@ -72,7 +71,7 @@ public class Blog extends BaseServer {
         conf.setResourceIdLabel("id");
 
         blogPlugin = BlogExplorerPlugin.create();
-        postPlugin = PostExplorerPlugin.create();
+        final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
@@ -81,7 +80,6 @@ public class Blog extends BaseServer {
         addController(new PostController(blogService, postService));
         addController(new FoldersController("blogsFolders"));
         blogPlugin.start();
-        postPlugin.start();
     }
 
     @Override
@@ -89,9 +87,6 @@ public class Blog extends BaseServer {
         super.stop();
         if(blogPlugin != null){
             blogPlugin.stop();
-        }
-        if(postPlugin != null){
-            postPlugin.stop();
         }
     }
 }
