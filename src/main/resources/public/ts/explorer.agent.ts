@@ -1,15 +1,17 @@
-import { AbstractBusAgent, ACTION, GetContextParameters, IActionParameters, IActionResult, IContext, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult } from 'ode-ts-client';
+import { AbstractBusAgent, ACTION, GetContextParameters, OpenParameters, IActionParameters, IActionResult, IContext, IHttp, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult } from 'ode-ts-client';
+import { TransportFrameworkFactory } from 'ode-ts-client';
 import { IHandler } from 'ode-ts-client/dist/ts/explore/Agent';
 
-console.log("agent loading....")
+console.log("Blog agent loading....");
 class BlogAgent extends AbstractBusAgent {
     constructor() {
         super( RESOURCE.BLOG );
 		this.registerHandlers();	
-        console.log("agent initialized....")	
+        console.log("Blog agent initialized!");
     }
 
     protected ctx:IContext|null = null;
+    //protected http:IHttp = TransportFrameworkFactory.instance().http;
 
     public registerHandlers(): void {
         this.setHandler( ACTION.OPEN,   	this.onOpen as unknown as IHandler );
@@ -18,8 +20,8 @@ class BlogAgent extends AbstractBusAgent {
         this.setHandler( ACTION.UPD_PROPS,  this.onUpdateProps as unknown as IHandler );
     }
 
-    onOpen( parameters:GetContextParameters ): void {
-        // TODO navigate to the correct URL. 
+    onOpen( parameters:OpenParameters ): void {
+        window.open( `/blog#/view/${parameters.resourceId}` );
     }
 
     onCreate( parameters:IActionParameters ): Promise<IActionResult> {
