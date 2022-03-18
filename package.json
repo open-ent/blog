@@ -26,8 +26,8 @@
     "@types/angular": "^1.8.4",
     "@types/jquery": "^3.5.13",
     "natives": "^1.1.6",
-    "ode-ngjs-front": "^1.0.0-dev.202201250236",
-    "ode-ts-client": "^1.0.0-dev.202202020235"
+    "ode-ngjs-front": "feat-explorer",
+    "ode-ts-client": "feat-explorer"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -85,6 +85,19 @@ publish () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
+localDep () {
+  for dep in ode-ts-client ode-ngjs-front ; do
+    if [ -e $PWD/../$dep ]; then
+      rm -rf $dep.tar $dep.tar.gz
+      mkdir $dep.tar && mkdir $dep.tar/dist \
+        && cp -R $PWD/../$dep/dist $PWD/../$dep/package.json $dep.tar
+      tar cfzh $dep.tar.gz $dep.tar
+      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "npm install --no-save $dep.tar.gz"
+      rm -rf $dep.tar $dep.tar.gz
+    fi
+  done
+}
+
 watch () {
   docker-compose run \
     --rm \
@@ -107,6 +120,9 @@ do
       ;;
     install)
       buildNode && buildGradle
+      ;;
+    localDep)
+      localDep
       ;;
     watch)
       watch
