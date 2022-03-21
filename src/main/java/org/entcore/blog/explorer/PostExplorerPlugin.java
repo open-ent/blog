@@ -13,6 +13,7 @@ import org.entcore.common.explorer.impl.ExplorerSubResourceDb;
 import org.entcore.common.user.UserInfos;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 public class PostExplorerPlugin extends ExplorerSubResourceDb {
     public static final String APPLICATION = Blog.APPLICATION;
@@ -32,6 +33,12 @@ public class PostExplorerPlugin extends ExplorerSubResourceDb {
         user.setUsername(author.getString("username"));
         user.setLogin(author.getString("login"));
         return user;
+    }
+
+    @Override
+    public Future<Void> onDeleteParent(Collection<String> collection) {
+        //TODO
+        return Future.succeededFuture();
     }
 
     @Override
