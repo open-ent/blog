@@ -96,7 +96,7 @@ public class DefaultBlogService implements BlogService{
 		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
 
-		plugin.create(author,blog, false).onComplete((e) -> {
+		plugin.create(author,b, false).onComplete((e) -> {
 			if(e.succeeded()){
 				result.handle(new Either.Right<>(blog.put("_id", e.result())));
 			}else{
