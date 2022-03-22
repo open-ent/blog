@@ -200,7 +200,7 @@ public class BlogExplorerPluginTest {
                     explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
-                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
                         context.assertEquals(post1.getString("content"), subResource.getString("contentHtml"));
                         postService.list(id, user, 0, 10, "", new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(1, listPost.size());
@@ -237,7 +237,7 @@ public class BlogExplorerPluginTest {
                     explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
-                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
                         context.assertEquals(post2.getString("content"), subResource.getString("contentHtml"));
                         postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(1, listPost.size());
@@ -273,7 +273,7 @@ public class BlogExplorerPluginTest {
                     explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
-                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
                         context.assertEquals(post3.getString("content"), subResource.getString("contentHtml"));
                         postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(1, listPost.size());
@@ -372,7 +372,7 @@ public class BlogExplorerPluginTest {
                     explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
-                        final JsonObject subResource = postES.getJsonObject("subresources").getJsonObject(postId);
+                        final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
                         context.assertEquals("", subResource.getString("contentHtml"));
                         postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(0, listPost.size());
