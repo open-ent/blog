@@ -10,26 +10,21 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
-import org.bson.conversions.Bson;
 import org.entcore.blog.Blog;
 import org.entcore.common.explorer.*;
-import org.entcore.common.explorer.impl.ExplorerDbMongo;
-import org.entcore.common.explorer.impl.ExplorerSubResourceDb;
+import org.entcore.common.explorer.impl.ExplorerSubResourceMongo;
 import org.entcore.common.user.UserInfos;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 
-public class PostExplorerPlugin extends ExplorerSubResourceDb {
-    public static final String APPLICATION = Blog.APPLICATION;
+public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     public static final String TYPE = Blog.BLOG_TYPE;
     public static final String COLLECTION = Blog.POSTS_COLLECTION;
     static Logger log = LoggerFactory.getLogger(PostExplorerPlugin.class);
 
     public PostExplorerPlugin(final BlogExplorerPlugin plugin) {
-        super(plugin, new PostResourceCrud(plugin.getMongoClient()));
+        super(plugin, plugin.getMongoClient());
     }
 
     @Override
@@ -72,19 +67,12 @@ public class PostExplorerPlugin extends ExplorerSubResourceDb {
         return Future.succeededFuture(message);
     }
 
-    static class PostResourceCrud extends ExplorerDbMongo {
+    @Override
+    protected String getCollectionName() { return COLLECTION; }
 
-        public PostResourceCrud(final MongoClient mongoClient) {
-            super(mongoClient);
-        }
-
-        @Override
-        protected String getCollectionName() { return COLLECTION; }
-
-        @Override
-        protected Object toMongoDate(LocalDateTime date) {
-            return MongoDb.toMongoDate(date);
-        }
+    @Override
+    protected Object toMongoDate(LocalDateTime date) {
+        return MongoDb.toMongoDate(date);
     }
 
 }
