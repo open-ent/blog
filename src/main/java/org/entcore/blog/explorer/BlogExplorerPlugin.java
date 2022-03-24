@@ -18,7 +18,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     public static final String COLLECTION = Blog.BLOGS_COLLECTION;
     static Logger log = LoggerFactory.getLogger(BlogExplorerPlugin.class);
     private final MongoClient mongoClient;
-    private final FolderExplorerPlugin folderPlugin;
+    private final BlogFoldersExplorerPlugin folderPlugin;
     private final PostExplorerPlugin postPlugin;
 
     public static BlogExplorerPlugin create() throws Exception {
@@ -32,14 +32,14 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         super(communication, mongoClient);
         this.mongoClient = mongoClient;
         //init folder plugin
-        this.folderPlugin = new FolderExplorerPlugin(this);
+        this.folderPlugin = new BlogFoldersExplorerPlugin(this);
         //init subresource plugin
         this.postPlugin = new PostExplorerPlugin(this);
     }
 
     public PostExplorerPlugin postPlugin(){ return postPlugin; }
 
-    public FolderExplorerPlugin folderPlugin(){ return folderPlugin; }
+    public BlogFoldersExplorerPlugin folderPlugin(){ return folderPlugin; }
 
     public MongoClient getMongoClient() {return mongoClient;}
 
