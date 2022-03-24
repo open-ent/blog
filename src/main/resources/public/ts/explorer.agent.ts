@@ -1,4 +1,4 @@
-import { AbstractBusAgent, ACTION, GetContextParameters, OpenParameters, IActionParameters, IActionResult, IContext, IHttp, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult } from 'ode-ts-client';
+import { AbstractBusAgent, ACTION, GetContextParameters, OpenParameters, IActionParameters, IActionResult, IContext, IHttp, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult, DeleteParameters } from 'ode-ts-client';
 import { TransportFrameworkFactory } from 'ode-ts-client';
 import { IHandler } from 'ode-ts-client/dist/ts/explore/Agent';
 
@@ -11,22 +11,27 @@ class BlogAgent extends AbstractBusAgent {
     }
 
     protected ctx:IContext|null = null;
-    //protected http:IHttp = TransportFrameworkFactory.instance().http;
+    protected http:IHttp = TransportFrameworkFactory.instance().newHttpInstance();
+    protected checkHttpResponse:<R>(result:R)=>R = result => {
+        if( this.http.latestResponse.status>=300 ) {
+            throw this.http.latestResponse.statusText;
+        }
+        return result;
+    }
 
     public registerHandlers(): void {
-        this.setHandler( ACTION.OPEN,   	this.onOpen as unknown as IHandler );
-        this.setHandler( ACTION.CREATE,   	this.onCreate as unknown as IHandler );
+        this.setHandler( ACTION.OPEN,   	this.openBlog as unknown as IHandler );
+        this.setHandler( ACTION.CREATE,   	this.createBlog as unknown as IHandler );
         this.setHandler( ACTION.MANAGE,     this.onManage as unknown as IHandler );
         this.setHandler( ACTION.UPD_PROPS,  this.onUpdateProps as unknown as IHandler );
     }
 
-    onOpen( parameters:OpenParameters ): void {
+    openBlog( parameters:OpenParameters ): void {
         window.open( `/blog#/view/${parameters.resourceId}` );
     }
 
-    onCreate( parameters:IActionParameters ): Promise<IActionResult> {
-        const res:IActionResult = "/blog#/edit/new";
-        return Promise.resolve().then( () => res );
+    createBlog( parameters:IActionParameters ): void {
+        window.open( `/blog#/edit/new` );
     }
 
     onManage( parameters:ManagePropertiesParameters ): Promise<ManagePropertiesResult> {
