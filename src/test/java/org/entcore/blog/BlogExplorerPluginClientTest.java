@@ -214,7 +214,7 @@ public class BlogExplorerPluginClientTest {
                                                                             context.assertFalse(model.getBoolean("trashed"));
                                                                             context.assertNotNull(model.getNumber("createdAt"));
                                                                             context.assertNotNull(model.getNumber("updatedAt"));
-                                                                            context.assertNotNull(model.getString("entId"));
+                                                                            context.assertNotNull(model.getString("assetId"));
                                                                         }
                                                                         {
                                                                             System.out.println(fetch3);
@@ -232,7 +232,7 @@ public class BlogExplorerPluginClientTest {
                                                                             context.assertFalse(model.getBoolean("trashed"));
                                                                             context.assertNotNull(model.getNumber("createdAt"));
                                                                             context.assertNotNull(model.getNumber("updatedAt"));
-                                                                            context.assertNotNull(model.getString("entId"));
+                                                                            context.assertNotNull(model.getString("assetId"));
                                                                         }
                                                                         {
                                                                             context.assertEquals(1, fetch4.size());
@@ -249,7 +249,7 @@ public class BlogExplorerPluginClientTest {
                                                                             context.assertFalse(model.getBoolean("trashed"));
                                                                             context.assertNotNull(model.getNumber("createdAt"));
                                                                             context.assertNotNull(model.getNumber("updatedAt"));
-                                                                            context.assertNotNull(model.getString("entId"));
+                                                                            context.assertNotNull(model.getString("assetId"));
                                                                         }
                                                                     }));
                                                                 }));

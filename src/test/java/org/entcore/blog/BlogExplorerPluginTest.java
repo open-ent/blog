@@ -106,7 +106,7 @@ public class BlogExplorerPluginTest {
                             context.assertFalse(first.getBoolean("trashed"));
                             context.assertNotNull(first.getNumber("createdAt"));
                             context.assertNotNull(first.getNumber("updatedAt"));
-                            context.assertNotNull(first.getString("entId"));
+                            context.assertNotNull(first.getString("assetId"));
                             blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list ->{
                                 context.assertEquals(1, list.size());
                                 final JsonObject firstDb = list.getJsonObject(0);
@@ -115,7 +115,7 @@ public class BlogExplorerPluginTest {
                                 context.assertEquals(b1.getString("description"), firstDb.getString("description"));
                                 context.assertEquals(b1.getString("thumbnail"), firstDb.getString("thumbnail"));
                                 context.assertEquals(b1.getBoolean("trashed"), firstDb.getBoolean("trashed"));
-                                context.assertEquals(first.getString("entId"), firstDb.getString("_id"));
+                                context.assertEquals(first.getString("assetId"), firstDb.getString("_id"));
                                 context.assertNotNull(firstDb.getJsonObject("created").getNumber("$date"));
                                 context.assertNotNull(firstDb.getJsonObject("modified").getNumber("$date"));
                                 context.assertEquals(user.getUserId(), firstDb.getJsonObject("author").getString("userId"));
@@ -160,14 +160,14 @@ public class BlogExplorerPluginTest {
                             context.assertTrue(first.getBoolean("trashed"));
                             context.assertNotNull(first.getNumber("createdAt"));
                             context.assertNotNull(first.getNumber("updatedAt"));
-                            context.assertEquals(id, first.getString("entId"));blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list ->{
+                            context.assertEquals(id, first.getString("assetId"));blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list ->{
                                 context.assertEquals(1, list.size());
                                 final JsonObject firstDb = list.getJsonObject(0);
                                 context.assertEquals(b2.getString("title"), firstDb.getString("title"));
                                 context.assertEquals(b2.getString("description"), firstDb.getString("description"));
                                 context.assertEquals(b2.getString("thumbnail"), firstDb.getString("thumbnail"));
                                 context.assertEquals(b2.getBoolean("trashed"), firstDb.getBoolean("trashed"));
-                                context.assertEquals(first.getString("entId"), firstDb.getString("_id"));
+                                context.assertEquals(first.getString("assetId"), firstDb.getString("_id"));
                                 context.assertNotNull(firstDb.getJsonObject("created").getNumber("$date"));
                                 context.assertNotNull(firstDb.getJsonObject("modified").getNumber("$date"));
                                 context.assertEquals(user.getUserId(), firstDb.getJsonObject("author").getString("userId"));
