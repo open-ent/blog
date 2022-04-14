@@ -200,6 +200,7 @@ public class BlogExplorerPluginClientTest {
                                                                             context.assertEquals(user.getUsername(), sfol1.getString("creatorName"));
                                                                             context.assertNotNull(sfol1.getNumber("createdAt"));
                                                                             //check resources
+                                                                            System.out.println(fetch2);
                                                                             context.assertEquals(1, fetch2.size());
                                                                             final JsonObject model = fetch2.getJsonObject(0);
                                                                             context.assertEquals(blog1.getString("title"), model.getString("name"));
