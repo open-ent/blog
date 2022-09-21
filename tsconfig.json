@@ -6,6 +6,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "noImplicitAny": false,
+    "skipLibCheck": true,
     "lib": ["es2015", "dom"]
   },
   "exclude": [
