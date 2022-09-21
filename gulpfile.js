@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var webpack = require('webpack-stream');
 var merge = require('merge2');
-const replace = require('gulp-replace');
+var replace = require('gulp-replace');
 var clean = require('gulp-clean');
 var sourcemaps = require('gulp-sourcemaps');
 var argv = require('yargs').argv;
@@ -12,7 +12,7 @@ gulp.task('drop-cache', function(){
 		.pipe(clean());
 });
 
-gulp.task('webpack', [], () => { 
+gulp.task('webpack', ['drop-cache'], () => { 
     return gulp.src('./src/main/resources/public')
         .pipe(webpack(require('./webpack.config.js')))
         .on('error', function handleError() {
@@ -20,8 +20,7 @@ gulp.task('webpack', [], () => {
         })
         .pipe(gulp.dest('./src/main/resources/public/dist'));
 });
-
-gulp.task('build', [], () => {
+gulp.task('build', ['webpack'], () => {
     var refs = gulp.src("./src/main/resources/view-src/**/*.+(html|json)")
         .pipe(replace('@@VERSION', Date.now()))
         .pipe(gulp.dest("./src/main/resources/view"));
@@ -50,14 +49,9 @@ gulp.task('watch', () => {
 
     gulp.watch('./src/main/resources/public/ts/**/*.ts', () => gulp.start('build'));
 
-    fs.readFile("./gradle.properties", "utf8", function(err, content){
+    fs.readFile("./gradle.properties", "utf8", function(error, content){
         var modName = getModName(content);
-        gulp.watch(['./src/main/resources/public/js'], () => {
-            console.log('Copying resources to ' + springboard + 'mods/' + modName);
-            gulp.src('./src/main/resources/**/*')
-                .pipe(gulp.dest(springboard + 'mods/' + modName));
-        });
-        gulp.watch(['./src/main/resources/public/template/**/*.html', '!./src/main/resources/public/template/entcore/*.html'], () => {
+        gulp.watch(['./src/main/resources/public/template/**/*.html', '!./src/main/resources/public/template/entcore/*.html', './src/main/resources/public/sass/**/*.scss'], () => {
             console.log('Copying resources to ' + springboard + 'mods/' + modName);
             gulp.src('./src/main/resources/**/*')
                 .pipe(gulp.dest(springboard + 'mods/' + modName));
