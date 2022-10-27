@@ -1,6 +1,7 @@
 package org.entcore.blog.explorer;
 
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -9,8 +10,12 @@ import io.vertx.ext.mongo.MongoClient;
 import org.entcore.blog.Blog;
 import org.entcore.common.explorer.*;
 import org.entcore.common.explorer.impl.ExplorerPluginResourceMongo;
+import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     public static final String APPLICATION = Blog.APPLICATION;
@@ -20,6 +25,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     private final MongoClient mongoClient;
     private final BlogFoldersExplorerPlugin folderPlugin;
     private final PostExplorerPlugin postPlugin;
+    private ShareService shareService;
 
     public static BlogExplorerPlugin create() throws Exception {
         final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
@@ -42,6 +48,16 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     public BlogFoldersExplorerPlugin folderPlugin(){ return folderPlugin; }
 
     public MongoClient getMongoClient() {return mongoClient;}
+
+    public ShareService createShareService(final Map<String, SecuredAction> securedActions, final Map<String, List<String>> groupedActions) {
+        this.shareService = createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, groupedActions);
+        return this.shareService;
+    }
+
+    @Override
+    protected Optional<ShareService> getShareService() {
+        return Optional.ofNullable(shareService);
+    }
 
     @Override
     protected String getApplication() { return APPLICATION; }
