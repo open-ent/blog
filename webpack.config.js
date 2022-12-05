@@ -6,8 +6,8 @@ module.exports = {
     entry: {
         application: './ts/app.ts',
         behaviours: './ts/behaviours.ts',
-        "explorer": './ts/explorer.ts',
-        "explorer.agent": './ts/explorer.agent.ts'
+//        "explorer": './ts/explorer.ts',
+//        "explorer.agent": './ts/explorer.agent.ts'
     },
     output: {
         filename: './[name].js',
@@ -19,8 +19,8 @@ module.exports = {
         "underscore": "entcore",
         "jquery": "entcore",
         "angular": "angular",
-        "ode-ts-client": 'window.entcore["ode-ts-client"]',
-        "ode-ngjs-front": 'window.entcore["ode-ngjs-front"]'
+//        "ode-ts-client": 'window.entcore["ode-ts-client"]',
+//        "ode-ngjs-front": 'window.entcore["ode-ngjs-front"]'
     },
     resolve: {
         modulesDirectories: ['node_modules'],
