@@ -25,9 +25,4 @@ public class BlogFoldersExplorerPlugin extends ExplorerFolderTreeMongo {
         return "created";
     }
 
-    @Override
-    protected Object toMongoDate(LocalDateTime date) {
-        return MongoDb.toMongoDate(date);
-    }
-
 }

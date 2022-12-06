@@ -70,9 +70,4 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     @Override
     protected String getCollectionName() { return COLLECTION; }
 
-    @Override
-    protected Object toMongoDate(LocalDateTime date) {
-        return MongoDb.toMongoDate(date);
-    }
-
 }

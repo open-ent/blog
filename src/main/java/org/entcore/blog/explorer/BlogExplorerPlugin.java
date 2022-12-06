@@ -102,9 +102,4 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         json.put("author", author);
     }
 
-    @Override
-    protected Object toMongoDate(LocalDateTime date) {
-        return MongoDb.toMongoDate(date);
-    }
-
 }
