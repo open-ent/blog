@@ -206,7 +206,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			QueryBuilder query = QueryBuilder.start("_id").is(postId);
 			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
 			JsonArray fetch = new JsonArray().add("blog");
-			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
+			findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-BlogController|update", user, new Handler<Map<String, Object>>() {
 				@Override
 				public void handle(Map<String, Object> event) {
 					if (event != null) {
@@ -259,8 +259,12 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 						shared = blog.getJsonObject("blog", new JsonObject()).getJsonArray("shared");
 					}
 					if (shared != null) {
-						shared.add(blog.getJsonObject("blog", new JsonObject()).getJsonObject("author")); //Allows owner to get notified for contributors posts
 						List<String> shareIds = getSharedIds(shared, filterRights);
+						String authorId = blog.getJsonObject("blog", new JsonObject()).getJsonObject("author", new JsonObject()).getString("userId");
+						if (authorId != null) {
+							//Allows owner to get notified for contributors posts
+							shareIds.add(authorId);
+						}
 						if (!shareIds.isEmpty()) {
 							Map<String, Object> params = new HashMap<>();
 							params.put("userId", user.getUserId());
