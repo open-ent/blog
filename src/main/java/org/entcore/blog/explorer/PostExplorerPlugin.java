@@ -11,7 +11,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import org.entcore.blog.Blog;
-import org.entcore.common.explorer.*;
+import org.entcore.common.explorer.ExplorerMessage;
 import org.entcore.common.explorer.impl.ExplorerSubResourceMongo;
 import org.entcore.common.user.UserInfos;
 
@@ -54,6 +54,11 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     }
 
     @Override
+    public String getEntityType() {
+        return "post";
+    }
+
+    @Override
     protected String getParentId(JsonObject jsonObject) {
         final JsonObject blogRef = jsonObject.getJsonObject("blog");
         final String blogId = blogRef.getString("$id");
@@ -61,9 +66,9 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     }
 
     @Override
-    protected Future<ExplorerMessage> toMessage(final ExplorerMessage message, final JsonObject source) {
+    protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
         final String id = source.getString("_id");
-        message.withSubResourceHtml(id, source.getString("content",""));
+        message.withSubResourceHtml(id, source.getString("content",""), source.getLong("version"));
         return Future.succeededFuture(message);
     }
 

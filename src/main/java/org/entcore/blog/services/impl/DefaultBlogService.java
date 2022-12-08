@@ -27,23 +27,27 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.entcore.blog.explorer.BlogExplorerPlugin;
-import org.entcore.blog.services.BlogService;
-import fr.wseduc.webutils.*;
-import org.entcore.blog.services.PostService;
-import org.entcore.common.explorer.IExplorerPlugin;
-import org.entcore.common.service.VisibilityFilter;
-import org.entcore.common.service.impl.MongoDbSearchService;
-import org.entcore.common.user.UserInfos;
-import org.entcore.common.utils.StringUtils;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Utils;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.entcore.blog.explorer.BlogExplorerPlugin;
+import org.entcore.blog.services.BlogService;
+import org.entcore.blog.services.PostService;
+import org.entcore.common.explorer.IdAndVersion;
+import org.entcore.common.explorer.IngestJobState;
+import org.entcore.common.service.VisibilityFilter;
+import org.entcore.common.service.impl.MongoDbSearchService;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.StringUtils;
 
 import java.util.*;
+
+import static java.lang.System.currentTimeMillis;
 
 public class DefaultBlogService implements BlogService{
 	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
@@ -70,6 +74,7 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void create(final JsonObject blog, UserInfos author, boolean isPublic, final Handler<Either<String, JsonObject>> result) {
+		final long version = currentTimeMillis();
 		CommentType commentType = Utils.stringToEnum(blog.getString("comment-type", "").toUpperCase(),
 				CommentType.NONE, CommentType.class);
 		PublishType publishType = Utils.stringToEnum(blog.getString("publish-type", "").toUpperCase(),
@@ -95,7 +100,7 @@ public class DefaultBlogService implements BlogService{
         }
 		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
-
+		plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
 		plugin.create(author,b, false).onComplete((e) -> {
 			if(e.succeeded()){
 				result.handle(new Either.Right<>(blog.put("_id", e.result())));
@@ -108,6 +113,7 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void update(UserInfos user, String blogId, JsonObject blog, final Handler<Either<String, JsonObject>> result) {
+		final long version = currentTimeMillis();
 		blog.put("modified", MongoDb.now());
 		if (blog.getString("comment-type") != null) {
 			try {
@@ -138,6 +144,7 @@ public class DefaultBlogService implements BlogService{
 		for (String attr: b.fieldNames()) {
 			modifier.set(attr, b.getValue(attr));
 		}
+		plugin.setIngestJobStateAndVersion(modifier, IngestJobState.TO_BE_SENT, version);
 		mongo.update(BLOG_COLLECTION, MongoQueryBuilder.build(query), modifier.build(),event-> {
 			final Either<String, JsonObject> either = Utils.validResult(event);
 			if(either.isLeft()){
@@ -145,6 +152,7 @@ public class DefaultBlogService implements BlogService{
 				result.handle(either);
 			}else{
 				blog.put("_id", blogId);
+				plugin.setVersion(blog, version);
 				plugin.notifyUpsert(user, blog).onComplete(e->{
 					if(e.failed()){
 						log.error("Failed to notify upsert blog: ", e.cause());
@@ -157,6 +165,7 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void delete(UserInfos user, final String blogId, final Handler<Either<String, JsonObject>> result) {
+		final long now = currentTimeMillis();
 		QueryBuilder q = QueryBuilder.start("blog.$id").is(blogId);
 		mongo.delete("posts", MongoQueryBuilder.build(q), new Handler<Message<JsonObject>>() {
 			@Override
@@ -169,7 +178,7 @@ public class DefaultBlogService implements BlogService{
 							log.error("Failed to delete blog: ", either.left().getValue());
 							result.handle(either);
 						}else{
-							plugin.notifyDeleteById(user, blogId).onComplete(e->{
+							plugin.notifyDeleteById(user, new IdAndVersion(blogId, now)).onComplete(e->{
 								if(e.failed()){
 									log.error("Failed to notify delete blog: ", e.cause());
 								}

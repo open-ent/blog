@@ -27,21 +27,22 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Utils;
+import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
-import fr.wseduc.webutils.*;
-
+import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
-import io.vertx.core.Handler;
-import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 
@@ -75,6 +76,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void create(String blogId, JsonObject post, UserInfos author,
 					   final Handler<Either<String, JsonObject>> result) {
+		final long version = System.currentTimeMillis();
 		JsonObject now = MongoDb.nowISO();
 		JsonObject blogRef = new JsonObject()
 				.put("$ref", "blogs")
@@ -96,90 +98,94 @@ public class DefaultPostService implements PostService {
 		if (b.containsKey("content")) {
 			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 		}
-
-		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
-			public void handle(Either<String, JsonObject> event) {
-				if(event.isLeft()){
-					log.error("Failed to create post: ", event.left().getValue());
-					result.handle(event);
-					return;
-				}
-				//#29106 avoid fetch after save
-				final String id = event.right().getValue().getString("_id");
-				b.put("_id", id);
-				//must set id before notify
-				plugin.notifyUpsert(blogId, author, b).onComplete(e->{
-					if(e.failed()){
-						log.error("Failed to notify upsert post: ", e.cause());
-					}
-					result.handle(new Either.Right<>(b));
-				});
+		plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
+		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
+			if(event.isLeft()){
+				log.error("Failed to create post: ", event.left().getValue());
+				result.handle(event);
+				return;
 			}
+			//#29106 avoid fetch after save
+			final String id = event.right().getValue().getString("_id");
+			b.put("_id", id);
+			//must set id before notify
+			plugin.notifyUpsert(blogId, author, b).onComplete(e->{
+				if(e.failed()){
+					plugin.setIngestJobState(b, IngestJobState.SEND_KO);
+					log.error("Failed to notify upsert post: ", e.cause());
+				} else {
+					plugin.setIngestJobState(b, IngestJobState.SENT);
+				}
+				// TODO JBER update here the state in mongo
+				result.handle(new Either.Right<>(b));
+			});
 		}));
 	}
 
 	@Override
 	public void update(String postId, final JsonObject post, final UserInfos user, final Handler<Either<String, JsonObject>> result) {
-
+		final long version = System.currentTimeMillis();
 		final JsonObject jQuery = MongoQueryBuilder.build(QueryBuilder.start("_id").is(postId));
-		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
-			public void handle(Either<String, JsonObject> event) {
-				if(event.isLeft()){
-					result.handle(event);
-					return;
-				} else {
-					final JsonObject postFromDb = event.right().getValue().getJsonObject("result", new JsonObject());
-					final JsonObject now = MongoDb.now();
-					post.put("modified", now);
-					final JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
+		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(event -> {
+			if(event.isLeft()){
+				result.handle(event);
+				return;
+			} else {
+				final JsonObject postFromDb = event.right().getValue().getJsonObject("result", new JsonObject());
+				final JsonObject now = MongoDb.now();
+				post.put("modified", now);
+				final JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 
-					if (validationError(result, b)) return;
-					if (b.containsKey("content")) {
-						b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
-					}
-
-					if (postFromDb.getJsonObject("firstPublishDate") != null) {
-						b.put("sorted", postFromDb.getJsonObject("firstPublishDate"));
-					} else {
-						b.put("sorted", now);
-					}
-
-					//republish post to make it go up
-					final boolean sorting = post.containsKey("sorted") && post.getBoolean("sorted", false);
-					if (sorting) {
-						b.put("sorted", now);
-					}
-
-					//if user is author and is not sorting the post, draft state
-					if (!sorting && user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
-						b.put("state", StateType.DRAFT.name());
-					}
-
-					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-					for (String attr: b.fieldNames()) {
-						modifier.set(attr, b.getValue(attr));
-					}
-					mongo.update(POST_COLLECTION, jQuery, modifier.build(),
-							new Handler<Message<JsonObject>>() {
-								@Override
-								public void handle(Message<JsonObject> event) {
-									if ("ok".equals(event.body().getString("status"))) {
-										final JsonObject blogRef = postFromDb.getJsonObject("blog");
-										final String blogId = blogRef.getString("$id");
-										plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
-											if(e.failed()){
-												log.error("Failed to notify upsert post: ", e.cause());
-											}
-											final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
-											result.handle(new Either.Right<String, JsonObject>(r));
-										});
-									} else {
-										result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
-									}
-								}
-							});
+				if (validationError(result, b)) return;
+				if (b.containsKey("content")) {
+					b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 				}
-			}})
+
+				if (postFromDb.getJsonObject("firstPublishDate") != null) {
+					b.put("sorted", postFromDb.getJsonObject("firstPublishDate"));
+				} else {
+					b.put("sorted", now);
+				}
+
+				//republish post to make it go up
+				final boolean sorting = post.containsKey("sorted") && post.getBoolean("sorted", false);
+				if (sorting) {
+					b.put("sorted", now);
+				}
+
+				//if user is author and is not sorting the post, draft state
+				if (!sorting && user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
+					b.put("state", StateType.DRAFT.name());
+				}
+
+				MongoUpdateBuilder modifier = new MongoUpdateBuilder();
+				for (String attr: b.fieldNames()) {
+					modifier.set(attr, b.getValue(attr));
+				}
+				plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
+				mongo.update(POST_COLLECTION, jQuery, modifier.build(),
+						new Handler<Message<JsonObject>>() {
+							@Override
+							public void handle(Message<JsonObject> event) {
+								if ("ok".equals(event.body().getString("status"))) {
+									final JsonObject blogRef = postFromDb.getJsonObject("blog");
+									final String blogId = blogRef.getString("$id");
+									plugin.setIngestJobStateAndVersion(post, IngestJobState.TO_BE_SENT, version);
+									plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
+										if(e.failed()){
+											log.error("Failed to notify upsert post: ", e.cause());
+										}
+										// TODO JBER update here status in mongo
+										final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
+											result.handle(new Either.Right<String, JsonObject>(r));
+									});
+								} else {
+									result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
+								}
+							}
+						});
+			}
+		})
 		);
 
 	}
@@ -187,6 +193,7 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void delete(UserInfos user, String blogId, String postId, final Handler<Either<String, JsonObject>> result) {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId);
+		// TODO JBER not handled
 		mongo.delete(POST_COLLECTION, MongoQueryBuilder.build(query), event -> {
 			//must set id before notify
 			plugin.notifyUpsert(blogId, user, new JsonObject().put("_id", postId)).onComplete(e -> {

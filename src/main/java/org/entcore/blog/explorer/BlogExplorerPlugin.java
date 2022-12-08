@@ -8,11 +8,17 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import org.entcore.blog.Blog;
-import org.entcore.common.explorer.*;
+import org.entcore.common.explorer.ExplorerMessage;
+import org.entcore.common.explorer.ExplorerPluginFactory;
+import org.entcore.common.explorer.IExplorerPlugin;
+import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.explorer.impl.ExplorerPluginResourceMongo;
+import org.entcore.common.explorer.impl.ExplorerSubResource;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
+
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,7 +72,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     protected String getResourceType() { return TYPE; }
 
     @Override
-    protected Future<ExplorerMessage> toMessage(final ExplorerMessage message, final JsonObject source) {
+    protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
         message.withName(source.getString("title", ""));
         message.withContent(source.getString("description", ""), ExplorerMessage.ExplorerContentType.Html);
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
@@ -100,6 +106,11 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         author.put("username", user.getUsername());
         author.put("login", user.getLogin());
         json.put("author", author);
+    }
+
+    @Override
+    protected List<ExplorerSubResource> getSubResourcesPlugin() {
+        return Collections.singletonList(postPlugin);
     }
 
 }
