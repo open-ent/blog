@@ -1,6 +1,5 @@
 package org.entcore.blog.explorer;
 
-import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -17,7 +16,6 @@ import org.entcore.common.explorer.impl.ExplorerSubResource;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
