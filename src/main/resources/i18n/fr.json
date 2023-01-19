@@ -153,13 +153,15 @@
   "blog.understood": "J'ai compris",
   "blog.url.public": "Adresse publique du blog",
   "blog.copy.clipboard": "L'adresse a été ajoutée au presse papier.",
-  "blog.label.write.your.comment" : "Saisissez votre commentaire"
-  
-  ,"explorer.searchbar.placeholder": "Rechercher un blog"
-  ,"explorer.sidebar.title": "Blog"
-  ,"explorer.modal.props.title": "Propriétés du blog"
-  ,"explorer.toaster.btn.create.label" : "Créer un blog"
-  ,"explorer.filter.owner": "Mes Blogs"
-  ,"explorer.filter.shared": "Les blogs partagés avec moi"
-  ,"explorer.filter.public": "Blogs public"
+  "blog.label.write.your.comment" : "Saisissez votre commentaire",
+  "explorer.searchbar.placeholder": "Rechercher un blog",
+  "explorer.sidebar.title": "Blog",
+  "explorer.modal.props.title": "Propriétés du blog",
+  "explorer.toaster.btn.create.label" : "Créer un blog",
+  "explorer.filter.owner": "Mes Blogs",
+  "explorer.filter.shared": "Les blogs partagés avec moi",
+  "explorer.filter.public": "Blogs public",
+  "explorer.create.title": "Nouveau Blog",
+  "explorer.label.search": "Rechercher dans mes blogs",
+  "explorer.filters.mine": "Mes blogs"
 }
