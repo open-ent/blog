@@ -163,5 +163,6 @@
   "explorer.filter.public": "Blogs public",
   "explorer.create.title": "Nouveau Blog",
   "explorer.label.search": "Rechercher dans mes blogs",
-  "explorer.filters.mine": "Mes blogs"
+  "explorer.filters.mine": "Mes blogs",
+  "explorer.tree.title": "Blogs"
 }
