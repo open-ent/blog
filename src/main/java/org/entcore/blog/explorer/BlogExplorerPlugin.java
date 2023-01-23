@@ -76,6 +76,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
         message.withTrashed(source.getBoolean("trashed", false));
         message.withShared(source.getJsonArray("shared"));
+        message.withThumbnail(source.getString("thumbnail"));
         return Future.succeededFuture(message);
     }
 

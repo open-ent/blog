@@ -68,7 +68,7 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     @Override
     protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
         final String id = source.getString("_id");
-        message.withSubResourceHtml(id, source.getString("content",""), source.getLong("version"));
+        message.withSubResourceHtml(id, source.getString("content",""), source.getLong("version", 0l));
         return Future.succeededFuture(message);
     }
 
