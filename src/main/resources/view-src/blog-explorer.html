@@ -10,15 +10,10 @@
       rel="stylesheet"
       href="/assets/themes/ode-bootstrap-neo/skins/default/theme.css"
     />
-    <script
-      type="module"
-      crossorigin
-      src="/assets/js/ode-explorer/index.js"
-    ></script>
-    <link rel="stylesheet" href="/assets/js/ode-explorer/index.css" />
+    <script type="module" crossorigin src="/index.js"></script>
   </head>
-  <body class="app-react">
+  <body class="app-react" data-ode-app='{"app":"blog"}'>
     <!-- blog, collaborativeeditor, collaborativewall, exercizer, mindmap, pages, timelinegenerator, wiki, scrapbook -->
-    <div data-ode-app='{"app":"blog"}'></div>
+    <div id="root"></div>
   </body>
 </html>
