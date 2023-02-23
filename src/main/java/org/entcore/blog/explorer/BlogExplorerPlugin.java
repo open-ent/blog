@@ -78,6 +78,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         message.withShared(source.getJsonArray("shared"));
         message.withThumbnail(source.getString("thumbnail"));
         message.withDescription(source.getString("description"));
+        message.withCustomFields(new JsonObject().put("slug", "slug"));
         return Future.succeededFuture(message);
     }
 
