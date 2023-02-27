@@ -164,5 +164,8 @@
   "explorer.create.title": "Nouveau Blog",
   "explorer.label.search": "Rechercher dans mes blogs",
   "explorer.filters.mine": "Mes blogs",
-  "explorer.tree.title": "Blogs"
+  "explorer.tree.title": "Blogs",
+  "explorer.emptyScreen.label": "Ce dossier est vide pour le moment. Vous pouvez organiser vos blogs dedans, dès maintenant !",
+  "explorer.emptyScreen.app.alt": "Illustration de l'application blog sans ressources",
+  "explorer.emptyScreen.trash.empty": "Aucun blogs dans la corbeille pour le moment."
 }
