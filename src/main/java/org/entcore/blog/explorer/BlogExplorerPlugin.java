@@ -71,6 +71,8 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
 
     @Override
     protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
+        final JsonObject custom = new JsonObject().put("slug", source.getString("slug", ""));
+        custom.put("publish-type", source.getString("publish-type", ""));
         message.withName(source.getString("title", ""));
         message.withContent(source.getString("description", ""), ExplorerMessage.ExplorerContentType.Html);
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
@@ -78,7 +80,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         message.withShared(source.getJsonArray("shared"));
         message.withThumbnail(source.getString("thumbnail"));
         message.withDescription(source.getString("description"));
-        message.withCustomFields(new JsonObject().put("slug", "slug"));
+        message.withCustomFields(custom);
         return Future.succeededFuture(message);
     }
 
