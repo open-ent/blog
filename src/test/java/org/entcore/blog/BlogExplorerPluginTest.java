@@ -1,5 +1,6 @@
 package org.entcore.blog;
 
+import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.services.ResourceService;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
@@ -54,6 +55,7 @@ public class BlogExplorerPluginTest {
 
     @BeforeClass
     public static void setUp(TestContext context) throws Exception {
+        IngestJobMetricsRecorderFactory.init(test.vertx(), new JsonObject());
         test.database().initNeo4j(context, neo4jContainer);
         user.setLogin("user1");
         user2.setLogin("user2");
@@ -67,7 +69,7 @@ public class BlogExplorerPluginTest {
         final Map<String, SecuredAction> securedActions = test.share().getSecuredActions(context);
         final IExplorerPluginCommunication communication = explorerTest.getCommunication();
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
-        blogPlugin = new BlogExplorerPlugin(communication, mongoClient);
+        blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
         postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);

@@ -37,8 +37,6 @@ import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventStoreFactory;
-import org.entcore.common.explorer.ExplorerPluginFactory;
-import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
 
@@ -70,7 +68,7 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        blogPlugin = BlogExplorerPlugin.create();
+        blogPlugin = BlogExplorerPlugin.create(securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);

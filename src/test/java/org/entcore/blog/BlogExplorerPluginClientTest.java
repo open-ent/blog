@@ -1,7 +1,9 @@
 package org.entcore.blog;
 
+import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -56,7 +58,7 @@ public class BlogExplorerPluginClientTest {
     static IExplorerPluginClient client;
 
     @BeforeClass
-    public static void setUp(TestContext context) {
+    public static void setUp(TestContext context) throws Exception {
         user.setLogin("user1");
         user2.setLogin("user2");
         explorerTest.start(context);
@@ -66,9 +68,10 @@ public class BlogExplorerPluginClientTest {
         final int POST_SEARCH_WORD = 4;
         final int BLOG_PAGING = 30;
         final int BLOG_SEARCH_WORD = 4;
+        final Map<String, SecuredAction> securedActions = test.share().getSecuredActions(context);
         final IExplorerPluginCommunication communication = explorerTest.getCommunication();
         mongoClient = test.database().createMongoClient(mongoDBContainer);
-        blogPlugin = new BlogExplorerPlugin(communication, mongoClient);
+        blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
         postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);

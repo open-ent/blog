@@ -98,7 +98,7 @@ public class BlogController extends BaseController {
 		final Map<String, List<String>> groupedActions = new HashMap<>();
 		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		final BlogExplorerPlugin plugin = blog.getPlugin();
-		this.shareService = plugin.createShareService(securedActions, groupedActions);
+		this.shareService = plugin.createShareService(groupedActions);
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 		eventHelper = new EventHelper(eventStore);
 	}

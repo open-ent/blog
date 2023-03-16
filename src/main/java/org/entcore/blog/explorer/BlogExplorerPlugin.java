@@ -2,6 +2,7 @@ package org.entcore.blog.explorer;
 
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -13,13 +14,11 @@ import org.entcore.common.explorer.IExplorerPlugin;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.explorer.impl.ExplorerPluginResourceMongo;
 import org.entcore.common.explorer.impl.ExplorerSubResource;
+import org.entcore.common.share.ShareModel;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     public static final String APPLICATION = Blog.APPLICATION;
@@ -30,17 +29,19 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     private final BlogFoldersExplorerPlugin folderPlugin;
     private final PostExplorerPlugin postPlugin;
     private ShareService shareService;
+    private final Map<String, SecuredAction> securedActions;
 
-    public static BlogExplorerPlugin create() throws Exception {
+    public static BlogExplorerPlugin create(final Map<String, SecuredAction> securedActions) throws Exception {
         final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
-            return new BlogExplorerPlugin(params.getCommunication(), params.getDb());
+            return new BlogExplorerPlugin(params.getCommunication(), params.getDb(), securedActions);
         });
         return (BlogExplorerPlugin) plugin;
     }
 
-    public BlogExplorerPlugin(final IExplorerPluginCommunication communication, final MongoClient mongoClient) {
+    public BlogExplorerPlugin(final IExplorerPluginCommunication communication, final MongoClient mongoClient, final Map<String, SecuredAction> securedActions) {
         super(communication, mongoClient);
         this.mongoClient = mongoClient;
+        this.securedActions = securedActions;
         //init folder plugin
         this.folderPlugin = new BlogFoldersExplorerPlugin(this);
         //init subresource plugin
@@ -53,7 +54,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
 
     public MongoClient getMongoClient() {return mongoClient;}
 
-    public ShareService createShareService(final Map<String, SecuredAction> securedActions, final Map<String, List<String>> groupedActions) {
+    public ShareService createShareService(final Map<String, List<String>> groupedActions) {
         this.shareService = createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, groupedActions);
         return this.shareService;
     }
@@ -71,17 +72,24 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
 
     @Override
     protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
+        final Optional<String> creatorId = Optional.of(getCreatorForModel(source)).map(e -> e.getUserId());
+        final ShareModel shareModel = new ShareModel(source.getJsonArray("shared", new JsonArray()), securedActions, creatorId);
         final JsonObject custom = new JsonObject().put("slug", source.getString("slug", ""));
         custom.put("publish-type", source.getString("publish-type", ""));
         message.withName(source.getString("title", ""));
         message.withContent(source.getString("description", ""), ExplorerMessage.ExplorerContentType.Html);
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
         message.withTrashed(source.getBoolean("trashed", false));
-        message.withShared(source.getJsonArray("shared"));
+        message.withShared(shareModel);
         message.withThumbnail(source.getString("thumbnail"));
         message.withDescription(source.getString("description"));
         message.withCustomFields(custom);
         return Future.succeededFuture(message);
+    }
+
+    @Override
+    public Map<String, SecuredAction> getSecuredActions() {
+        return securedActions;
     }
 
     @Override
