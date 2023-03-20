@@ -196,7 +196,7 @@ public class DefaultPostService implements PostService {
 		// TODO JBER not handled
 		mongo.delete(POST_COLLECTION, MongoQueryBuilder.build(query), event -> {
 			//must set id before notify
-			plugin.notifyUpsert(blogId, user, new JsonObject().put("_id", postId)).onComplete(e -> {
+			plugin.notifyUpsert(blogId, user, new JsonObject().put("_id", postId).put("version", new Date().getTime())).onComplete(e -> {
 				if (e.failed()) {
 					log.error("Failed to notify upsert post: ", e.cause());
 				}
@@ -856,6 +856,7 @@ public class DefaultPostService implements PostService {
 					for (final JsonObject post : posts) {
 						final JsonObject blogRef = post.getJsonObject("blog");
 						final String blogId = blogRef.getString("$id");
+						post.put("version", new Date().getTime());
 						all.put(blogId, post);
 					}
 					plugin.notifyUpsert(user, all).onComplete(eNotif -> {

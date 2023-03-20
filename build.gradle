@@ -44,6 +44,10 @@ configurations.all {
   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
+configurations.testRuntime {
+  exclude 'group': 'io.gatling'
+}
+
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 

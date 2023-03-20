@@ -17,6 +17,7 @@ import org.entcore.common.user.UserInfos;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     public static final String TYPE = Blog.BLOG_TYPE;
@@ -28,13 +29,16 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     }
 
     @Override
-    protected UserInfos getCreatorForModel(final JsonObject json) {
+    protected Optional<UserInfos> getCreatorForModel(final JsonObject json) {
+        if(!json.containsKey("author") || !json.getJsonObject("author").containsKey("userId")){
+            return Optional.empty();
+        }
         final JsonObject author = json.getJsonObject("author");
         final UserInfos user = new UserInfos();
         user.setUserId( author.getString("userId"));
         user.setUsername(author.getString("username"));
         user.setLogin(author.getString("login"));
-        return user;
+        return Optional.ofNullable(user);
     }
 
     @Override

@@ -72,7 +72,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
 
     @Override
     protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
-        final Optional<String> creatorId = Optional.of(getCreatorForModel(source)).map(e -> e.getUserId());
+        final Optional<String> creatorId = getCreatorForModel(source).map(e -> e.getUserId());
         final ShareModel shareModel = new ShareModel(source.getJsonArray("shared", new JsonArray()), securedActions, creatorId);
         final JsonObject custom = new JsonObject().put("slug", source.getString("slug", ""));
         custom.put("publish-type", source.getString("publish-type", ""));
@@ -101,13 +101,16 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     }
 
     @Override
-    public UserInfos getCreatorForModel(JsonObject json) {
+    public Optional<UserInfos> getCreatorForModel(final JsonObject json) {
+        if(!json.containsKey("author") || !json.getJsonObject("author").containsKey("userId")){
+            return Optional.empty();
+        }
         final JsonObject author = json.getJsonObject("author");
         final UserInfos user = new UserInfos();
         user.setUserId( author.getString("userId"));
         user.setUsername(author.getString("username"));
         user.setLogin(author.getString("login"));
-        return user;
+        return Optional.ofNullable(user);
     }
 
     @Override

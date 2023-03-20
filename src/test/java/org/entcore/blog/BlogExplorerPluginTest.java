@@ -34,7 +34,7 @@ import java.util.*;
 
 @RunWith(VertxUnitRunner.class)
 public class BlogExplorerPluginTest {
-    static final String RIGHT = "org-entcore-blog-controllers-BlogController|blog";
+    static final String RIGHT = "org-entcore-blog-controllers-BlogController|get";
     private static final TestHelper test = TestHelper.helper();
     @ClassRule
     public static Neo4jContainer<?> neo4jContainer = test.database().createNeo4jContainer();
@@ -272,22 +272,24 @@ public class BlogExplorerPluginTest {
         postService.updateAllContents(user, posts, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
             postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
                 explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
-                    explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
-                        context.assertEquals(1, fetch1.size());
-                        final JsonObject postES = fetch1.getJsonObject(0);
-                        final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
-                        context.assertEquals(post3.getString("content"), subResource.getString("contentHtml"));
-                        postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
-                            context.assertEquals(1, listPost.size());
-                            final JsonObject postModel = listPost.getJsonObject(0);
-                            context.assertEquals(postId, postModel.getString("_id"));
-                            context.assertNotNull(postModel.getString("state"));
-                            context.assertNotNull(postModel.getValue("created"));
-                            context.assertNotNull(postModel.getValue("modified"));
-                            context.assertNotNull(postModel.getValue("author"));
-                            context.assertNotNull(postModel.getNumber("views"));
-                            async.complete();
-                        })));
+                    postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r4a-> {
+                        explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                            context.assertEquals(1, fetch1.size());
+                            final JsonObject postES = fetch1.getJsonObject(0);
+                            final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
+                            context.assertEquals(post3.getString("content"), subResource.getString("contentHtml"));
+                            postService.list(blogId, user, 0, 10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
+                                context.assertEquals(1, listPost.size());
+                                final JsonObject postModel = listPost.getJsonObject(0);
+                                context.assertEquals(postId, postModel.getString("_id"));
+                                context.assertNotNull(postModel.getString("state"));
+                                context.assertNotNull(postModel.getValue("created"));
+                                context.assertNotNull(postModel.getValue("modified"));
+                                context.assertNotNull(postModel.getValue("author"));
+                                context.assertNotNull(postModel.getNumber("views"));
+                                async.complete();
+                            })));
+                        }));
                     }));
                 }));
             }));
