@@ -669,6 +669,7 @@ export const blogController = ng.controller("BlogController", [
                 if (result != null) {
                   $scope.post = $scope.blog.posts.first();
                   $scope.post.publishing = true;
+                  $scope.post.state =  'PUBLISHED';
                   resolve();
                   $location.path(
                     "/detail/" + $scope.post.blogId + "/" + $scope.post._id
