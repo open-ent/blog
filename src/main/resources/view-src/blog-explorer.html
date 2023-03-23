@@ -30,6 +30,7 @@
       var WORKFLOW_PRINT = "org.entcore.blog.controllers.BlogController|print";
       var odeConfig = {
         app: "blog",
+        types: ["blog"], 
         filters: [
           { id: "owner", defaultValue: true },
           { id: "public", defaultValue: false },
@@ -37,7 +38,7 @@
         ],
         orders: [
           { id: "name", defaultValue: "asc", i18n: "explorer.sorts.name" },
-          { id: "updatedat", i18n: "explorer.sorts.updatedat" }
+          { id: "updatedAt", i18n: "explorer.sorts.updatedat" }
         ],
         actions: [
           {
