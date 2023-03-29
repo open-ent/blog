@@ -90,6 +90,9 @@ public class DefaultBlogService implements BlogService{
 				.put("comment-type", commentType.name())
 				.put("publish-type", publishType.name())
 				.put("shared", new JsonArray());
+		// get and remove folder field
+		final Optional<Number> folderId = Optional.ofNullable(blog.getNumber("folder"));
+		blog.remove("folder");
 		List<String> fields = new ArrayList<>(FIELDS);
 		if (isPublic) {
 		    blog.put("visibility", VisibilityFilter.PUBLIC.name());
@@ -101,7 +104,7 @@ public class DefaultBlogService implements BlogService{
 		JsonObject b = Utils.validAndGet(blog, FIELDS, fields);
 		if (validationError(result, b)) return;
 		plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
-		plugin.create(author,b, false).onComplete((e) -> {
+		plugin.create(author,b, false, folderId).onComplete((e) -> {
 			if(e.succeeded()){
 				result.handle(new Either.Right<>(blog.put("_id", e.result())));
 			}else{
