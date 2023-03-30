@@ -191,7 +191,7 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
 
     toJSON() {
         const { trashed } = this;
-        return {
+        const json = {
             visibility: this.visibility || "OWNER",
             slug: this.slug,
             trashed,
@@ -202,6 +202,12 @@ export class Blog extends Model<Blog> implements Selectable, Shareable {
             'publish-type': this['publish-type'] || 'RESTRAINT',
             description: this.description || ''
         };
+        // add folder if needed
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        if(urlSearchParams.has("folderid")){
+            (json as any).folder = urlSearchParams.get("folderid")
+        }
+        return json;
     }
 }
 
