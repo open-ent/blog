@@ -322,7 +322,7 @@ export let blogModel: any = {
 				// add folder if needed
 				const urlSearchParams = new URLSearchParams(window.location.search);
 				if(urlSearchParams.has("folderid")){
-					(json as any).folder = urlSearchParams.get("folderid")
+					(json as any).folder = parseInt(urlSearchParams.get("folderid"))
 				}
 				return json;
 			}
