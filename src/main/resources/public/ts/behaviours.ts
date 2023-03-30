@@ -309,7 +309,7 @@ export let blogModel: any = {
 		},
 		register: function(){
 			this.Blog.prototype.toJSON = function(){
-				return {
+				const json = {
 					_id: this._id,
 					title: this.title,
 					thumbnail: this.thumbnail || '',
@@ -319,6 +319,12 @@ export let blogModel: any = {
 					visibility: this.visibility || "OWNER",
 					slug: this.slug,
 				}
+				// add folder if needed
+				const urlSearchParams = new URLSearchParams(window.location.search);
+				if(urlSearchParams.has("folderid")){
+					(json as any).folder = urlSearchParams.get("folderid")
+				}
+				return json;
 			}
 
 			this.Blog.prototype.create = function(fn){
