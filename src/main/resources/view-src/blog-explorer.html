@@ -24,74 +24,77 @@
     <!-- SET INITIALISATION CONFIG -->
     <script>
       var WORFLOW_ACCESS = "org.entcore.blog.controllers.BlogController|blog";
-      var WORKFLOW_CREATE = "org.entcore.blog.controllers.BlogController|create";
-      var WORKFLOW_CREATE_PUBLIC = "org.entcore.blog.controllers.BlogController|createPublicBlog";
-      var WORKFLOW_PUBLISH = "org.entcore.blog.controllers.BlogController|publish";
+      var WORKFLOW_CREATE =
+        "org.entcore.blog.controllers.BlogController|create";
+      var WORKFLOW_CREATE_PUBLIC =
+        "org.entcore.blog.controllers.BlogController|createPublicBlog";
+      var WORKFLOW_PUBLISH =
+        "org.entcore.blog.controllers.BlogController|publish";
       var WORKFLOW_PRINT = "org.entcore.blog.controllers.BlogController|print";
       var odeConfig = {
         app: "blog",
-        types: ["blog"], 
+        types: ["blog"],
         filters: [
           { id: "owner", defaultValue: true },
           { id: "public", defaultValue: false },
-          { id: "shared", defaultValue: true }
+          { id: "shared", defaultValue: true },
         ],
         orders: [
           { id: "name", defaultValue: "asc", i18n: "explorer.sorts.name" },
-          { id: "updatedAt", i18n: "explorer.sorts.updatedat" }
+          { id: "updatedAt", i18n: "explorer.sorts.updatedat" },
         ],
         actions: [
           {
             id: "open",
             workflow: WORFLOW_ACCESS,
             target: "actionbar",
-            right: "read"
-          },
-          {
-            id: "edit",
-            workflow: WORFLOW_ACCESS,
-            target: "actionbar",
-            right: "manager"
-          },
-          {
-            id: "create",
-            workflow: WORKFLOW_CREATE,
-            target: "tree"
-          },
-          {
-            id: "createPublic",
-            workflow: WORKFLOW_CREATE_PUBLIC,
-            target: "tree"
-          },
-          {
-            id: "move",
-            workflow: WORFLOW_ACCESS,
-            target: "actionbar",
-            right: "read"
-          },
-          {
-            id: "delete",
-            workflow: WORFLOW_ACCESS,
-            target: "actionbar",
-            right: "read"
-          },
-          {
-            id: "publish",
-            workflow: WORKFLOW_PUBLISH,
-            target: "actionbar",
-            right: "creator"
-          },
-          {
-            id: "print",
-            workflow: WORKFLOW_PRINT,
-            target: "actionbar",
-            right: "read"
+            right: "read",
           },
           {
             id: "share",
             workflow: WORFLOW_ACCESS,
             target: "actionbar",
-            right: "manager"
+            right: "manager",
+          },
+          {
+            id: "edit",
+            workflow: WORFLOW_ACCESS,
+            target: "actionbar",
+            right: "manager",
+          },
+          {
+            id: "create",
+            workflow: WORKFLOW_CREATE,
+            target: "tree",
+          },
+          {
+            id: "createPublic",
+            workflow: WORKFLOW_CREATE_PUBLIC,
+            target: "tree",
+          },
+          {
+            id: "move",
+            workflow: WORFLOW_ACCESS,
+            target: "actionbar",
+            right: "read",
+          },
+          {
+            id: "publish",
+            workflow: WORKFLOW_PUBLISH,
+            target: "actionbar",
+            right: "creator",
+          },
+          {
+            id: "print",
+            workflow: WORKFLOW_PRINT,
+            target: "actionbar",
+            right: "read",
+          },
+          {
+            id: "delete",
+            workflow: WORFLOW_ACCESS,
+            target: "actionbar",
+            right: "read",
           },
         ],
       };
