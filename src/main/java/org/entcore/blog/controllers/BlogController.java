@@ -110,14 +110,6 @@ public class BlogController extends BaseController {
 		eventHelper.onAccess(request);
 	}
 
-	@Get("/explorer")
-//	TODO @SecuredAction("blog.explore")
-	public void blogExplorer(HttpServerRequest request) {
-//		String language = Utils.getOrElse(I18n.acceptLanguage(request), "fr", false);
-		renderView(request, new JsonObject()/*.put("lang",I18n.getLocale(language).getLanguage())*/, "blog-explorer.html", null);
-		eventHelper.onAccess(request);
-	}
-
 	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {

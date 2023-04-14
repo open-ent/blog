@@ -486,7 +486,7 @@ export let blogModel: any = {
 			}
 
 			this.Post.prototype.comment = function(comment){
-				return new Promise<void>((resolve,reject)=>{
+				return new Promise((resolve,reject)=>{
 					oldHttp().postJson('/blog/comment/' + this.blogId + '/' + this._id, comment).done(function(){
 						this.comments.sync();
 						resolve();
