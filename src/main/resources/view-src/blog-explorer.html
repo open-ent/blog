@@ -21,6 +21,7 @@
     <!-- blog, collaborativeeditor, collaborativewall, exercizer, mindmap, pages, timelinegenerator, wiki, scrapbook -->
     <div id="root"></div>
     <div id="portal"></div>
+
     <!-- SET INITIALISATION CONFIG -->
     <script>
       var WORFLOW_ACCESS = "org.entcore.blog.controllers.BlogController|blog";
@@ -95,6 +96,20 @@
             workflow: WORFLOW_ACCESS,
             target: "actionbar",
             right: "read",
+          },
+        ],
+        trashActions: [
+          {
+            id: "restore",
+            available: true,
+            target: "actionbar",
+            workflow: "",
+          },
+          {
+            id: "delete",
+            available: true,
+            target: "actionbar",
+            workflow: "",
           },
         ],
       };
