@@ -202,12 +202,12 @@ export function LibraryDelegate(
           resolve();
         })
         .then(function () {
+          $scope.$apply();
+        })
+        .then(function () {
           setTimeout(() => {
             window.open("/blog/explorer", "_self");
           }, 1000);
-        })
-        .then(function () {
-          $scope.$apply();
         })
         .catch(function (e) {
           if (e.response && e.response.status == 409) {
