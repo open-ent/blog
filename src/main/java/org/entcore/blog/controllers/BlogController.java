@@ -106,23 +106,12 @@ public class BlogController extends BaseController {
 	@Get("")
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
-		eventHelper.onAccess(request);
-		final String view = request.params().get("view");
-		final boolean useNewUi = this.config.getBoolean("use-explorer-ui", true);
-		if("home".equals(view)){
-			if(useNewUi){
-				// use new ui by default
-				renderView(request, new JsonObject(), "blog-explorer.html", null);
-			}else{
-				// use old ui by default
-				renderView(request);
-			}
-		}else if("resource".equals(view)){
-			// force new ui
+		if(this.config.getBoolean("use-explorer-ui", true)){
 			renderView(request, new JsonObject(), "blog-explorer.html", null);
-		}else {
-			// use old ui by default for routing
+			eventHelper.onAccess(request);
+		}else{
 			renderView(request);
+			eventHelper.onAccess(request);
 		}
 	}
 

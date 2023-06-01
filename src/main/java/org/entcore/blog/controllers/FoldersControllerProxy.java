@@ -25,7 +25,6 @@ public class FoldersControllerProxy extends BaseController implements FoldersCon
 	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
 					 Map<String, fr.wseduc.webutils.security.SecuredAction> securedActions) {
 		super.init(vertx, config, rm, securedActions);
-		this.controller.init(vertx, config, rm, securedActions);
 	}
 
 	@Override

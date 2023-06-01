@@ -1,9 +1,7 @@
 package org.entcore.blog.controllers;
 
-import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.http.Renders;
 import fr.wseduc.webutils.request.RequestUtils;
-import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
@@ -16,22 +14,15 @@ import org.entcore.common.explorer.to.FolderListRequest;
 import org.entcore.common.explorer.to.FolderResponse;
 import org.entcore.common.explorer.to.FolderUpsertRequest;
 import org.entcore.common.user.UserUtils;
-import org.vertx.java.core.http.RouteMatcher;
 
 import java.util.Arrays;
-import java.util.Map;
 
-public class FoldersControllerExplorer extends BaseController implements FoldersController {
+public class FoldersControllerExplorer implements FoldersController {
 	private final Vertx vertx;
 	private final BlogExplorerPlugin plugin;
 	public FoldersControllerExplorer(final Vertx vertx, final BlogExplorerPlugin plugin) {
 		this.vertx = vertx;
 		this.plugin = plugin;
-	}
-	@Override
-	public void init(Vertx vertx, JsonObject config, RouteMatcher rm,
-					 Map<String, SecuredAction> securedActions) {
-		super.init(vertx, config, rm, securedActions);
 	}
 	private JsonObject adapt(final FolderResponse response){
 		final JsonObject owner = new JsonObject().put("userId",response.getOwnerUserId()).put("displayName", response.getOwnerUserName());
@@ -54,22 +45,24 @@ public class FoldersControllerExplorer extends BaseController implements Folders
 
 	@Override
 	public void list(HttpServerRequest request) {
-		UserUtils.getUserInfos(this.vertx.eventBus(), request, user -> {
-			if (user != null) {
-				plugin.listFolder(user, new FolderListRequest(user, Blog.APPLICATION)).onComplete(result -> {
-					if(result.succeeded()){
-						final JsonArray folders = new JsonArray();
-						for(final FolderResponse response : result.result()){
-							folders.add(this.adapt(response));
+		RequestUtils.bodyToJson(request,  data-> {
+			UserUtils.getUserInfos(this.vertx.eventBus(), request, user -> {
+				if (user != null) {
+					plugin.listFolder(user, new FolderListRequest(user, Blog.APPLICATION)).onComplete(result -> {
+						if(result.succeeded()){
+							final JsonArray folders = new JsonArray();
+							for(final FolderResponse response : result.result()){
+								folders.add(this.adapt(response));
+							}
+							Renders.renderJson(request, folders);
+						}else{
+							Renders.renderError(request, new JsonObject().put("error", result.cause().getMessage()));
 						}
-						Renders.renderJson(request, folders);
-					}else{
-						Renders.renderError(request, new JsonObject().put("error", result.cause().getMessage()));
-					}
-				});
-			} else {
-				Renders.unauthorized(request);
-			}
+					});
+				} else {
+					Renders.unauthorized(request);
+				}
+			});
 		});
 	}
 
