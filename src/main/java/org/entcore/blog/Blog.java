@@ -24,9 +24,7 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
-import org.entcore.blog.controllers.BlogController;
-import org.entcore.blog.controllers.FoldersController;
-import org.entcore.blog.controllers.PostController;
+import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.explorer.PostExplorerPlugin;
@@ -76,7 +74,11 @@ public class Blog extends BaseServer {
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);
         addController(new BlogController(mongo, blogService, postService));
         addController(new PostController(blogService, postService));
-        addController(new FoldersController("blogsFolders"));
+        if(config().getBoolean("use-explorer-folder-api", true)){
+            addController(new FoldersControllerProxy(new FoldersControllerExplorer(vertx, blogPlugin)));
+        }else{
+            addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
+        }
         blogPlugin.start();
     }
 

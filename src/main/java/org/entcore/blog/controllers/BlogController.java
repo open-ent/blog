@@ -106,8 +106,13 @@ public class BlogController extends BaseController {
 	@Get("")
 	@SecuredAction("blog.view")
 	public void blog(HttpServerRequest request) {
-		renderView(request);
-		eventHelper.onAccess(request);
+		if(this.config.getBoolean("use-explorer-ui", true)){
+			renderView(request, new JsonObject(), "blog-explorer.html", null);
+			eventHelper.onAccess(request);
+		}else{
+			renderView(request);
+			eventHelper.onAccess(request);
+		}
 	}
 
 	@Get("/print/blog")
