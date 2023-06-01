@@ -206,7 +206,7 @@ export function LibraryDelegate(
         })
         .then(function () {
           setTimeout(() => {
-            window.open("/blog/explorer", "_self");
+            window.open("/blog?view=home", "_self");
           }, 1000);
         })
         .catch(function (e) {
@@ -228,7 +228,7 @@ export function LibraryDelegate(
     if (blog) {
       await blog.remove();
     }
-    window.open("/blog/explorer", "_self");
+    window.open("/blog?view=home", "_self");
     Folders.onChange.next(
       !((await Folders.ressources()).length || (await Folders.folders()).length)
     ); // ICI

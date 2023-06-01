@@ -1,25 +1,32 @@
 <div class="row">
-	<side-panel class="zero-mobile">
-		<nav class="vertical">
-			<h2>
-				<i18n>blog.list.title</i18n>
-			</h2>
-			<ul>
-				<li ng-repeat="currBlog in blogs.all">
-					<a ng-class="{'selected': currBlog._id === blog._id}"
-						ng-href="#/view/[[currBlog._id]]">[[currBlog.title]]</a>
-				</li>
-			</ul>
-		</nav>
-	</side-panel>
-	<app-title>
-		<h1>
-			<i class="blog"></i>
-			<span ng-click="redirect('/list-blogs')">
-				<i18n>blog.title</i18n>
-			</span> / <span subtitle ng-click="redirect('/view/' + blog._id)">[[blog.title]]</span>
-		</h1>
-	</app-title>
+  <side-panel class="zero-mobile">
+    <nav class="vertical">
+      <h2>
+        <i18n>blog.list.title</i18n>
+      </h2>
+      <ul>
+        <li ng-repeat="currBlog in blogs.all">
+          <a
+            ng-class="{'selected': currBlog._id === blog._id}"
+            ng-href="#/view/[[currBlog._id]]"
+            >[[currBlog.title]]</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </side-panel>
+  <app-title>
+    <h1>
+      <i class="blog"></i>
+      <a href="/blog">
+        <i18n>blog.title</i18n>
+      </a>
+      /
+      <span subtitle ng-click="redirect('/view/' + blog._id)"
+        >[[blog.title]]</span
+      >
+    </h1>
+  </app-title>
 </div>
 
 <lightbox show="display.postRead" on-close="display.postRead = false;">

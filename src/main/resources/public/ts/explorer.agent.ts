@@ -1,4 +1,4 @@
-import { AbstractBusAgent, ACTION, GetContextParameters, OpenParameters, IActionParameters, IActionResult, IContext, IHttp, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult, DeleteParameters } from 'ode-ts-client';
+import { AbstractBusAgent, ACTION, GetContextParameters, IActionParameters, IActionResult, IContext, IHttp, ManagePropertiesParameters, ManagePropertiesResult, PROP_KEY, PROP_MODE, PROP_TYPE, RESOURCE, UpdatePropertiesParameters, UpdatePropertiesResult, DeleteParameters } from 'ode-ts-client';
 import { TransportFrameworkFactory } from 'ode-ts-client';
 import { IHandler } from 'ode-ts-client/dist/ts/explore/Agent';
 
@@ -26,7 +26,7 @@ class BlogAgent extends AbstractBusAgent {
         this.setHandler( ACTION.UPD_PROPS,  this.onUpdateProps as unknown as IHandler );
     }
 
-    openBlog( parameters:OpenParameters ): void {
+    openBlog( parameters:any ): void {
         window.open( `/blog#/view/${parameters.resourceId}` );
     }
 
