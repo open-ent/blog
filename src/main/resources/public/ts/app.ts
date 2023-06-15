@@ -30,7 +30,7 @@ ng.configs.push(
 );
 
 function redirectToReact() {
-  if(!HAS_VIEW){
+  if(!HAS_VIEW && window.location.pathname !== '/blog/print/blog'){
     window.open("/blog?view=home", "_self");
   }
 }
