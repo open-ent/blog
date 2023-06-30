@@ -58,6 +58,7 @@ export interface LibraryControllerScope {
     showEmptyScreenTrashFilter ():boolean
     //
     $apply: any
+    loaderSave: boolean;
     display: {
         warningDuplicate?: boolean
         publishType?: 'IMMEDIATE' | 'RESTRAINT'
@@ -77,6 +78,8 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
         searchBlogs: "",
         targetFolder: undefined
     };
+
+  $scope.loaderSave = false;
 
   template.open("library/folder-content", "library/folder-content");
   $scope.currentFolder = Folders.root;
@@ -161,6 +164,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
 
   $scope.saveProperties = (): Promise<void> => {
     return new Promise<void>(function (resolve, reject) {
+      $scope.loaderSave= true;
       $scope.display.warningDuplicate = false;
       $scope.lightbox("properties");
       //adapt old model to new
@@ -189,6 +193,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
           setTimeout(() => {
             window.open("/blog?view=home", "_self");
           }, 1000);
+          $scope.loaderSave= false;
         })
         .catch(function (e) {
           if (e.response && e.response.status == 409) {
@@ -200,6 +205,7 @@ export function LibraryDelegate($scope: LibraryControllerScope, $rootScope, $loc
             console.error(e);
             reject();
           }
+          $scope.loaderSave= false;
         });
     });
   };

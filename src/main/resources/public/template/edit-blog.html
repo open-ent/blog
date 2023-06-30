@@ -78,7 +78,7 @@
       </div>
     </div>
     <div class="row twelve top-spacing-four" style="right: 0px">
-      <button class="right-magnet" ng-disabled="blogForm.$invalid">
+      <button class="right-magnet" ng-disabled="blogForm.$invalid || loaderSave">
         <i18n>blog.save</i18n>
       </button>
       <a type="button" class="button right-magnet cancel" href="/blog">
