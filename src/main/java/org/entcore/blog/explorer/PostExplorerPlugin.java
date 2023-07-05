@@ -1,7 +1,6 @@
 package org.entcore.blog.explorer;
 
 import com.mongodb.QueryBuilder;
-import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -15,7 +14,6 @@ import org.entcore.common.explorer.ExplorerMessage;
 import org.entcore.common.explorer.impl.ExplorerSubResourceMongo;
 import org.entcore.common.user.UserInfos;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -38,7 +36,7 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
         user.setUserId( author.getString("userId"));
         user.setUsername(author.getString("username"));
         user.setLogin(author.getString("login"));
-        return Optional.ofNullable(user);
+        return Optional.of(user);
     }
 
     @Override
@@ -59,25 +57,29 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
 
     @Override
     public String getEntityType() {
-        return "post";
+        return Blog.POST_TYPE;
     }
 
     @Override
     protected String getParentId(JsonObject jsonObject) {
         final JsonObject blogRef = jsonObject.getJsonObject("blog");
-        final String blogId = blogRef.getString("$id");
-        return blogId;
+        return blogRef.getString("$id");
     }
+
 
     @Override
     protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
         final String id = source.getString("_id");
         message.withVersion(System.currentTimeMillis());
-        message.withSubResourceHtml(id, source.getString("content",""), source.getLong("version", 0l));
+        message.withSubResourceHtml(id, source.getString("content",""), source.getLong("version", 0L));
         return Future.succeededFuture(message);
     }
 
     @Override
     protected String getCollectionName() { return COLLECTION; }
+
+    protected String getParentColumn() {
+        return "blog.$id";
+    }
 
 }
