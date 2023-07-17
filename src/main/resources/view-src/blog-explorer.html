@@ -2,25 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Blog</title>
-    <link
-      id="theme"
-      rel="stylesheet"
-      href="/assets/themes/ode-bootstrap-neo/skins/default/theme.css"
-    />
+    <link rel="icon" id="favicon" href="" />
+    <link id="theme" rel="stylesheet" href="" />
     <script
       type="module"
       crossorigin
       src="/assets/js/ode-explorer/index.js"
     ></script>
-    <link rel="stylesheet" href="/assets/js/ode-explorer/index.css" />
+    <link rel="stylesheet" href="/assets/js/ode-explorer/style.css" />
   </head>
   <body class="app-react" data-ode-app>
     <!-- blog, collaborativeeditor, collaborativewall, exercizer, mindmap, pages, timelinegenerator, wiki, scrapbook -->
     <div id="root"></div>
     <div id="portal"></div>
+
     <!-- SET INITIALISATION CONFIG -->
     <script>
       var WORFLOW_ACCESS = "org.entcore.blog.controllers.BlogController|blog";
@@ -95,6 +92,22 @@
             workflow: WORFLOW_ACCESS,
             target: "actionbar",
             right: "read",
+          },
+        ],
+        trashActions: [
+          {
+            id: "restore",
+            available: true,
+            target: "actionbar",
+            workflow: "",
+            right: "manager",
+          },
+          {
+            id: "delete",
+            available: true,
+            target: "actionbar",
+            workflow: "",
+            right: "manager",
           },
         ],
       };

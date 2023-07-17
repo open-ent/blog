@@ -24,9 +24,7 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
-import org.entcore.blog.controllers.BlogController;
-import org.entcore.blog.controllers.FoldersController;
-import org.entcore.blog.controllers.PostController;
+import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.explorer.PostExplorerPlugin;
@@ -37,13 +35,19 @@ import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.explorer.IExplorerPluginClient;
+import org.entcore.common.explorer.impl.ExplorerRepositoryEvents;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Blog extends BaseServer {
 
     public static final String APPLICATION = "blog";
     public static final String BLOG_TYPE = "blog";
+    public static final String POST_TYPE = "post";
     public static final String POSTS_COLLECTION = "posts";
     public static final String BLOGS_COLLECTION = "blogs";
     BlogExplorerPlugin blogPlugin;
@@ -58,7 +62,12 @@ public class Blog extends BaseServer {
         EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
         eventStoreFactory.setVertx(vertx);
 
-        setRepositoryEvents(new BlogRepositoryEvents(vertx));
+        final Map<String, IExplorerPluginClient> pluginClientPerCollection = new HashMap<>();
+        pluginClientPerCollection.put(BLOGS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, BLOG_TYPE));
+        pluginClientPerCollection.put(POSTS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, POST_TYPE));
+        setRepositoryEvents(new ExplorerRepositoryEvents(
+                new BlogRepositoryEvents(vertx),
+                pluginClientPerCollection));
 
         if (config.getBoolean("searching-event", true)) {
             setSearchingEvents(new BlogSearchingEvents());
@@ -76,7 +85,11 @@ public class Blog extends BaseServer {
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);
         addController(new BlogController(mongo, blogService, postService));
         addController(new PostController(blogService, postService));
-        addController(new FoldersController("blogsFolders"));
+        if(config().getBoolean("use-explorer-folder-api", true)){
+            addController(new FoldersControllerProxy(new FoldersControllerExplorer(vertx, blogPlugin)));
+        }else{
+            addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
+        }
         blogPlugin.start();
     }
 

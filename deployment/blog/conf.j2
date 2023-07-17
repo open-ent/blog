@@ -14,6 +14,8 @@
         "host": "https://{{ host }}",
         "userbook-host": "https://{{ host }}",
         "mode": "prod",
+        "use-explorer-folder-api": {{ blogUseExplorerApi | default(true) }},
+        "use-explorer-ui": {{ blogUseExplorerUi | default(true) }},
         "publicConf": {
             "xiti": {
                 "ID_SERVICE": {

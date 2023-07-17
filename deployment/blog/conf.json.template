@@ -1,5 +1,5 @@
 {
-  "name": "org.entcore~blog~3.0.3",
+  "name": "org.entcore~blog~3.0-SNAPSHOT",
     "config": {
       "main":"org.entcore.blog.Blog",
       "port": 8018,
@@ -12,6 +12,8 @@
       "host": "${host}",
       "userbook-host": "${host}",
       "mode": "${mode}",
+      "use-explorer-folder-api": true,
+      "use-explorer-ui": true,
       "publicConf": {
           <% if ("true".equals(xitiSwitch)) { %>
             "xiti": {
