@@ -39,6 +39,7 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Neo4jContainer;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(VertxUnitRunner.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -176,7 +177,7 @@ public class BlogRepositoryEventTest {
     }
 
     /**
-     * <b>This test assert that a blog is upsert in OpenSearch when a group in shares is deleted through RepositoryEvent</b>
+     * <b>This test assert that a blog is upserted on OpenSearch when a group in shares is deleted through RepositoryEvent</b>
      * <ul>
      *     <li>Assert that user2 see blog1 through group1</li>
      *     <li>Delete group1</li>
@@ -299,18 +300,23 @@ public class BlogRepositoryEventTest {
             context.assertEquals(1, fetch1.size());
             repositoryEvents.deleteUsers(new JsonArray().add(new JsonObject().put("id", "user1")));
         }));
-        repositoryEvents.setOnReindex(context.asyncAssertSuccess(e -> {
-            blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3 -> {
-                explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
-                    explorerTest.ingestJobWaitPending().onComplete(context.asyncAssertSuccess(r5 -> {
-                        explorerTest.fetch(user, application, explorerTest.createSearch().setWaitFor(true)).onComplete(context.asyncAssertSuccess(fetch1 -> {
-                            log.info("Number of blog visible after delete owner:" + fetch1.size());
-                            context.assertEquals(0, fetch1.size());
-                            async.complete();
+        AtomicInteger count = new AtomicInteger(0);
+        //callback update then delete
+        repositoryEvents.setOnReindex(ee -> {
+            int countInt = count.incrementAndGet();
+            if (countInt == 2) {
+                blogPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3 -> {
+                    explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
+                        explorerTest.ingestJobWaitPending().onComplete(context.asyncAssertSuccess(r5 -> {
+                            explorerTest.fetch(user, application, explorerTest.createSearch().setWaitFor(true)).onComplete(context.asyncAssertSuccess(fetch1 -> {
+                                log.info("Number of blog visible after delete owner:" + fetch1.size());
+                                context.assertEquals(0, fetch1.size());
+                                async.complete();
+                            }));
                         }));
                     }));
                 }));
-            }));
-        }));
+            }
+        });
     }
 }
