@@ -27,6 +27,8 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
+import fr.wseduc.transformer.ContentTransformerHolder;
+import fr.wseduc.transformer.ContentTransformerRequest;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
 import io.vertx.core.Handler;
@@ -222,8 +224,28 @@ public class DefaultPostService implements PostService {
 					MongoUpdateBuilder incView = new MongoUpdateBuilder();
 					incView.inc("views", 1);
 					mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
+
+					// content only exists in html format
+					if (!res.right().getValue().containsKey("jsonContent")) {
+						ContentTransformerHolder.getInstance()
+								.transform(new ContentTransformerRequest("html2json", 0, res.right().getValue().getString("content"), null))
+								.onComplete(response -> {
+									if (response.failed()) {
+										log.error("Content transformation failed");
+										result.handle(res);
+									} else {
+										result.handle(new Either.Right<>(res.right().getValue()
+												.put("contentVersion", response.result().getContentVersion())
+												.put("jsonContent", response.result().getJsonContent())));
+									}
+								});
+					// content exists in both html and json format
+					} else {
+						result.handle(res);
+					}
+				} else {
+					result.handle(res);
 				}
-				result.handle(res);
 			}
 		});
 	}

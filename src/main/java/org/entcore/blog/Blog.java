@@ -24,6 +24,7 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.ContentTransformerHolder;
 import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
@@ -89,6 +90,7 @@ public class Blog extends BaseServer {
         }else{
             addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
+        ContentTransformerHolder.init(vertx, config);
         blogPlugin.start();
     }
 
