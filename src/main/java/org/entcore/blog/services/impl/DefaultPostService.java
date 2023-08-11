@@ -136,35 +136,53 @@ public class DefaultPostService implements PostService {
 				final JsonObject postFromDb = event.right().getValue().getJsonObject("result", new JsonObject());
 				final JsonObject now = MongoDb.now();
 				post.put("modified", now);
-				final JsonObject b = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
+				final JsonObject validatedPost = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 
-				if (validationError(result, b)) return;
-				if (b.containsKey("content")) {
-					b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+				if (validationError(result, validatedPost)) return;
+				if (validatedPost.containsKey("content")) {
+					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
+				}
+
+				// if jsonContent is present, transformation to html content
+				if (validatedPost.containsKey("jsonContent") && validatedPost.containsKey("contentVersion")) {
+					ContentTransformerHolder.getInstance()
+							.transform(
+									new ContentTransformerRequest(
+											"json2html",
+											validatedPost.getInteger("contentVersion"),
+											null,
+											validatedPost.getJsonObject("jsonContent")))
+							.onComplete(response -> {
+								if (response.failed()) {
+									log.error("Content transformation failed");
+								} else {
+									validatedPost.put("content", response.result().getHtmlContent());
+								}
+							});
 				}
 
 				if (postFromDb.getJsonObject("firstPublishDate") != null) {
-					b.put("sorted", postFromDb.getJsonObject("firstPublishDate"));
+					validatedPost.put("sorted", postFromDb.getJsonObject("firstPublishDate"));
 				} else {
-					b.put("sorted", now);
+					validatedPost.put("sorted", now);
 				}
 
 				//republish post to make it go up
 				final boolean sorting = post.containsKey("sorted") && post.getBoolean("sorted", false);
 				if (sorting) {
-					b.put("sorted", now);
+					validatedPost.put("sorted", now);
 				}
 
 				//if user is author and is not sorting the post, draft state
 				if (!sorting && user.getUserId().equals(postFromDb.getJsonObject("author", new JsonObject()).getString("userId"))) {
-					b.put("state", StateType.DRAFT.name());
+					validatedPost.put("state", StateType.DRAFT.name());
 				}
 
 				MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-				for (String attr: b.fieldNames()) {
-					modifier.set(attr, b.getValue(attr));
+				for (String attr: validatedPost.fieldNames()) {
+					modifier.set(attr, validatedPost.getValue(attr));
 				}
-				plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
+				plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
 				mongo.update(POST_COLLECTION, jQuery, modifier.build(),
 						new Handler<Message<JsonObject>>() {
 							@Override
@@ -178,7 +196,7 @@ public class DefaultPostService implements PostService {
 											log.error("Failed to notify upsert post: ", e.cause());
 										}
 										// TODO JBER update here status in mongo
-										final JsonObject r = new JsonObject().put("state", b.getString("state", postFromDb.getString("state")));
+										final JsonObject r = new JsonObject().put("state", validatedPost.getString("state", postFromDb.getString("state")));
 											result.handle(new Either.Right<String, JsonObject>(r));
 									});
 								} else {
