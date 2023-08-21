@@ -2,6 +2,7 @@ package org.entcore.blog;
 
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -11,7 +12,6 @@ import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import static java.util.Collections.emptySet;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.explorer.BlogFoldersExplorerPlugin;
@@ -38,6 +38,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static java.util.Collections.emptySet;
 
 @RunWith(VertxUnitRunner.class)
 public class BlogExplorerPluginClientTest {
@@ -77,7 +79,7 @@ public class BlogExplorerPluginClientTest {
         mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
         blogPlugin.start();
         client = IExplorerPluginClient.withBus(test.vertx(), application, resourceType);

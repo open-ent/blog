@@ -1,11 +1,10 @@
 package org.entcore.blog;
 
 import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
-import com.opendigitaleducation.explorer.services.ResourceService;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.webutils.security.SecuredAction;
-import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
@@ -25,14 +24,17 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.test.TestHelper;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Neo4jContainer;
 
 import java.util.*;
 
 @RunWith(VertxUnitRunner.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BlogExplorerPluginTest {
     static final String RIGHT = "org-entcore-blog-controllers-BlogController|get";
     private static final TestHelper test = TestHelper.helper();
@@ -71,7 +73,7 @@ public class BlogExplorerPluginTest {
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }
@@ -85,7 +87,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldCreateBlog(TestContext context) {
+    public void step1ShouldCreateBlog(TestContext context) {
         final JsonObject b1 = createBlog("blog1");
         final Async async = context.async();
         explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch0 -> {
@@ -136,7 +138,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldUpdateBlog(TestContext context) {
+    public void step2ShouldUpdateBlog(TestContext context) {
         final Async async = context.async();
         blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list0 -> {
             context.assertEquals(1, list0.size());
@@ -188,7 +190,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldCreatePost(TestContext context) {
+    public void step3ShouldCreatePost(TestContext context) {
         final Async async = context.async();
         context.assertNotNull(data.get("ID1"));
         final String id = (String) data.get("ID1");
@@ -226,7 +228,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldUpdatePost(TestContext context) {
+    public void step4ShouldUpdatePost(TestContext context) {
         final Async async = context.async();
         context.assertNotNull(data.get("ID1"));
         context.assertNotNull(data.get("POSTID1"));
@@ -260,7 +262,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldBulkUpdatePost(TestContext context) {
+    public void step5ShouldBulkUpdatePost(TestContext context) {
         final Async async = context.async();
         context.assertNotNull(data.get("ID1"));
         context.assertNotNull(data.get("POSTID1"));
@@ -297,7 +299,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldExploreBlogByUser(TestContext context) {
+    public void step6ShouldExploreBlogByUser(TestContext context) {
         final Async async = context.async(3);
         final UserInfos user1 = test.directory().generateUser("user_share1", "group_share1");
         user1.setLogin("user1");
@@ -328,7 +330,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldExploreBlogByGroup(TestContext context) {
+    public void step7ShouldExploreBlogByGroup(TestContext context) {
         final Async async = context.async(3);
         final UserInfos user2 = test.directory().generateUser("user_share2", "group_share2");
         user2.setLogin("user2");
@@ -363,7 +365,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldDeletePost(TestContext context) {
+    public void step8ShouldDeletePost(TestContext context) {
         final Async async = context.async();
         context.assertNotNull(data.get("ID1"));
         context.assertNotNull(data.get("POSTID1"));
@@ -389,7 +391,7 @@ public class BlogExplorerPluginTest {
     }
 
     @Test
-    public void shouldDeleteBlog(TestContext context) {
+    public void step9ShouldDeleteBlog(TestContext context) {
         final Async async = context.async();
         blogService.list(user, 0, "",  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(list -> {
             context.assertEquals(1, list.size());

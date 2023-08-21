@@ -3,6 +3,7 @@ package org.entcore.blog;
 import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -38,7 +39,9 @@ import org.junit.runners.MethodSorters;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Neo4jContainer;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(VertxUnitRunner.class)
@@ -82,7 +85,7 @@ public class BlogRepositoryEventTest {
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
         final IExplorerPluginClient mainClient = IExplorerPluginClient.withBus(vertx, Blog.APPLICATION, Blog.BLOG_TYPE);

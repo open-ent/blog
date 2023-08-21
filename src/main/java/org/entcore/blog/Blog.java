@@ -24,7 +24,10 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.transformer.ContentTransformerHolder;
+import fr.wseduc.transformer.ContentTransformerFactoryProvider;
+import fr.wseduc.transformer.IContentTransformerClient;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.LocalMap;
 import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
@@ -80,7 +83,11 @@ public class Blog extends BaseServer {
         blogPlugin = BlogExplorerPlugin.create(securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
-        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin);
+        ContentTransformerFactoryProvider.init(vertx);
+        LocalMap<Object, Object> server= vertx.sharedData().getLocalMap("server");
+        JsonObject contentTransformerConfig = new JsonObject((String) server.get("content-transformer"));
+        IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory(contentTransformerConfig).create();
+        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);
         addController(new BlogController(mongo, blogService, postService));
@@ -90,7 +97,6 @@ public class Blog extends BaseServer {
         }else{
             addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
-        ContentTransformerHolder.init(vertx, config);
         blogPlugin.start();
     }
 

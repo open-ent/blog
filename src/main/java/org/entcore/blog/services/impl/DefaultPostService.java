@@ -27,10 +27,12 @@ import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
-import fr.wseduc.transformer.ContentTransformerHolder;
-import fr.wseduc.transformer.ContentTransformerRequest;
+import fr.wseduc.transformer.IContentTransformerClient;
+import fr.wseduc.transformer.to.ContentTransformerRequest;
+import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -63,16 +65,20 @@ public class DefaultPostService implements PostService {
 			.put("created", 1)
 			.put("modified", 1)
 			.put("views", 1)
-			.put("firstPublishDate", 1);
+			.put("firstPublishDate", 1)
+			.put("jsonContent", 1)
+			.put("contentVersion", 1);
 
 	private final int searchWordMinSize;
 	private final PostExplorerPlugin plugin;
+	private final IContentTransformerClient contentTransformerClient;
 
-	public DefaultPostService(MongoDb mongo, int searchWordMinSize,String listPostAction, final PostExplorerPlugin plugin) {
+	public DefaultPostService(MongoDb mongo, int searchWordMinSize, String listPostAction, final PostExplorerPlugin plugin, IContentTransformerClient contentTransformerClient) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.listPostAction = listPostAction;
 		this.searchWordMinSize = searchWordMinSize;
+		this.contentTransformerClient = contentTransformerClient;
 	}
 
 	@Override
@@ -97,31 +103,49 @@ public class DefaultPostService implements PostService {
 		JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
 		if (validationError(result, b)) return;
 		b.put("sorted", now);
+
+		Future<ContentTransformerResponse> contentTransformerResponseFuture;
 		if (b.containsKey("content")) {
 			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+			contentTransformerResponseFuture = contentTransformerClient
+					.transform(new ContentTransformerRequest("html2json", 0, b.getString("content", ""), null));
+		} else {
+			contentTransformerResponseFuture = Future.succeededFuture();
 		}
-		plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
-		mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
-			if(event.isLeft()){
-				log.error("Failed to create post: ", event.left().getValue());
-				result.handle(event);
-				return;
-			}
-			//#29106 avoid fetch after save
-			final String id = event.right().getValue().getString("_id");
-			b.put("_id", id);
-			//must set id before notify
-			plugin.notifyUpsert(blogId, author, b).onComplete(e->{
-				if(e.failed()){
-					plugin.setIngestJobState(b, IngestJobState.SEND_KO);
-					log.error("Failed to notify upsert post: ", e.cause());
+		contentTransformerResponseFuture.onComplete(transformerResponse -> {
+			if (transformerResponse.failed()) {
+				log.error(transformerResponse.cause());
+			} else {
+				if (transformerResponse.result() == null) {
+					log.info("No content transformed.");
 				} else {
-					plugin.setIngestJobState(b, IngestJobState.SENT);
+					b.put("jsonContent", transformerResponse.result().getJsonContent());
+					b.put("contentVersion", transformerResponse.result().getContentVersion());
 				}
-				// TODO JBER update here the state in mongo
-				result.handle(new Either.Right<>(b));
-			});
-		}));
+			}
+			plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
+			mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
+				if(event.isLeft()){
+					log.error("Failed to create post: ", event.left().getValue());
+					result.handle(event);
+					return;
+				}
+				//#29106 avoid fetch after save
+				final String id = event.right().getValue().getString("_id");
+				b.put("_id", id);
+				//must set id before notify
+				plugin.notifyUpsert(blogId, author, b).onComplete(e->{
+					if(e.failed()){
+						plugin.setIngestJobState(b, IngestJobState.SEND_KO);
+						log.error("Failed to notify upsert post: ", e.cause());
+					} else {
+						plugin.setIngestJobState(b, IngestJobState.SENT);
+					}
+					// TODO JBER update here the state in mongo
+					result.handle(new Either.Right<>(b));
+				});
+			}));
+		});
 	}
 
 	@Override
@@ -139,26 +163,15 @@ public class DefaultPostService implements PostService {
 				final JsonObject validatedPost = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 
 				if (validationError(result, validatedPost)) return;
+
+				Future<ContentTransformerResponse> contentTransformerResponseFuture;
 				if (validatedPost.containsKey("content")) {
 					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
-				}
-
-				// if jsonContent is present, transformation to html content
-				if (validatedPost.containsKey("jsonContent") && validatedPost.containsKey("contentVersion")) {
-					ContentTransformerHolder.getInstance()
-							.transform(
-									new ContentTransformerRequest(
-											"json2html",
-											validatedPost.getInteger("contentVersion"),
-											null,
-											validatedPost.getJsonObject("jsonContent")))
-							.onComplete(response -> {
-								if (response.failed()) {
-									log.error("Content transformation failed");
-								} else {
-									validatedPost.put("content", response.result().getHtmlContent());
-								}
-							});
+					// transformation of html content into jsonContent
+					contentTransformerResponseFuture = contentTransformerClient.transform(new ContentTransformerRequest("html2json", 0, validatedPost.getString("content"), null));
+				} else {
+					// No content to transform
+					contentTransformerResponseFuture = Future.succeededFuture();
 				}
 
 				if (postFromDb.getJsonObject("firstPublishDate") != null) {
@@ -178,32 +191,40 @@ public class DefaultPostService implements PostService {
 					validatedPost.put("state", StateType.DRAFT.name());
 				}
 
-				MongoUpdateBuilder modifier = new MongoUpdateBuilder();
-				for (String attr: validatedPost.fieldNames()) {
-					modifier.set(attr, validatedPost.getValue(attr));
-				}
-				plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
-				mongo.update(POST_COLLECTION, jQuery, modifier.build(),
-						new Handler<Message<JsonObject>>() {
-							@Override
-							public void handle(Message<JsonObject> event) {
-								if ("ok".equals(event.body().getString("status"))) {
-									final JsonObject blogRef = postFromDb.getJsonObject("blog");
-									final String blogId = blogRef.getString("$id");
-									plugin.setIngestJobStateAndVersion(post, IngestJobState.TO_BE_SENT, version);
-									plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
-										if(e.failed()){
-											log.error("Failed to notify upsert post: ", e.cause());
-										}
-										// TODO JBER update here status in mongo
-										final JsonObject r = new JsonObject().put("state", validatedPost.getString("state", postFromDb.getString("state")));
-											result.handle(new Either.Right<String, JsonObject>(r));
-									});
-								} else {
-									result.handle(new Either.Left<String, JsonObject>(event.body().getString("message", "")));
+				contentTransformerResponseFuture.onComplete(response -> {
+					if (response.failed()) {
+						log.error("Content transformation failed");
+					} else {
+						if (response.result() == null) {
+							log.info("No content transformed");
+						} else {
+							validatedPost.put("jsonContent", response.result().getJsonContent());
+							validatedPost.put("contentVersion", response.result().getContentVersion());
+						}
+					}
+					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
+					for (String attr: validatedPost.fieldNames()) {
+						modifier.set(attr, validatedPost.getValue(attr));
+					}
+					plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
+					mongo.update(POST_COLLECTION, jQuery, modifier.build(), updateResponse -> {
+						if ("ok".equals(updateResponse.body().getString("status"))) {
+							final JsonObject blogRef = postFromDb.getJsonObject("blog");
+							final String blogId = blogRef.getString("$id");
+							plugin.setIngestJobStateAndVersion(post, IngestJobState.TO_BE_SENT, version);
+							plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
+								if(e.failed()){
+									log.error("Failed to notify upsert post: ", e.cause());
 								}
-							}
-						});
+								// TODO JBER update here status in mongo
+								final JsonObject r = new JsonObject().put("state", validatedPost.getString("state", postFromDb.getString("state")));
+								result.handle(new Either.Right<String, JsonObject>(r));
+							});
+						} else {
+							result.handle(new Either.Left<String, JsonObject>(updateResponse.body().getString("message", "")));
+						}
+					});
+				});
 			}
 		})
 		);
@@ -245,19 +266,23 @@ public class DefaultPostService implements PostService {
 
 					// content only exists in html format
 					if (!res.right().getValue().containsKey("jsonContent")) {
-						ContentTransformerHolder.getInstance()
-								.transform(new ContentTransformerRequest("html2json", 0, res.right().getValue().getString("content"), null))
+						contentTransformerClient.transform(new ContentTransformerRequest("html2json", 0, res.right().getValue().getString("content"), null))
 								.onComplete(response -> {
 									if (response.failed()) {
 										log.error("Content transformation failed");
 										result.handle(res);
 									} else {
-										result.handle(new Either.Right<>(res.right().getValue()
-												.put("contentVersion", response.result().getContentVersion())
-												.put("jsonContent", response.result().getJsonContent())));
+										if (response.result() == null) {
+											log.info("No content transformed");
+											result.handle(res);
+										} else {
+											result.handle(new Either.Right<>(res.right().getValue()
+													.put("contentVersion", 0)
+													.put("jsonContent", response.result().getJsonContent())));
+										}
 									}
 								});
-					// content exists in both html and json format
+					// content exists in json format
 					} else {
 						result.handle(res);
 					}

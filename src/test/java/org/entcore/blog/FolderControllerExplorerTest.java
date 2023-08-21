@@ -3,6 +3,7 @@ package org.entcore.blog;
 import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.webutils.http.HttpMethod;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.json.JsonObject;
@@ -31,7 +32,8 @@ import org.junit.runner.RunWith;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Neo4jContainer;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(VertxUnitRunner.class)
 public class FolderControllerExplorerTest {
@@ -73,7 +75,7 @@ public class FolderControllerExplorerTest {
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
-        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin);
+        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
         controllerExplorer = new FoldersControllerExplorer(test.vertx(), blogPlugin);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
     }
