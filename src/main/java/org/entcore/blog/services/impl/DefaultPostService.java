@@ -108,7 +108,7 @@ public class DefaultPostService implements PostService {
 		if (b.containsKey("content")) {
 			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 			contentTransformerResponseFuture = contentTransformerClient
-					.transform(new ContentTransformerRequest("html2json", 0, b.getString("content", ""), null));
+					.transform(new ContentTransformerRequest("html2json", b.getInteger("contentVersion", 0), b.getString("content", ""), null));
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
@@ -168,7 +168,7 @@ public class DefaultPostService implements PostService {
 				if (validatedPost.containsKey("content")) {
 					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
 					// transformation of html content into jsonContent
-					contentTransformerResponseFuture = contentTransformerClient.transform(new ContentTransformerRequest("html2json", 0, validatedPost.getString("content"), null));
+					contentTransformerResponseFuture = contentTransformerClient.transform(new ContentTransformerRequest("html2json", validatedPost.getInteger("contentVersion", 0), validatedPost.getString("content"), null));
 				} else {
 					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
