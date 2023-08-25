@@ -122,7 +122,7 @@ public class PostServiceContentTransformerTest {
 
         @Override
         public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
-            return Future.succeededFuture(new ContentTransformerResponse(1, null, new JsonObject().put("key", "<p> value </p>").getMap()));
+            return Future.succeededFuture(new ContentTransformerResponse(1, "<p> value </p>", new JsonObject().put("key", "<p> value </p>").getMap()));
         }
     }
 

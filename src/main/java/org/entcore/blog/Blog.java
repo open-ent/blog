@@ -26,8 +26,10 @@ package org.entcore.blog;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.transformer.ContentTransformerFactoryProvider;
 import fr.wseduc.transformer.IContentTransformerClient;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
+import static java.util.Optional.empty;
 import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
@@ -46,6 +48,7 @@ import org.entcore.common.mongodb.MongoDbConf;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Blog extends BaseServer {
 
@@ -84,9 +87,8 @@ public class Blog extends BaseServer {
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         ContentTransformerFactoryProvider.init(vertx);
-        LocalMap<Object, Object> server= vertx.sharedData().getLocalMap("server");
-        JsonObject contentTransformerConfig = new JsonObject((String) server.get("content-transformer"));
-        IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory(contentTransformerConfig).create();
+        final JsonObject contentTransformerConfig = getContentTransformerConfig(vertx).orElse(null);
+        IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);
@@ -98,6 +100,18 @@ public class Blog extends BaseServer {
             addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
         blogPlugin.start();
+    }
+
+    private Optional<JsonObject> getContentTransformerConfig(final Vertx vertx) {
+        final LocalMap<Object, Object> server= vertx.sharedData().getLocalMap("server");
+        final String rawConfiguration = (String) server.get("content-transformer");
+        final Optional<JsonObject> contentTransformerConfig;
+        if(rawConfiguration == null) {
+            contentTransformerConfig = empty();
+        } else {
+            contentTransformerConfig = Optional.of(new JsonObject(rawConfiguration));
+        }
+        return contentTransformerConfig;
     }
 
     @Override

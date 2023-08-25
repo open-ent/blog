@@ -24,16 +24,20 @@ package org.entcore.blog.services.impl;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
+import com.mongodb.util.JSON;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
+import fr.wseduc.transformer.to.ContentTransformerAction;
+import static fr.wseduc.transformer.to.ContentTransformerAction.HTML2JSON;
 import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -106,20 +110,33 @@ public class DefaultPostService implements PostService {
 
 		Future<ContentTransformerResponse> contentTransformerResponseFuture;
 		if (b.containsKey("content")) {
-			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
+			final String content = b.getString("content", "");
+			b.put("contentPlain",  StringUtils.stripHtmlTag(content));
 			contentTransformerResponseFuture = contentTransformerClient
-					.transform(new ContentTransformerRequest("html2json", b.getInteger("contentVersion", 0), b.getString("content", ""), null));
+					.transform(new ContentTransformerRequest( b.getInteger("contentVersion", 0), content));
+		} else if (b.containsKey("contentJson")) {
+			final JsonObject contentJson = b.getJsonObject("contentJson", new JsonObject());
+			contentTransformerResponseFuture = contentTransformerClient
+					.transform(new ContentTransformerRequest( b.getInteger("contentVersion", 0), contentJson));
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
 		contentTransformerResponseFuture.onComplete(transformerResponse -> {
 			if (transformerResponse.failed()) {
-				log.error(transformerResponse.cause());
+				log.error("Error while transforming the content", transformerResponse.cause());
 			} else {
 				if (transformerResponse.result() == null) {
-					log.info("No content transformed.");
+					log.debug("No content transformed.");
 				} else {
-					b.put("jsonContent", transformerResponse.result().getJsonContent());
+					final ContentTransformerResponse transformerResult = transformerResponse.result();
+					if(transformerResult.getHtmlContent() != null) {
+						final String content = transformerResult.getHtmlContent();
+						b.put("content", content);
+						b.put("contentPlain",  StringUtils.stripHtmlTag(content));
+					}
+					if(transformerResult.getJsonContent() != null) {
+						b.put("jsonContent", transformerResult.getJsonContent());
+					}
 					b.put("contentVersion", transformerResponse.result().getContentVersion());
 				}
 			}
@@ -166,11 +183,15 @@ public class DefaultPostService implements PostService {
 
 				Future<ContentTransformerResponse> contentTransformerResponseFuture;
 				if (validatedPost.containsKey("content")) {
-					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
-					// transformation of html content into jsonContent
-					contentTransformerResponseFuture = contentTransformerClient.transform(new ContentTransformerRequest("html2json", validatedPost.getInteger("contentVersion", 0), validatedPost.getString("content"), null));
+					final String content = validatedPost.getString("content", "");
+					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(content));
+					contentTransformerResponseFuture = contentTransformerClient
+							.transform(new ContentTransformerRequest( validatedPost.getInteger("contentVersion", 0), content));
+				} else if (validatedPost.containsKey("contentJson")) {
+					final JsonObject contentJson = validatedPost.getJsonObject("contentJson", new JsonObject());
+					contentTransformerResponseFuture = contentTransformerClient
+							.transform(new ContentTransformerRequest( validatedPost.getInteger("contentVersion", 0), contentJson));
 				} else {
-					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
 				}
 
@@ -198,7 +219,15 @@ public class DefaultPostService implements PostService {
 						if (response.result() == null) {
 							log.info("No content transformed");
 						} else {
-							validatedPost.put("jsonContent", response.result().getJsonContent());
+							final ContentTransformerResponse transformerResult = response.result();
+							if(transformerResult.getHtmlContent() != null) {
+								final String content = transformerResult.getHtmlContent();
+								validatedPost.put("content", content);
+								validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(content));
+							}
+							if(transformerResult.getJsonContent() != null) {
+								validatedPost.put("jsonContent", transformerResult.getJsonContent());
+							}
 							validatedPost.put("contentVersion", response.result().getContentVersion());
 						}
 					}
@@ -263,34 +292,46 @@ public class DefaultPostService implements PostService {
 					MongoUpdateBuilder incView = new MongoUpdateBuilder();
 					incView.inc("views", 1);
 					mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
-
-					// content only exists in html format
-					if (!res.right().getValue().containsKey("jsonContent")) {
-						contentTransformerClient.transform(new ContentTransformerRequest("html2json", 0, res.right().getValue().getString("content"), null))
-								.onComplete(response -> {
-									if (response.failed()) {
-										log.error("Content transformation failed");
-										result.handle(res);
-									} else {
-										if (response.result() == null) {
-											log.info("No content transformed");
-											result.handle(res);
-										} else {
-											result.handle(new Either.Right<>(res.right().getValue()
-													.put("contentVersion", 0)
-													.put("jsonContent", response.result().getJsonContent())));
-										}
-									}
-								});
-					// content exists in json format
-					} else {
-						result.handle(res);
-					}
+					handleOldContent(res.right().getValue()).onComplete(modified -> result.handle(res));
 				} else {
 					result.handle(res);
 				}
 			}
 		});
+	}
+
+	/**
+	 * Iff {@code post} does not already have a jsonContent field then we call content transformer (and save it to the
+	 * database ?).<br />
+	 * Otherwise, nothing is done
+	 * @param post Post whose content could be transformed
+	 * @return The modified post (actually the same as {@code post})
+	 */
+	private Future<JsonObject> handleOldContent(final JsonObject post) {
+		// Content only exists in html format so we need to convert it to its json format
+		final Promise<JsonObject> promise = Promise.promise();
+		if (post.containsKey("jsonContent")) {
+			log.debug("Post already contains a field 'jsonContent' so nothing to do");
+			promise.complete(post);
+		} else {
+			contentTransformerClient.transform(new ContentTransformerRequest( 0, post.getString("content")))
+			.onComplete(response -> {
+				if (response.failed()) {
+					log.error("Content transformation failed", response.cause());
+					promise.fail("content.transformation.failed");
+				} else if (response.result() == null) {
+					log.info("No content transformed");
+					promise.complete(post);
+				} else {
+					// TODO Should we save JSON version here with contentVersion=0 ?
+					post.put("contentVersion", 0)
+						.put("jsonContent", response.result().getJsonContent());
+					promise.complete(post);
+				}
+			});
+			// content exists in json format
+		}
+		return promise.future();
 	}
 
 	@Override
