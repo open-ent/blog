@@ -24,13 +24,10 @@ package org.entcore.blog.services.impl;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
-import com.mongodb.util.JSON;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
-import fr.wseduc.transformer.to.ContentTransformerAction;
-import static fr.wseduc.transformer.to.ContentTransformerAction.HTML2JSON;
 import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.Either;
@@ -52,7 +49,14 @@ import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class DefaultPostService implements PostService {
 	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
@@ -110,14 +114,11 @@ public class DefaultPostService implements PostService {
 
 		Future<ContentTransformerResponse> contentTransformerResponseFuture;
 		if (b.containsKey("content")) {
-			final String content = b.getString("content", "");
-			b.put("contentPlain",  StringUtils.stripHtmlTag(content));
+			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 			contentTransformerResponseFuture = contentTransformerClient
-					.transform(new ContentTransformerRequest( b.getInteger("contentVersion", 0), content));
-		} else if (b.containsKey("contentJson")) {
-			final JsonObject contentJson = b.getJsonObject("contentJson", new JsonObject());
-			contentTransformerResponseFuture = contentTransformerClient
-					.transform(new ContentTransformerRequest( b.getInteger("contentVersion", 0), contentJson));
+					.transform(new ContentTransformerRequest(
+							b.getInteger("contentVersion", 0),
+							b.getString("content", "")));
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
@@ -128,15 +129,7 @@ public class DefaultPostService implements PostService {
 				if (transformerResponse.result() == null) {
 					log.debug("No content transformed.");
 				} else {
-					final ContentTransformerResponse transformerResult = transformerResponse.result();
-					if(transformerResult.getHtmlContent() != null) {
-						final String content = transformerResult.getHtmlContent();
-						b.put("content", content);
-						b.put("contentPlain",  StringUtils.stripHtmlTag(content));
-					}
-					if(transformerResult.getJsonContent() != null) {
-						b.put("jsonContent", transformerResult.getJsonContent());
-					}
+					b.put("jsonContent", transformerResponse.result().getJsonContent());
 					b.put("contentVersion", transformerResponse.result().getContentVersion());
 				}
 			}
@@ -183,15 +176,14 @@ public class DefaultPostService implements PostService {
 
 				Future<ContentTransformerResponse> contentTransformerResponseFuture;
 				if (validatedPost.containsKey("content")) {
-					final String content = validatedPost.getString("content", "");
-					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(content));
-					contentTransformerResponseFuture = contentTransformerClient
-							.transform(new ContentTransformerRequest( validatedPost.getInteger("contentVersion", 0), content));
-				} else if (validatedPost.containsKey("contentJson")) {
-					final JsonObject contentJson = validatedPost.getJsonObject("contentJson", new JsonObject());
-					contentTransformerResponseFuture = contentTransformerClient
-							.transform(new ContentTransformerRequest( validatedPost.getInteger("contentVersion", 0), contentJson));
+					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
+					// transformation of html content into jsonContent
+					contentTransformerResponseFuture = contentTransformerClient.transform(
+							new ContentTransformerRequest(
+									validatedPost.getInteger("contentVersion", 0),
+									validatedPost.getString("content")));
 				} else {
+					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
 				}
 
@@ -219,15 +211,7 @@ public class DefaultPostService implements PostService {
 						if (response.result() == null) {
 							log.info("No content transformed");
 						} else {
-							final ContentTransformerResponse transformerResult = response.result();
-							if(transformerResult.getHtmlContent() != null) {
-								final String content = transformerResult.getHtmlContent();
-								validatedPost.put("content", content);
-								validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(content));
-							}
-							if(transformerResult.getJsonContent() != null) {
-								validatedPost.put("jsonContent", transformerResult.getJsonContent());
-							}
+							validatedPost.put("jsonContent", response.result().getJsonContent());
 							validatedPost.put("contentVersion", response.result().getContentVersion());
 						}
 					}
