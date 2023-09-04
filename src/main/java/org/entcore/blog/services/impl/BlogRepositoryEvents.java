@@ -23,6 +23,7 @@
 package org.entcore.blog.services.impl;
 
 import com.mongodb.QueryBuilder;
+import fr.wseduc.mongodb.MongoDbAPI;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import io.vertx.core.Vertx;
@@ -173,6 +174,11 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 	@Override
 	public void deleteUsers(JsonArray users) {
+		deleteUsers(users, e -> {});
+	}
+
+	@Override
+	public void deleteUsers(JsonArray users, Handler<List<ResourceChanges>> handler) {
 		if(users == null) {
 			return;
 		}
@@ -194,11 +200,13 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 		final JsonObject criteria = MongoQueryBuilder.build(QueryBuilder.start("shared.userId").in(userIds));
 
+		long timestamp = System.currentTimeMillis();
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
+		modifier.set("_deleteUsersKey", timestamp);
 		modifier.pull("shared", MongoQueryBuilder.build(QueryBuilder.start("userId").in(userIds)));
 
 		final String collection = DefaultBlogService.BLOG_COLLECTION;
-		mongo.update(collection, criteria, modifier.build(), false, true, new Handler<Message<JsonObject>>() {
+		mongo.update(collection, criteria, modifier.build(), false, true, MongoDbAPI.WriteConcern.MAJORITY, new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
 				if (!"ok".equals(event.body().getString("status"))) {
@@ -208,15 +216,36 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 				final JsonObject criteria = MongoQueryBuilder.build(QueryBuilder.start("author.userId").in(userIds));
 				MongoUpdateBuilder modifier = new MongoUpdateBuilder();
+				modifier.set("_deleteUsersKey", timestamp);
 				modifier.set("author.deleted", true);
-				mongo.update(collection, criteria, modifier.build(), false, true,  new Handler<Message<JsonObject>>() {
+				mongo.update(collection, criteria, modifier.build(), false, true,  MongoDbAPI.WriteConcern.MAJORITY, new Handler<Message<JsonObject>>() {
 					@Override
 					public void handle(Message<JsonObject> event) {
 						if (!"ok".equals(event.body().getString("status"))) {
 							log.error("Error deleting users shared in collection " + collection +
 									" : " + event.body().getString("message"));
 						} else {
-							delete(collection);
+							final QueryBuilder findByKey = QueryBuilder.start("_deleteUsersKey").is(timestamp);
+							final JsonObject query = MongoQueryBuilder.build(findByKey);
+							// fetch for update
+							mongo.find(collection, query, (eventFind) -> {
+								JsonArray results = ((JsonObject)eventFind.body()).getJsonArray("results");
+								List<ResourceChanges> list = new ArrayList();
+								if ("ok".equals(((JsonObject)eventFind.body()).getString("status")) && results != null && !results.isEmpty()) {
+									log.info("[deleteUsers] resource to update count=" + results.size());
+									results.forEach((elem) -> {
+										if (elem instanceof JsonObject) {
+											JsonObject jsonElem = (JsonObject)elem;
+											String id = jsonElem.getString("_id");
+											list.add(new ResourceChanges(id, false));
+										}
+									});
+								} else {
+									log.error("[deleteUsers] Could not found updated resources:" + eventFind.body());
+								}
+								handler.handle(list);
+							});
+							delete(collection, handler);
 						}
 					}
 				});
@@ -224,7 +253,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 		});
 	}
 
-	private void delete(final String collection) {
+	private void delete(final String collection, Handler<List<ResourceChanges>> handler) {
 		final JsonObject query = MongoQueryBuilder.build(
 				QueryBuilder.start("shared.org-entcore-blog-controllers-BlogController|shareJson").notEquals(true)
 						.put("author.deleted").is(true));
@@ -261,6 +290,11 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 										log.error("Error deleting blogs : " + event.body().encode());
 									} else {
 										log.info("Blogs deleted : " + event.body().getInteger("number"));
+										final List<ResourceChanges> changes = new ArrayList<>();
+										for(final String id : blogIds) {
+											changes.add(new ResourceChanges(id, true));
+										}
+										handler.handle(changes);
 									}
 								}
 							});
@@ -268,8 +302,5 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 			}
 		});
 	}
-
-	@Override
-	public void deleteGroups(JsonArray groups) {}
 
 }

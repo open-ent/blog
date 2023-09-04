@@ -62,12 +62,11 @@ public class Blog extends BaseServer {
         EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
         eventStoreFactory.setVertx(vertx);
 
+        final IExplorerPluginClient mainClient = IExplorerPluginClient.withBus(vertx, APPLICATION, BLOG_TYPE);
         final Map<String, IExplorerPluginClient> pluginClientPerCollection = new HashMap<>();
-        pluginClientPerCollection.put(BLOGS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, BLOG_TYPE));
+        pluginClientPerCollection.put(BLOGS_COLLECTION, mainClient);
         pluginClientPerCollection.put(POSTS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, POST_TYPE));
-        setRepositoryEvents(new ExplorerRepositoryEvents(
-                new BlogRepositoryEvents(vertx),
-                pluginClientPerCollection));
+        setRepositoryEvents(new ExplorerRepositoryEvents(new BlogRepositoryEvents(vertx), pluginClientPerCollection,mainClient));
 
         if (config.getBoolean("searching-event", true)) {
             setSearchingEvents(new BlogSearchingEvents());
