@@ -17,7 +17,7 @@ export type ComentsModel = {
 	sync():void
 	all:CommentModel[];
 }
-export type State = "PUBLISHED"|"DRAFT";
+export type State = "PUBLISHED"|"DRAFT"|"SUBMITTED";
 export type PostModel = {
 	_id: string
 	slided?: boolean
