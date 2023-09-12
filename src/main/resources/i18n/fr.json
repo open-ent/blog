@@ -172,5 +172,10 @@
   "explorer.validate.publication": "Billets soumis à validation",
   "explorer.publication.steps": "Circuit de publication des billets",
   "explorer.slug.name.mandatory": "Requis lorsque la checkbox 'Accessible publiquement via une URL est cochée'",
-  "explorer.slug.name.error": "Choisissez une autre URL pour votre blog"
+  "explorer.slug.name.error": "Choisissez une autre URL pour votre blog",
+  "explorer.emptyScreen.title.create": "Lancez votre premier blog !",
+  "explorer.emptyScreen.txt1d.create": "Une sortie en classe découverte ou un potager bio dans l’école ? Créez un blog pour mettre en valeur les activités des enfants et informer facilement les parents ! => Créer un blog",
+  "explorer.emptyScreen.txt1d.consultation": "Il n’y a pas encore de blog. Patience ! C'est ici que vous pourrez bientôt suivre et commenter toutes les activités de la classe.",
+  "explorer.emptyScreen.txt2d.create": "Vous partez en voyage linguistique et souhaitez partager toutes vos aventures ? Devenez apprenti reporter ! Seul ou à plusieurs, publiez et partagez facilement textes, photos et vidéos. => Créer un blog",
+  "explorer.emptyScreen.txt2d.consultation": "Il n’y a pas encore de blog. Patience ! Des sujets passionnants s’apprêtent à déferler sur cette page."
 }
