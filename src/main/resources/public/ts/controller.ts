@@ -660,6 +660,7 @@ export const blogController = ng.controller("BlogController", [
               if (succeeded == true) {
                 $scope.post.publishing = true;
                 initPostCounter($scope.post.blogId);
+                $scope.post.state = $scope.blog.myRights.publishPost ? 'PUBLISHED' : 'SUBMITTED';
                 resolve();
               } else reject();
             });
