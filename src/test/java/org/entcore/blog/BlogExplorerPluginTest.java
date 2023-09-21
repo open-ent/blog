@@ -4,7 +4,10 @@ import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.transformer.IContentTransformerClient;
+import fr.wseduc.transformer.to.ContentTransformerRequest;
+import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.security.SecuredAction;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
@@ -48,6 +51,7 @@ public class BlogExplorerPluginTest {
     static PostService postService;
     static BlogExplorerPlugin blogPlugin;
     static PostExplorerPlugin postPlugin;
+    static IContentTransformerClient contentTransformerClient;
     static ShareService shareService;
     static final String application = BlogExplorerPlugin.APPLICATION;
     static final String resourceType = BlogExplorerPlugin.TYPE;
@@ -73,7 +77,7 @@ public class BlogExplorerPluginTest {
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, new DummyContentTransformerClient());
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }
@@ -205,7 +209,7 @@ public class BlogExplorerPluginTest {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
                         final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
-                        context.assertEquals(post1.getString("content"), subResource.getString("contentHtml"));
+                        context.assertEquals(post1.getString("content"), subResource.getString("content"));
                         postService.list(id, user, 0, 10, "", new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(1, listPost.size());
                             final JsonObject postModel = listPost.getJsonObject(0);
@@ -242,7 +246,7 @@ public class BlogExplorerPluginTest {
                         context.assertEquals(1, fetch1.size());
                         final JsonObject postES = fetch1.getJsonObject(0);
                         final JsonObject subResource = postES.getJsonArray("subresources").getJsonObject(0);
-                        context.assertEquals(post2.getString("content"), subResource.getString("contentHtml"));
+                        context.assertEquals(post2.getString("content"), subResource.getString("content"));
                         postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(1, listPost.size());
                             final JsonObject postModel = listPost.getJsonObject(0);
@@ -409,5 +413,13 @@ public class BlogExplorerPluginTest {
                 }));
             })));
         })));
+    }
+
+    static class DummyContentTransformerClient implements IContentTransformerClient {
+
+        @Override
+        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
+            return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), null, contentTransformerRequest.getHtmlContent(), null, null));
+        }
     }
 }

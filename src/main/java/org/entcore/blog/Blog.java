@@ -83,12 +83,13 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        blogPlugin = BlogExplorerPlugin.create(securedActions);
-        final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
-        final MongoDb mongo = MongoDb.getInstance();
         ContentTransformerFactoryProvider.init(vertx);
         final JsonObject contentTransformerConfig = getContentTransformerConfig(vertx).orElse(null);
         IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
+
+        blogPlugin = BlogExplorerPlugin.create(securedActions);
+        final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
+        final MongoDb mongo = MongoDb.getInstance();
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin);

@@ -28,6 +28,7 @@ import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
+import fr.wseduc.transformer.to.ContentTransformerFormat;
 import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.Either;
@@ -49,14 +50,7 @@ import org.entcore.common.service.impl.MongoDbSearchService;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class DefaultPostService implements PostService {
 	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
@@ -114,11 +108,12 @@ public class DefaultPostService implements PostService {
 
 		Future<ContentTransformerResponse> contentTransformerResponseFuture;
 		if (b.containsKey("content")) {
-			b.put("contentPlain",  StringUtils.stripHtmlTag(b.getString("content", "")));
 			contentTransformerResponseFuture = contentTransformerClient
 					.transform(new ContentTransformerRequest(
+							new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
 							b.getInteger("contentVersion", 0),
-							b.getString("content", "")));
+							b.getString("content", ""),
+							null));
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
@@ -129,8 +124,9 @@ public class DefaultPostService implements PostService {
 				if (transformerResponse.result() == null) {
 					log.debug("No content transformed.");
 				} else {
-					b.put("jsonContent", transformerResponse.result().getJsonContent());
 					b.put("contentVersion", transformerResponse.result().getContentVersion());
+					b.put("jsonContent", transformerResponse.result().getJsonContent());
+					b.put("contentPlain", transformerResponse.result().getPlainTextContent());
 				}
 			}
 			plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
@@ -176,12 +172,13 @@ public class DefaultPostService implements PostService {
 
 				Future<ContentTransformerResponse> contentTransformerResponseFuture;
 				if (validatedPost.containsKey("content")) {
-					validatedPost.put("contentPlain",  StringUtils.stripHtmlTag(validatedPost.getString("content", "")));
 					// transformation of html content into jsonContent
 					contentTransformerResponseFuture = contentTransformerClient.transform(
 							new ContentTransformerRequest(
+									new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
 									validatedPost.getInteger("contentVersion", 0),
-									validatedPost.getString("content")));
+									validatedPost.getString("content"),
+									null));
 				} else {
 					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
@@ -211,8 +208,9 @@ public class DefaultPostService implements PostService {
 						if (response.result() == null) {
 							log.info("No content transformed");
 						} else {
-							validatedPost.put("jsonContent", response.result().getJsonContent());
 							validatedPost.put("contentVersion", response.result().getContentVersion());
+							validatedPost.put("jsonContent", response.result().getJsonContent());
+							validatedPost.put("contentPlain", response.result().getPlainTextContent());
 						}
 					}
 					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
@@ -224,8 +222,8 @@ public class DefaultPostService implements PostService {
 						if ("ok".equals(updateResponse.body().getString("status"))) {
 							final JsonObject blogRef = postFromDb.getJsonObject("blog");
 							final String blogId = blogRef.getString("$id");
-							plugin.setIngestJobStateAndVersion(post, IngestJobState.TO_BE_SENT, version);
-							plugin.notifyUpsert(blogId, user, post.put("_id", postId)).onComplete(e->{
+							plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
+							plugin.notifyUpsert(blogId, user, validatedPost.put("_id", postId)).onComplete(e->{
 								if(e.failed()){
 									log.error("Failed to notify upsert post: ", e.cause());
 								}
@@ -292,13 +290,13 @@ public class DefaultPostService implements PostService {
 	 * @return The modified post (actually the same as {@code post})
 	 */
 	private Future<JsonObject> handleOldContent(final JsonObject post) {
-		// Content only exists in html format so we need to convert it to its json format
 		final Promise<JsonObject> promise = Promise.promise();
 		if (post.containsKey("jsonContent")) {
 			log.debug("Post already contains a field 'jsonContent' so nothing to do");
 			promise.complete(post);
+		// If content only exists in html format, we need to convert it to its json format
 		} else {
-			contentTransformerClient.transform(new ContentTransformerRequest( 0, post.getString("content")))
+			contentTransformerClient.transform(new ContentTransformerRequest(new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON)), 0, post.getString("content"), null))
 			.onComplete(response -> {
 				if (response.failed()) {
 					log.error("Content transformation failed", response.cause());
