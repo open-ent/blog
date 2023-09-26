@@ -175,7 +175,7 @@ public class DefaultPostService implements PostService {
 					// transformation of html content into jsonContent
 					contentTransformerResponseFuture = contentTransformerClient.transform(
 							new ContentTransformerRequest(
-									new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
+									new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT, ContentTransformerFormat.HTML)),
 									validatedPost.getInteger("contentVersion", 0),
 									validatedPost.getString("content"),
 									null));
@@ -210,6 +210,7 @@ public class DefaultPostService implements PostService {
 						} else {
 							validatedPost.put("contentVersion", response.result().getContentVersion());
 							validatedPost.put("jsonContent", response.result().getJsonContent());
+							validatedPost.put("content", response.result().getCleanHtml());
 							validatedPost.put("contentPlain", response.result().getPlainTextContent());
 						}
 					}

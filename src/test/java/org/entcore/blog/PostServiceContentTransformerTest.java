@@ -92,7 +92,7 @@ public class PostServiceContentTransformerTest {
             postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
                 context.assertEquals(post1.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
-                context.assertEquals("<p> value </p>", postGet.getJsonObject("jsonContent").getString("key"));
+                context.assertEquals("value", postGet.getJsonObject("jsonContent").getString("content"));
                 async.complete();
             })));
         })));
@@ -112,7 +112,7 @@ public class PostServiceContentTransformerTest {
             postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
                 context.assertEquals(post2.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
-                context.assertEquals("<p> value </p>", postGet.getJsonObject("jsonContent").getString("key"));
+                context.assertEquals("value", postGet.getJsonObject("jsonContent").getString("content"));
                 async.complete();
             })));
         })));
@@ -122,12 +122,12 @@ public class PostServiceContentTransformerTest {
 
         @Override
         public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
-            return Future.succeededFuture(new ContentTransformerResponse(1, "<p> value </p>", new JsonObject().put("key", "<p> value </p>").getMap(), "value", null, null));
+            return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), new JsonObject().put("content", "value").getMap(), "value", contentTransformerRequest.getHtmlContent(), null));
         }
     }
 
 
     static JsonObject createPost(final String name) {
-        return new JsonObject().put("title", name).put("content", "description" + name).put("state", "PUBLISHED");
+        return new JsonObject().put("title", name).put("content", "<p> description" + name + " </p>").put("state", "PUBLISHED");
     }
 }

@@ -68,18 +68,6 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
 
 
     @Override
-    protected Future<ExplorerMessage> doToMessage(final ExplorerMessage message, final JsonObject source) {
-        final String id = source.getString("_id");
-        message.withVersion(System.currentTimeMillis());
-        if (source.containsKey("contentPlain")) {
-            message.withSubResourceContent(id, source.getString("contentPlain"), ExplorerMessage.ExplorerContentType.Text, source.getLong("version", 0L));
-        } else {
-            message.withSubResourceContent(id, source.getString("content", ""), ExplorerMessage.ExplorerContentType.Html, source.getLong("version", 0L));
-        }
-        return Future.succeededFuture(message);
-    }
-
-    @Override
     protected String getCollectionName() { return COLLECTION; }
 
     protected String getParentColumn() {
