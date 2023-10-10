@@ -1,8 +1,10 @@
 package org.entcore.blog;
 
+import com.mongodb.QueryBuilder;
 import com.opendigitaleducation.explorer.ingest.IngestJobMetricsRecorderFactory;
 import com.opendigitaleducation.explorer.tests.ExplorerTestHelper;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
@@ -90,9 +92,15 @@ public class PostServiceContentTransformerTest {
             data.put("POSTID1", postId);
             context.assertNotNull(postId);
             postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
-                context.assertEquals(post1.getString("content"), postGet.getString("content"));
+                context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
-                context.assertEquals("value", postGet.getJsonObject("jsonContent").getString("content"));
+                // Checking that fields not returned by get method are correctly persisted in the database
+                QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId);
+                mongoDb.findOne("posts", MongoQueryBuilder.build(query), new JsonObject().put("jsonContent", 1).put("contentPlain", 1), event -> {
+                    JsonObject result = event.body().getJsonObject("result");
+                    context.assertEquals(new JsonObject().put("content", post1.getString("content")), result.getJsonObject("jsonContent"));
+                    context.assertEquals("plainTextContent", result.getString("contentPlain"));
+                });
                 async.complete();
             })));
         })));
@@ -110,9 +118,14 @@ public class PostServiceContentTransformerTest {
         postService.update(postId, post2, user, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(updatedPost -> {
             context.assertNotNull(postId);
             postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
-                context.assertEquals(post2.getString("content"), postGet.getString("content"));
+                context.assertEquals("<p>clean html</p>"+post2.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
-                context.assertEquals("value", postGet.getJsonObject("jsonContent").getString("content"));
+                // Checking that fields not returned by get method are correctly persisted in the database
+                QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId);
+                mongoDb.findOne("posts", MongoQueryBuilder.build(query), new JsonObject().put("jsonContent", 1).put("contentPlain", 1), event -> {
+                    context.assertEquals(new JsonObject().put("content", post2.getString("content")), event.body().getJsonObject("result").getJsonObject("jsonContent"));
+                    context.assertEquals("plainTextContent", event.body().getJsonObject("result").getString("contentPlain"));
+                });
                 async.complete();
             })));
         })));
@@ -122,12 +135,12 @@ public class PostServiceContentTransformerTest {
 
         @Override
         public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
-            return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), new JsonObject().put("content", "value").getMap(), "value", contentTransformerRequest.getHtmlContent(), null));
+            return Future.succeededFuture(new ContentTransformerResponse(1, null, new JsonObject().put("content", contentTransformerRequest.getHtmlContent()).getMap(), "plainTextContent", "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }
     }
 
 
     static JsonObject createPost(final String name) {
-        return new JsonObject().put("title", name).put("content", "<p> description" + name + " </p>").put("state", "PUBLISHED");
+        return new JsonObject().put("title", name).put("content", "<div> description" + name + " </div>").put("state", "PUBLISHED");
     }
 }

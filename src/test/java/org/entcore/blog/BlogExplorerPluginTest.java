@@ -221,7 +221,7 @@ public class BlogExplorerPluginTest {
                             context.assertNotNull(postModel.getValue("author"));
                             context.assertNotNull(postModel.getNumber("views"));
                             postService.get(id, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
-                                context.assertEquals(post1.getString("content"), postGet.getString("content"));
+                                context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                                 async.complete();
                             })));
                         })));
@@ -323,7 +323,7 @@ public class BlogExplorerPluginTest {
                             context.assertEquals(1, fetch1.size());
                             blogPlugin.getShareInfo(blogId).onComplete(context.asyncAssertSuccess(shareEvt->{
                                 context.assertEquals(1, shareEvt.size());
-                                context.assertTrue(shareEvt.getJsonObject(0).containsKey("userId"));
+                                context.assertTrue(shareEvt.contains("user:user_share1:read"));
                                 async.complete();
                             }));
                         }));
@@ -358,7 +358,7 @@ public class BlogExplorerPluginTest {
                             context.assertEquals(1, fetch1.size());
                             blogPlugin.getShareInfo(blogId).onComplete(context.asyncAssertSuccess(shareEvt->{
                                 context.assertEquals(1, shareEvt.size());
-                                context.assertTrue(shareEvt.getJsonObject(0).containsKey("groupId"));
+                                context.assertTrue(shareEvt.contains("group:group_share2:read"));
                                 async.complete();
                             }));
                         }));
@@ -419,7 +419,7 @@ public class BlogExplorerPluginTest {
 
         @Override
         public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
-            return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), null, contentTransformerRequest.getHtmlContent(), null, null));
+            return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), null, contentTransformerRequest.getHtmlContent(), "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }
     }
 }

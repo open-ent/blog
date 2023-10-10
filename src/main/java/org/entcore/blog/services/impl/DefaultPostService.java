@@ -68,7 +68,6 @@ public class DefaultPostService implements PostService {
 			.put("modified", 1)
 			.put("views", 1)
 			.put("firstPublishDate", 1)
-			.put("jsonContent", 1)
 			.put("contentVersion", 1);
 
 	private final int searchWordMinSize;
@@ -110,7 +109,7 @@ public class DefaultPostService implements PostService {
 		if (b.containsKey("content")) {
 			contentTransformerResponseFuture = contentTransformerClient
 					.transform(new ContentTransformerRequest(
-							new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
+							new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML, ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
 							b.getInteger("contentVersion", 0),
 							b.getString("content", ""),
 							null));
@@ -125,6 +124,7 @@ public class DefaultPostService implements PostService {
 					log.debug("No content transformed.");
 				} else {
 					b.put("contentVersion", transformerResponse.result().getContentVersion());
+					b.put("content", transformerResponse.result().getCleanHtml());
 					b.put("jsonContent", transformerResponse.result().getJsonContent());
 					b.put("contentPlain", transformerResponse.result().getPlainTextContent());
 				}
@@ -265,39 +265,34 @@ public class DefaultPostService implements PostService {
 				.put("state").is(state.name());
 
 		mongo.findOne(POST_COLLECTION, MongoQueryBuilder.build(query), defaultKeys,
-				new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> event) {
-				Either<String, JsonObject> res = Utils.validResult(event);
-				if (res.isRight() && res.right().getValue().size() > 0) {
-					QueryBuilder query2 = QueryBuilder.start("_id").is(postId)
-							.put("state").is(StateType.PUBLISHED.name());
-					MongoUpdateBuilder incView = new MongoUpdateBuilder();
-					incView.inc("views", 1);
-					mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
-					handleOldContent(res.right().getValue()).onComplete(modified -> result.handle(res));
-				} else {
-					result.handle(res);
-				}
-			}
-		});
+                event -> {
+                    Either<String, JsonObject> res = Utils.validResult(event);
+                    if (res.isRight() && res.right().getValue().size() > 0) {
+                        QueryBuilder query2 = QueryBuilder.start("_id").is(postId)
+                                .put("state").is(StateType.PUBLISHED.name());
+                        MongoUpdateBuilder incView = new MongoUpdateBuilder();
+                        incView.inc("views", 1);
+                        mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
+                        handleOldContent(res.right().getValue()).onComplete(modified -> result.handle(res));
+                    } else {
+                        result.handle(res);
+                    }
+                });
 	}
 
 	/**
-	 * Iff {@code post} does not already have a jsonContent field then we call content transformer (and save it to the
-	 * database ?).<br />
+	 * If {@code post} does not have contentVersion or if version is 0 then old content is transformed to new content.<br />
 	 * Otherwise, nothing is done
 	 * @param post Post whose content could be transformed
 	 * @return The modified post (actually the same as {@code post})
 	 */
 	private Future<JsonObject> handleOldContent(final JsonObject post) {
 		final Promise<JsonObject> promise = Promise.promise();
-		if (post.containsKey("jsonContent")) {
-			log.debug("Post already contains a field 'jsonContent' so nothing to do");
+		if (post.containsKey("contentVersion") && post.getInteger("contentVersion") >= 1) {
+			log.debug("Post has already been transformed, nothing to do.");
 			promise.complete(post);
-		// If content only exists in html format, we need to convert it to its json format
 		} else {
-			contentTransformerClient.transform(new ContentTransformerRequest(new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON)), 0, post.getString("content"), null))
+			contentTransformerClient.transform(new ContentTransformerRequest(new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML)), 0, post.getString("content"), null))
 			.onComplete(response -> {
 				if (response.failed()) {
 					log.error("Content transformation failed", response.cause());
@@ -306,13 +301,12 @@ public class DefaultPostService implements PostService {
 					log.info("No content transformed");
 					promise.complete(post);
 				} else {
-					// TODO Should we save JSON version here with contentVersion=0 ?
+					// contentVersion set to 0 to indicate that content has been transformed for the first time.
 					post.put("contentVersion", 0)
-						.put("jsonContent", response.result().getJsonContent());
+						.put("content", response.result().getCleanHtml());
 					promise.complete(post);
 				}
 			});
-			// content exists in json format
 		}
 		return promise.future();
 	}
