@@ -169,7 +169,7 @@ public class BlogExplorerPluginClientTest {
                                 return saveFolder("folder1", user, Optional.empty()).compose(folder1 -> {
                                     final String folder1Id = folder1.getString("_id");
                                     return saveFolder("folder2", user, Optional.ofNullable(folder1Id), blog3Id).compose(folder2 -> {
-                                        return client.reindex(admin, new ExplorerReindexResourcesRequest(null, null, emptySet(), true, emptySet())).onComplete(context.asyncAssertSuccess(indexation -> {
+                                        return client.reindex(admin, new ExplorerReindexResourcesRequest(null, null, emptySet(), true, emptySet(), emptySet())).onComplete(context.asyncAssertSuccess(indexation -> {
                                             context.assertEquals(3, indexation.nbBatch);
                                             context.assertEquals(3, indexation.nbMessage);
                                             explorerTest.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(pending -> {
