@@ -56,6 +56,11 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     }
 
     @Override
+    protected String getCreatedAtColumn() {
+        return "created";
+    }
+
+    @Override
     public String getEntityType() {
         return Blog.POST_TYPE;
     }
