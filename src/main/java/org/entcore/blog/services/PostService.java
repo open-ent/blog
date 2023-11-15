@@ -23,6 +23,8 @@
 package org.entcore.blog.services;
 
 import fr.wseduc.webutils.Either;
+import io.vertx.core.Future;
+import org.entcore.blog.to.PostFilter;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -47,7 +49,12 @@ public interface PostService {
 
 	void delete(UserInfos user, String blogId, String postId, Handler<Either<String, JsonObject>> result);
 
-	void get(String blogId, String postId, StateType state, Handler<Either<String, JsonObject>> result);
+	/**
+	 *
+	 * @param filter Filter that describes the desired post.
+	 * @return Fetched post iff the post with the specified id and state belongs to the blog with the specified id.
+	 */
+	Future<JsonObject> get(final PostFilter filter);
 
 	default void list(String blogId, UserInfos user, Integer page, int limit, String search, final Set<String> states, Handler<Either<String, JsonArray>> result){
 		list(blogId, user, page, limit, search, states, false, result);

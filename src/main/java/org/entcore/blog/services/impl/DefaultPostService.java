@@ -44,6 +44,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
+import org.entcore.blog.to.PostFilter;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
@@ -63,12 +64,16 @@ public class DefaultPostService implements PostService {
 			.put("author", 1)
 			.put("title", 1)
 			.put("content", 1)
+			.put("jsonContent", 1)
 			.put("state", 1)
 			.put("created", 1)
 			.put("modified", 1)
 			.put("views", 1)
 			.put("firstPublishDate", 1)
 			.put("contentVersion", 1);
+	private static final JsonObject keysWithTransformedContent = defaultKeys.copy().put("transformed_content", 1);
+
+	public static final String TRANSFORMED_CONTENT_DB_FIELD_NAME = "transformed_content";
 
 	private final int searchWordMinSize;
 	private final PostExplorerPlugin plugin;
@@ -218,6 +223,9 @@ public class DefaultPostService implements PostService {
 					for (String attr: validatedPost.fieldNames()) {
 						modifier.set(attr, validatedPost.getValue(attr));
 					}
+					if(postFromDb.containsKey(TRANSFORMED_CONTENT_DB_FIELD_NAME)) {
+						modifier.unset(TRANSFORMED_CONTENT_DB_FIELD_NAME);
+					}
 					plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
 					mongo.update(POST_COLLECTION, jQuery, modifier.build(), updateResponse -> {
 						if ("ok".equals(updateResponse.body().getString("status"))) {
@@ -230,10 +238,10 @@ public class DefaultPostService implements PostService {
 								}
 								// TODO JBER update here status in mongo
 								final JsonObject r = new JsonObject().put("state", validatedPost.getString("state", postFromDb.getString("state")));
-								result.handle(new Either.Right<String, JsonObject>(r));
+								result.handle(new Either.Right<>(r));
 							});
 						} else {
-							result.handle(new Either.Left<String, JsonObject>(updateResponse.body().getString("message", "")));
+							result.handle(new Either.Left<>(updateResponse.body().getString("message", "")));
 						}
 					});
 				});
@@ -259,25 +267,26 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void get(String blogId, final String postId, StateType state,
-				final Handler<Either<String, JsonObject>> result) {
-		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId)
-				.put("state").is(state.name());
-
-		mongo.findOne(POST_COLLECTION, MongoQueryBuilder.build(query), defaultKeys,
-                event -> {
-                    Either<String, JsonObject> res = Utils.validResult(event);
-                    if (res.isRight() && res.right().getValue().size() > 0) {
-                        QueryBuilder query2 = QueryBuilder.start("_id").is(postId)
-                                .put("state").is(StateType.PUBLISHED.name());
-                        MongoUpdateBuilder incView = new MongoUpdateBuilder();
-                        incView.inc("views", 1);
-                        mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
-                        handleOldContent(res.right().getValue()).onComplete(modified -> result.handle(res));
-                    } else {
-                        result.handle(res);
-                    }
-                });
+	public Future<JsonObject> get(final PostFilter filter) {
+		final Promise<JsonObject> promise = Promise.promise();
+		final QueryBuilder query = QueryBuilder.start("_id").is(filter.getPostId())
+				.put("blog.$id").is(filter.getBlogId())
+				.put("state").is(filter.getState().name());
+		mongo.findOne(POST_COLLECTION, MongoQueryBuilder.build(query), keysWithTransformedContent, event -> {
+				Either<String, JsonObject> res = Utils.validResult(event);
+				if (res.isRight() && !res.right().getValue().isEmpty()) {
+						QueryBuilder query2 = QueryBuilder.start("_id").is(filter.getPostId())
+										.put("state").is(StateType.PUBLISHED.name());
+						MongoUpdateBuilder incView = new MongoUpdateBuilder();
+						incView.inc("views", 1);
+						mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
+						handleOldContent(res.right().getValue(), filter.isOriginalFormat())
+								.onComplete(promise);
+				} else {
+					promise.fail(res.left().getValue());
+				}
+		});
+		return promise.future();
 	}
 
 	/**
@@ -286,13 +295,17 @@ public class DefaultPostService implements PostService {
 	 * @param post Post whose content could be transformed
 	 * @return The modified post (actually the same as {@code post})
 	 */
-	private Future<JsonObject> handleOldContent(final JsonObject post) {
+	private Future<JsonObject> handleOldContent(final JsonObject post, final boolean originalFormatRequested) {
 		final Promise<JsonObject> promise = Promise.promise();
-		if (post.containsKey("contentVersion") && post.getInteger("contentVersion") >= 1) {
+		if (post.containsKey("jsonContent")) {
 			log.debug("Post has already been transformed, nothing to do.");
 			promise.complete(post);
 		} else {
-			contentTransformerClient.transform(new ContentTransformerRequest(new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML)), 0, post.getString("content"), null))
+			Set<ContentTransformerFormat> desiredFormats = new HashSet<>();
+			desiredFormats.add(ContentTransformerFormat.HTML);
+			desiredFormats.add(ContentTransformerFormat.JSON);
+			final ContentTransformerRequest transformerRequest = new ContentTransformerRequest(desiredFormats, 0, post.getString("content"), null);
+			contentTransformerClient.transform(transformerRequest)
 			.onComplete(response -> {
 				if (response.failed()) {
 					log.error("Content transformation failed", response.cause());
@@ -302,13 +315,33 @@ public class DefaultPostService implements PostService {
 					promise.complete(post);
 				} else {
 					// contentVersion set to 0 to indicate that content has been transformed for the first time.
+					final ContentTransformerResponse transformedContent = response.result();
 					post.put("contentVersion", 0)
-						.put("content", response.result().getCleanHtml());
-					promise.complete(post);
+						.put("content", transformedContent.getCleanHtml())
+						.put("jsonContent", transformedContent.getJsonContent());
+					final QueryBuilder findPost = QueryBuilder.start("_id").is(post.getString("_id"));
+					// Cache the products of the transformation so they can be reused until the manager updates the post
+					final MongoUpdateBuilder updateFields = new MongoUpdateBuilder()
+							.set("jsonContent", transformedContent.getJsonContent())
+							.set("contentVersion", 0)
+							.set(TRANSFORMED_CONTENT_DB_FIELD_NAME, post.getString("content"));
+					mongo.update(POST_COLLECTION, MongoQueryBuilder.build(findPost), updateFields.build(),e -> {
+						promise.complete(post);
+					});
 				}
 			});
 		}
-		return promise.future();
+		return promise.future().map(fetchedPost -> {
+			// If the user did not request the original format we populate the field content with the value of transformed_content
+			// Which was cached after the first transformation.
+			// This only applies for post whose content version is 0 (i.e. for posts whose content has never been updated since
+			// the new editor)
+			if(!originalFormatRequested && fetchedPost.getInteger("contentVersion", -1) == 0 && fetchedPost.containsKey(TRANSFORMED_CONTENT_DB_FIELD_NAME)) {
+				fetchedPost.put("content", fetchedPost.getString(TRANSFORMED_CONTENT_DB_FIELD_NAME));
+			}
+			fetchedPost.remove("original_content"); // Remove this so it doesn't appear in the response to the client
+			return fetchedPost;
+		});
 	}
 
 	@Override
@@ -611,7 +644,7 @@ public class DefaultPostService implements PostService {
 			}
 		};
 
-		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
+		mongo.count(DefaultBlogService.BLOG_COLLECTION, MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
 			public void handle(Message<JsonObject> event) {
 				JsonObject res = event.body();
 				if(res == null || !"ok".equals(res.getString("status"))){

@@ -20,6 +20,7 @@ import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.blog.to.PostFilter;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.share.ShareService;
@@ -220,10 +221,12 @@ public class BlogExplorerPluginTest {
                             context.assertNotNull(postModel.getValue("modified"));
                             context.assertNotNull(postModel.getValue("author"));
                             context.assertNotNull(postModel.getNumber("views"));
-                            postService.get(id, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
+                            postService.get(new PostFilter(id, postId, false, PostService.StateType.DRAFT))
+                            .onSuccess(postGet -> {
                                 context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                                 async.complete();
-                            })));
+                            })
+                            .onFailure(context::fail);
                         })));
                     }));
                 }));

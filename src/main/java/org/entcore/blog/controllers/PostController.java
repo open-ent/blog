@@ -22,20 +22,21 @@
 
 package org.entcore.blog.controllers;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.arrayResponseHandler;
-import static org.entcore.common.http.response.DefaultResponseHandler.defaultResponseHandler;
+import static org.entcore.common.http.response.DefaultResponseHandler.*;
 import static org.entcore.common.user.UserUtils.getUserInfos;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import fr.wseduc.rs.*;
 import org.entcore.blog.Blog;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
+import org.entcore.blog.to.PostFilter;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
@@ -46,10 +47,6 @@ import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
 
 import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.rs.Delete;
-import fr.wseduc.rs.Get;
-import fr.wseduc.rs.Post;
-import fr.wseduc.rs.Put;
 import fr.wseduc.security.ActionType;
 import fr.wseduc.security.SecuredAction;
 import fr.wseduc.webutils.Either;
@@ -165,16 +162,22 @@ public class PostController extends BaseController {
 		});
 	}
 
+	@ApiDoc("Gets a post by id iff the post belongs to the blog whose id has been specified in blogId parameter and " +
+			"if the given state is the expected one. " +
+			"The query param oldFormat is to be set to true if the content field of the returned post must be in its original (i.e." +
+			"if we want the content unaltered by the rich content converter) ")
 	@Get("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
+		final boolean oldFormat = "true".equalsIgnoreCase(request.params().get("oldFormat"));
 		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
-		post.get(blogId, postId, BlogResourcesProvider.getStateType(request), defaultResponseHandler(request));
+		final PostFilter filter = new PostFilter(blogId, postId, oldFormat, BlogResourcesProvider.getStateType(request));
+		post.get(filter).onComplete(defaultAsyncResultResponseHandler(request));
 	}
 
 	@Get("/post/list/all/:blogId")

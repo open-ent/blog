@@ -83,10 +83,31 @@ task generateCommitId {
     project.ext.set('buildTime', formattedDate)
   }
 }
+
+task gatherDependenciesBuildInformation {
+  doLast {
+    // Filter dependencies by group and name
+    def selectedDependencies = configurations.compile
+            .findAll { it.name.startsWith("web-utils") }
+
+    // Iterate over the selected dependencies
+    selectedDependencies.each { File dependency ->
+      def jarFile = new java.util.jar.JarFile(dependency)
+      def dependencyManifest = jarFile.getManifest()
+      def depName = dependency.name.replaceAll("^(.*?)-\\d+\\..+\$", "\$1").replace("-", "")
+      project.ext.set(depName + '_commitId', dependencyManifest.mainAttributes.getValue('SCM-Commit-Id'))
+      project.ext.set(depName + '_branch', dependencyManifest.mainAttributes.getValue('SCM-Branch'))
+      project.ext.set(depName + '_buildTime', dependencyManifest.mainAttributes.getValue('Build-Time'))
+      // Close the JarFile
+      jarFile.close()
+    }
+  }
+}
 compileJava {
   sourceCompatibility = project.sourceCompatibility
   targetCompatibility = project.targetCompatibility
   dependsOn generateCommitId
+  dependsOn gatherDependenciesBuildInformation
 }
 
 compileTestJava {
@@ -113,7 +134,10 @@ jar {
         "Main-Verticle": "service:mod",
         "SCM-Commit-Id": "${-> project.ext.commitId}",
         "SCM-Branch": "${-> project.ext.branchName}",
-        "Build-Time": "${-> project.ext.buildTime}"
+        "Build-Time": "${-> project.ext.buildTime}",
+        "Web-Utils-SCM-Commit-Id": "${-> project.ext.webutils_commitId}",
+        "Web-Utils-SCM-Branch": "${-> project.ext.webutils_branch}",
+        "Web-Utils-Build-Time": "${-> project.ext.webutils_buildTime}"
         )
   }
 }

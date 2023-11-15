@@ -9,6 +9,8 @@ import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Utils;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -24,6 +26,7 @@ import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.blog.to.PostFilter;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -39,6 +42,7 @@ import org.testcontainers.containers.Neo4jContainer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static fr.wseduc.mongodb.MongoDbAPI.isOk;
 import static org.entcore.blog.BlogExplorerPluginClientTest.createBlog;
@@ -101,7 +105,8 @@ public class PostServiceContentTransformerTest {
             final String postId = createdPost.getString("_id");
             data.put("POSTID1", postId);
             context.assertNotNull(postId);
-            postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
+            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT))
+            .onSuccess(postGet -> {
                 context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
                 // Checking that fields not returned by get method are correctly persisted in the database
@@ -112,7 +117,8 @@ public class PostServiceContentTransformerTest {
                     context.assertEquals("plainTextContent", result.getString("contentPlain"));
                 });
                 async.complete();
-            })));
+            })
+            .onFailure(context::fail);
         })));
     }
 
@@ -127,7 +133,8 @@ public class PostServiceContentTransformerTest {
         final JsonObject post2 = createPost("post2");
         postService.update(postId, post2, user, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(updatedPost -> {
             context.assertNotNull(postId);
-            postService.get(blogId, postId, PostService.StateType.DRAFT, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(postGet -> {
+            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT))
+            .onSuccess(postGet -> {
                 context.assertEquals("<p>clean html</p>"+post2.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
                 // Checking that fields not returned by get method are correctly persisted in the database
@@ -137,7 +144,8 @@ public class PostServiceContentTransformerTest {
                     context.assertEquals("plainTextContent", event.body().getJsonObject("result").getString("contentPlain"));
                 });
                 async.complete();
-            })));
+            })
+            .onFailure(context::fail);
         })));
     }
 
@@ -162,25 +170,109 @@ public class PostServiceContentTransformerTest {
         final JsonObject postCache = createPost("post-cache");
         createBlogOrFail(blogData, user, context)
         .compose(blog -> createPostOrFail(blog.getString("_id"), postCache, user, context).map(post -> new BlogAndPost(blog, post)))
-        .compose(blogAndPost -> simulateOldContentData(blogAndPost.post).map(e -> blogAndPost))
+        .compose(blogAndPost -> simulateOldContentData(blogAndPost.post).map(e -> new BlogAndPost(blogAndPost.blog, e)))
         .onSuccess(e -> contentTransformerClient.resetNbCalls())
-        .compose(blogAndPost -> getPostOrFailNTimes(blogAndPost.blog, blogAndPost.post, nbTimesGetSamePost, context))
+        .compose(blogAndPost -> getPostOrFailNTimes(
+            new PostFilter(
+                blogAndPost.blog.getString("_id"),
+                blogAndPost.post.getString("_id"),
+                false, // This is where we ask for new format
+                PostService.StateType.DRAFT),
+            nbTimesGetSamePost,
+            fetchedPost -> ("<p>clean html</p>"+ blogAndPost.post.getString("content")).equals(fetchedPost.getString("content")),
+            context).map(blogAndPost))
+        .compose(blogAndPost -> getPostOrFailNTimes(
+            new PostFilter(
+                blogAndPost.blog.getString("_id"),
+                blogAndPost.post.getString("_id"),
+                true, // This is where we ask for the original format
+                PostService.StateType.DRAFT),
+            nbTimesGetSamePost,
+            fetchedPost -> blogAndPost.post.getString("content").equals(fetchedPost.getString("content")),
+            context))
         .onSuccess(e -> context.assertEquals(1, contentTransformerClient.nbCalls, "The cache didn't work, we should have called the transformer only once"))
         .onSuccess(e -> async.complete())
-        .onFailure(context::fail)
-        .onSuccess(e -> async.complete());
+        .onFailure(context::fail);
     }
 
-    private Future<Void> simulateOldContentData(JsonObject post) {
-        final Promise<Void> promise = Promise.promise();
+    /**
+     * <h1>Goal</h1>
+     * <p>Ensure that the transformer is called only once for legacy content.</p>
+     * <h1>Steps</h1>
+     * <ol>
+     *   <li>Create a blog</li>
+     *   <li>Create a post</li>
+     *   <li>Remove the fields of the created post which allows us to detect that a content is produced by the new editor</li>
+     *   <li>Call successively n times /get</li>
+     *   <li>Verify that we get a coherent result</li>
+     *   <li>Verify that the transformer is only called once</li>
+     * </ol>
+     * @param context Test context
+     */
+    @Test
+    public void testCachedTransformationContentRemovedAfterUpdate(final TestContext context) {
+        final Async async = context.async();
+        final JsonObject blogData = createBlog("Blog cache to be updated", user);
+        final JsonObject postCache = createPost("post-cache-to-be-updated");
+        createBlogOrFail(blogData, user, context)
+            .compose(blog -> createPostOrFail(blog.getString("_id"), postCache, user, context).map(post -> new BlogAndPost(blog, post)))
+            .compose(blogAndPost -> simulateOldContentData(blogAndPost.post).map(e -> new BlogAndPost(blogAndPost.blog, e)))
+            .onSuccess(e -> contentTransformerClient.resetNbCalls())
+            .compose(blogAndPost -> updatePostOrFail(blogAndPost.post).map(blogAndPost))
+            .compose(blogAndPost -> {
+                final Promise<JsonObject> promise = Promise.promise();
+                JsonObject keys = new JsonObject()
+                    .put("content", 1)
+                    .put("contentVersion", 1)
+                    .put(DefaultPostService.TRANSFORMED_CONTENT_DB_FIELD_NAME, 1);
+                final QueryBuilder query = QueryBuilder.start("_id").is(blogAndPost.post.getString("_id"));
+                mongoDb.findOne("posts", MongoQueryBuilder.build(query), keys, e -> {
+                    Either<String, JsonObject> res = Utils.validResult(e);
+                    if(res.isLeft()) {
+                        promise.fail("Could not find the updated post : " + res.left().getValue());
+                    } else {
+                        final JsonObject fetchedUpdatedPost = res.right().getValue();
+                        context.assertEquals(fetchedUpdatedPost.getInteger("contentVersion"), 1, "Content version does not have the right value after being updated");
+                        context.assertEquals("<p>clean html</p><p>Updated Content</p>Old content", fetchedUpdatedPost.getString("content"));
+                        context.assertNull(fetchedUpdatedPost.getString(DefaultPostService.TRANSFORMED_CONTENT_DB_FIELD_NAME), "Post still has transformed_content after being updated");
+                        promise.complete(blogAndPost.post);
+                    }
+                });
+                return promise.future();
+            })
+            .onSuccess(e -> context.assertEquals(1, contentTransformerClient.nbCalls, "The cache didn't work, we should have called the transformer only once"))
+            .onSuccess(e -> async.complete())
+            .onFailure(context::fail);
+    }
+
+    private Future<JsonObject> updatePostOrFail(JsonObject post) {
+        final Promise<JsonObject> promise = Promise.promise();
+        final JsonObject updatedPost = new JsonObject().put("content", "<p>Updated Content</p>" + post.getString("content"));
+        postService.update(post.getString("_id"), updatedPost, user, e -> {
+            if(e.isLeft()) {
+                promise.fail(e.left().getValue());
+            } else {
+                promise.complete(e.right().getValue());
+            }
+        });
+        return promise.future();
+    }
+
+    private Future<JsonObject> simulateOldContentData(JsonObject post) {
+        final Promise<JsonObject> promise = Promise.promise();
         final QueryBuilder query = QueryBuilder.start("_id").is(post.getString("_id"));
         MongoUpdateBuilder simulateOldUpdateQuery = new MongoUpdateBuilder();
         simulateOldUpdateQuery.unset("jsonContent");
         simulateOldUpdateQuery.unset("contentVersion");
+        simulateOldUpdateQuery.unset(DefaultPostService.TRANSFORMED_CONTENT_DB_FIELD_NAME);
+        simulateOldUpdateQuery.set("content", "Old content");
         mongoDb.update("posts", MongoQueryBuilder.build(query), simulateOldUpdateQuery.build(), message -> {
             final JsonObject body = message.body();
             if (isOk(body)) {
-                promise.complete();
+                final JsonObject oldPost = post.copy().put("content", "Old content");
+                oldPost.remove("jsonContent");
+                oldPost.remove("contentVersion");
+                promise.complete(oldPost);
             } else {
                 promise.fail("Error while removing new editor content fields : " + body);
             }
@@ -188,24 +280,28 @@ public class PostServiceContentTransformerTest {
         return promise.future();
     }
 
-    private Future<Void> getPostOrFailNTimes(final JsonObject blog, JsonObject post, final int nbTimesToGet, final TestContext context) {
+    private Future<Void> getPostOrFailNTimes(final PostFilter filter,
+                                             final int nbTimesToGet,
+                                             final Predicate<JsonObject> checkContent,
+                                             final TestContext context) {
         final Promise<Void> promise = Promise.promise();
+        final int iterationNumber = (nbTimesGetSamePost - nbTimesToGet) + 1;
         if(nbTimesToGet <= 0) {
             promise.fail("nbTimesToGet should be a positive number");
         } else {
-            postService.get(blog.getString("_id"), post.getString("_id"), PostService.StateType.DRAFT, e -> {
-                if(e.isLeft()) {
-                    promise.fail("Fail to get the post at iteration " + ( nbTimesGetSamePost - nbTimesToGet + 1) + " : " + e.right().getValue());
+            postService.get(filter).onComplete(e -> {
+                if(e.failed()) {
+                    promise.fail(e.cause());
                 } else {
-                    final JsonObject fetchedPost = e.right().getValue();
-                    context.assertTrue(fetchedPost.containsKey("contentVersion"), "Fetched post should contain a version field");
-                    context.assertEquals(0, fetchedPost.getInteger("contentVersion"), "Content version should remain 0");
-                    context.assertEquals("<p>clean html</p>"+ post.getString("content"), fetchedPost.getString("content"));
-                    context.assertTrue(fetchedPost.containsKey("jsonContent"), "Fetched post should have a jsonContent field");
+                    final JsonObject fetchedPost = e.result();
+                    context.assertTrue(fetchedPost.containsKey("contentVersion"), "Fetched post should contain a version field at iteration " + iterationNumber);
+                    context.assertEquals(0, fetchedPost.getInteger("contentVersion"), "Content version should remain 0 at iteration " + iterationNumber);
+                    context.assertTrue(checkContent.test(fetchedPost), "Cleaned content does not match the expected value at iteration  at iteration " + iterationNumber);
+                    context.assertTrue(fetchedPost.containsKey("jsonContent"), "Fetched post should have a jsonContent field at iteration " + iterationNumber);
                     if(nbTimesToGet == 1) {
                         promise.complete();
                     } else {
-                        getPostOrFailNTimes(blog, post, nbTimesToGet - 1, context).onComplete(promise);
+                        getPostOrFailNTimes(filter, nbTimesToGet - 1, checkContent, context).onComplete(promise);
                     }
                 }
             });

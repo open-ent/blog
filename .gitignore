@@ -39,3 +39,4 @@ package-lock.json
 gradle/
 gradlew*
 rev-manifest.json
+.env
