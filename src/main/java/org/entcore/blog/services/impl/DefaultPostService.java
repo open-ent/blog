@@ -60,6 +60,7 @@ public class DefaultPostService implements PostService {
 
 	private final MongoDb mongo;
 	protected static final String POST_COLLECTION = "posts";
+	public static final String TRANSFORMED_CONTENT_DB_FIELD_NAME = "transformed_content";
 	private static final JsonObject defaultKeys = new JsonObject()
 			.put("author", 1)
 			.put("title", 1)
@@ -71,9 +72,8 @@ public class DefaultPostService implements PostService {
 			.put("views", 1)
 			.put("firstPublishDate", 1)
 			.put("contentVersion", 1);
-	private static final JsonObject keysWithTransformedContent = defaultKeys.copy().put("transformed_content", 1);
+	private static final JsonObject keysWithTransformedContent = defaultKeys.copy().put(TRANSFORMED_CONTENT_DB_FIELD_NAME, 1);
 
-	public static final String TRANSFORMED_CONTENT_DB_FIELD_NAME = "transformed_content";
 
 	private final int searchWordMinSize;
 	private final PostExplorerPlugin plugin;
@@ -339,7 +339,7 @@ public class DefaultPostService implements PostService {
 			if(!originalFormatRequested && fetchedPost.getInteger("contentVersion", -1) == 0 && fetchedPost.containsKey(TRANSFORMED_CONTENT_DB_FIELD_NAME)) {
 				fetchedPost.put("content", fetchedPost.getString(TRANSFORMED_CONTENT_DB_FIELD_NAME));
 			}
-			fetchedPost.remove("original_content"); // Remove this so it doesn't appear in the response to the client
+			fetchedPost.remove(TRANSFORMED_CONTENT_DB_FIELD_NAME); // Remove this so it doesn't appear in the response to the client
 			return fetchedPost;
 		});
 	}

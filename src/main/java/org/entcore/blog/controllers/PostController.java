@@ -164,19 +164,19 @@ public class PostController extends BaseController {
 
 	@ApiDoc("Gets a post by id iff the post belongs to the blog whose id has been specified in blogId parameter and " +
 			"if the given state is the expected one. " +
-			"The query param oldFormat is to be set to true if the content field of the returned post must be in its original (i.e." +
+			"The query param originalFormat is to be set to true if the content field of the returned post must be in its original (i.e." +
 			"if we want the content unaltered by the rich content converter) ")
 	@Get("/post/:blogId/:postId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		final boolean oldFormat = "true".equalsIgnoreCase(request.params().get("oldFormat"));
+		final boolean originalFormat = "true".equalsIgnoreCase(request.params().get("originalFormat"));
 		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
-		final PostFilter filter = new PostFilter(blogId, postId, oldFormat, BlogResourcesProvider.getStateType(request));
+		final PostFilter filter = new PostFilter(blogId, postId, originalFormat, BlogResourcesProvider.getStateType(request));
 		post.get(filter).onComplete(defaultAsyncResultResponseHandler(request));
 	}
 

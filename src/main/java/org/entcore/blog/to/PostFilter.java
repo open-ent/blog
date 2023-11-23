@@ -40,7 +40,7 @@ public class PostFilter {
   @JsonCreator
   public PostFilter(@JsonProperty("blogId") final String blogId,
                     @JsonProperty("postId") final String postId,
-                    @JsonProperty("oldFormat") final boolean originalFormat,
+                    @JsonProperty("originalFormat") final boolean originalFormat,
                     @JsonProperty("state") final PostService.StateType state) {
 
 
