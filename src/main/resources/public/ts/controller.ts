@@ -660,6 +660,7 @@ export const blogController = ng.controller("BlogController", [
               if (succeeded == true) {
                 $scope.post.publishing = true;
                 initPostCounter($scope.post.blogId);
+                $scope.post.state = $scope.blog.myRights.publishPost ? 'PUBLISHED' : 'SUBMITTED';
                 resolve();
               } else reject();
             });
@@ -669,7 +670,7 @@ export const blogController = ng.controller("BlogController", [
                 if (result != null) {
                   $scope.post = $scope.blog.posts.first();
                   $scope.post.publishing = true;
-                  $scope.post.state =  'PUBLISHED';
+                  $scope.post.state = $scope.blog.myRights.publishPost ? 'PUBLISHED' : 'SUBMITTED';
                   resolve();
                   $location.path(
                     "/detail/" + $scope.post.blogId + "/" + $scope.post._id

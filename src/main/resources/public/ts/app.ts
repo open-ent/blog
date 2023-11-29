@@ -31,7 +31,7 @@ ng.configs.push(
 
 function redirectToReact() {
   if(!HAS_VIEW && window.location.pathname !== '/blog/print/blog' && !window.location.pathname.startsWith("/blog/pub")){
-    window.open("/blog?view=home", "_self");
+    window.location.replace("/blog?view=home")
   }
 }
 

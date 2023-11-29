@@ -17,6 +17,7 @@ import org.entcore.common.explorer.impl.ExplorerSubResource;
 import org.entcore.common.share.ShareModel;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.user.UserInfos;
+import fr.wseduc.mongodb.MongoDb;
 
 import java.util.*;
 
@@ -87,6 +88,11 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         message.withThumbnail(source.getString("thumbnail"));
         message.withDescription(source.getString("description"));
         message.withCustomFields(custom);
+        // set updated date
+        final Object modified = source.getValue("modified");
+        if(modified != null && modified instanceof JsonObject){
+            message.withUpdatedAt(MongoDb.parseIsoDate((JsonObject) modified));
+        }
         return Future.succeededFuture(message);
     }
 
