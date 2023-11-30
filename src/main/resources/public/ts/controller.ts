@@ -4,7 +4,6 @@ import {
   LinkerEventBody,
   template,
   idiom,
-  http,
   notify,
   ng,
   angular,
@@ -20,6 +19,8 @@ import {
   State,
 } from "./controllers/commons";
 import { Blog, Folders } from "./models";
+import http, { AxiosPromise } from "axios";
+
 //=== Types
 
 interface BlogControllerScope extends LibraryControllerScope {
@@ -259,8 +260,19 @@ export const blogController = ng.controller("BlogController", [
       };
     };
     route({
-      viewBlog: function (params) {
+      viewBlog: async function (params) {
         model.blogs.deselectAll();
+
+        // Fix #WB2-1252: show 404 resource error page if blog is in trash
+        // To know if the blog has been trashed we need to request Explorer API. The information is not updates in legacy blog app.
+        const explorerBlogResponse = await http.get(`/explorer/resources?application=blog&resource_type=blog&asset_id[]=${params.blogId}`);
+        if (explorerBlogResponse.data && explorerBlogResponse.data.resources) {
+          const explorerBlog = explorerBlogResponse.data.resources.find(resource => resource.assetId === params.blogId)
+          if (!explorerBlog || explorerBlog.trashed) {
+            template.open("main", "e404");
+            return;
+          }
+        }
 
         $scope.blog = model.blogs.findWhere({ _id: params.blogId });
 
