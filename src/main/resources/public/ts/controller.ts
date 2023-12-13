@@ -265,10 +265,14 @@ export const blogController = ng.controller("BlogController", [
 
         // Fix #WB2-1252: show 404 resource error page if blog is in trash
         // To know if the blog has been trashed we need to request Explorer API. The information is not updates in legacy blog app.
-        const explorerBlogResponse = await http.get(`/explorer/resources?application=blog&resource_type=blog&asset_id[]=${params.blogId}`);
-        if (explorerBlogResponse.data && explorerBlogResponse.data.resources) {
-          const explorerBlog = explorerBlogResponse.data.resources.find(resource => resource.assetId === params.blogId)
-          if (!explorerBlog || explorerBlog.trashed) {
+        const explorerBlogResponse = await http.get(
+          `/explorer/resources?application=blog&resource_type=blog&asset_id[]=${params.blogId}`
+        );
+        if (explorerBlogResponse?.data?.resources) {
+          const explorerBlog = explorerBlogResponse.data.resources.find(
+            (resource) => resource.assetId === params.blogId
+          );
+          if (explorerBlog?.trashed) {
             template.open("main", "e404");
             return;
           }
@@ -672,7 +676,9 @@ export const blogController = ng.controller("BlogController", [
               if (succeeded == true) {
                 $scope.post.publishing = true;
                 initPostCounter($scope.post.blogId);
-                $scope.post.state = $scope.blog.myRights.publishPost ? 'PUBLISHED' : 'SUBMITTED';
+                $scope.post.state = $scope.blog.myRights.publishPost
+                  ? "PUBLISHED"
+                  : "SUBMITTED";
                 resolve();
               } else reject();
             });
@@ -682,7 +688,9 @@ export const blogController = ng.controller("BlogController", [
                 if (result != null) {
                   $scope.post = $scope.blog.posts.first();
                   $scope.post.publishing = true;
-                  $scope.post.state = $scope.blog.myRights.publishPost ? 'PUBLISHED' : 'SUBMITTED';
+                  $scope.post.state = $scope.blog.myRights.publishPost
+                    ? "PUBLISHED"
+                    : "SUBMITTED";
                   resolve();
                   $location.path(
                     "/detail/" + $scope.post.blogId + "/" + $scope.post._id
