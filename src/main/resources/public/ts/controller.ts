@@ -162,9 +162,16 @@ export const blogController = ng.controller("BlogController", [
     });
     //=== Routes
     var viewPostFactory = function (modal) {
-      return function (params) {
+      return async function (params) {
         template.close("create-post");
         model.blogs.deselectAll();
+
+        try {
+          await handle404Resource(params.blogId);
+        } catch (error) {
+          template.open("main", "e404");
+          return;
+        }
 
         var openLightbox = function (post) {
           if (post) {
@@ -263,18 +270,9 @@ export const blogController = ng.controller("BlogController", [
       viewBlog: async function (params) {
         model.blogs.deselectAll();
 
-        // Fix #WB2-1252: show 404 resource error page if blog is in trash
-        // To know if the blog has been trashed we need to request Explorer API. The information is not updates in legacy blog app.
-        const explorerBlogResponse = await http.get(
-          `/explorer/resources?application=blog&resource_type=blog&asset_id[]=${params.blogId}`
-        );
-        const explorerBlog = explorerBlogResponse?.data?.resources?.find(
-          (resource) => resource.assetId === params.blogId
-        );
-        if (
-          explorerBlog?.trashed ||
-          explorerBlog?.trashedBy?.includes(model.me.userId)
-        ) {
+        try {
+          await handle404Resource(params.blogId);
+        } catch (error) {
           template.open("main", "e404");
           return;
         }
@@ -453,6 +451,25 @@ export const blogController = ng.controller("BlogController", [
         }
       },
     });
+
+    // Fix #WB2-1252: show 404 resource error page if blog is in trash
+    async function handle404Resource(blogId: string): Promise<"200" | "404"> {
+      // To know if the blog has been trashed we need to request Explorer API. The information is not updates in legacy blog app.
+      const explorerBlogResponse = await http.get(
+        `/explorer/resources?application=blog&resource_type=blog&asset_id[]=${blogId}`
+      );
+      const explorerBlog = explorerBlogResponse?.data?.resources?.find(
+        (resource) => resource.assetId === blogId
+      );
+
+      if (
+        explorerBlog?.trashed ||
+        explorerBlog?.trashedBy?.includes(model.me.userId)
+      ) {
+        return Promise.reject("404");
+      }
+      return Promise.resolve("200");
+    }
 
     function openFirstPostAndCounter(blogId) {
       $scope.post = $scope.blog.posts.first();
