@@ -19,7 +19,7 @@
       href="/assets/js/ode-explorer/style.css?v=@@VERSION"
     />
   </head>
-  <body class="app-react" data-ode-app>
+  <body class="app-react" data-explorer-config>
     <!-- blog, collaborativeeditor, collaborativewall, exercizer, mindmap, pages, timelinegenerator, wiki, scrapbook -->
     <div id="root"></div>
     <div id="portal"></div>
@@ -34,7 +34,7 @@
       var WORKFLOW_PUBLISH =
         "org.entcore.blog.controllers.BlogController|publish";
       var WORKFLOW_PRINT = "org.entcore.blog.controllers.BlogController|print";
-      var odeConfig = {
+      var explorerConfig = {
         app: "blog",
         types: ["blog"],
         filters: [
@@ -117,8 +117,11 @@
           },
         ],
       };
-      var rootElement = document.querySelector("[data-ode-app]");
-      rootElement.setAttribute("data-ode-app", JSON.stringify(odeConfig));
+      const rootElement = document.querySelector("[data-explorer-config]");
+      rootElement.setAttribute(
+        "data-explorer-config",
+        JSON.stringify(explorerConfig)
+      );
     </script>
   </body>
 </html>
