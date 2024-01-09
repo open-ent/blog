@@ -200,7 +200,7 @@ public class BlogExplorerPluginTest {
         context.assertNotNull(data.get("ID1"));
         final String id = (String) data.get("ID1");
         final JsonObject post1 = createPost("post1");
-        postService.create(id, post1, user,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+        postService.create(id, post1, user, false, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
             final String postId = create.getString("_id");
             data.put("POSTID1", postId);
             context.assertNotNull(postId);
@@ -242,7 +242,7 @@ public class BlogExplorerPluginTest {
         final String blogId = (String) data.get("ID1");
         final String postId = (String) data.get("POSTID1");
         final JsonObject post2 = createPost("post2");
-        postService.update(postId, post2, user,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
+        postService.update(postId, post2, user, false,  test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(create -> {
             postPlugin.getCommunication().waitPending().onComplete(context.asyncAssertSuccess(r3-> {
                 explorerTest.ingestJobExecute(true).onComplete(context.asyncAssertSuccess(r4 -> {
                     explorerTest.fetch(user, application, explorerTest.createSearch()).onComplete(context.asyncAssertSuccess(fetch1 -> {

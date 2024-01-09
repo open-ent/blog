@@ -88,7 +88,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void create(String blogId, JsonObject post, UserInfos author,
+	public void create(String blogId, JsonObject post, UserInfos author, boolean originalFormat,
 					   final Handler<Either<String, JsonObject>> result) {
 		final long version = System.currentTimeMillis();
 		JsonObject now = MongoDb.nowISO();
@@ -129,7 +129,9 @@ public class DefaultPostService implements PostService {
 					log.debug("No content transformed.");
 				} else {
 					b.put("contentVersion", transformerResponse.result().getContentVersion());
-					b.put("content", transformerResponse.result().getCleanHtml());
+					if (originalFormat == false) {
+						b.put("content", transformerResponse.result().getCleanHtml());
+					}
 					b.put("jsonContent", transformerResponse.result().getJsonContent());
 					b.put("contentPlain", transformerResponse.result().getPlainTextContent());
 				}
@@ -160,7 +162,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void update(String postId, final JsonObject post, final UserInfos user, final Handler<Either<String, JsonObject>> result) {
+	public void update(String postId, final JsonObject post, final UserInfos user, boolean originalFormat, final Handler<Either<String, JsonObject>> result) {
 		final long version = System.currentTimeMillis();
 		final JsonObject jQuery = MongoQueryBuilder.build(QueryBuilder.start("_id").is(postId));
 		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(event -> {
@@ -215,7 +217,9 @@ public class DefaultPostService implements PostService {
 						} else {
 							validatedPost.put("contentVersion", response.result().getContentVersion());
 							validatedPost.put("jsonContent", response.result().getJsonContent());
-							validatedPost.put("content", response.result().getCleanHtml());
+							if (originalFormat == false) {
+								validatedPost.put("content", response.result().getCleanHtml());
+							}
 							validatedPost.put("contentPlain", response.result().getPlainTextContent());
 						}
 					}
