@@ -90,7 +90,6 @@ public class PostController extends BaseController {
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void create(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
-		final boolean originalFormat = request.params().get("originalFormat") == null ? true : "true".equalsIgnoreCase(request.params().get("originalFormat"));
 		if (blogId == null || blogId.trim().isEmpty()) {
 			badRequest(request);
 			return;
@@ -102,7 +101,7 @@ public class PostController extends BaseController {
 					public void handle(final UserInfos user) {
 						if (user != null) {
 							final Handler<Either<String, JsonObject>> handler = eventHelper.onCreateResource(request, RESOURCE_NAME, defaultResponseHandler(request));
-							post.create(blogId, data, user, originalFormat, handler);
+							post.create(blogId, data, user, handler);
 						} else {
 							unauthorized(request);
 						}
@@ -116,8 +115,6 @@ public class PostController extends BaseController {
 	@SecuredAction(value = "blog.contrib", type = ActionType.RESOURCE)
 	public void update(final HttpServerRequest request) {
 		final String postId = request.params().get("postId");
-		final boolean originalFormat = request.params().get("originalFormat") == null ? true : "true".equalsIgnoreCase(request.params().get("originalFormat"));
-
 		if (postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
@@ -129,7 +126,7 @@ public class PostController extends BaseController {
 				if (user != null) {
 					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
 						public void handle(final JsonObject data) {
-							post.update(postId, data, user, originalFormat, defaultResponseHandler(request));
+							post.update(postId, data, user, defaultResponseHandler(request));
 						}
 					});
 				} else {
@@ -177,7 +174,7 @@ public class PostController extends BaseController {
 	public void get(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
-		final boolean originalFormat = request.params().get("originalFormat") == null ? true : "true".equalsIgnoreCase(request.params().get("originalFormat"));
+		final boolean originalFormat = "true".equalsIgnoreCase(request.params().get("originalFormat"));
 		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;

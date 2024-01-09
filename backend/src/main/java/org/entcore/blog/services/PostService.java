@@ -46,10 +46,10 @@ public interface PostService {
 
 	List<String> UPDATABLE_FIELDS = Arrays.asList("title", "content", "modified");
 
-	void create(String blogId, JsonObject post, UserInfos author, boolean originalFormat,
+	void create(String blogId, JsonObject post, UserInfos author,
 			Handler<Either<String, JsonObject>> result);
 
-	void update(String postId, JsonObject post, UserInfos user, boolean originalFormat,
+	void update(String postId, JsonObject post, UserInfos user,
 			Handler<Either<String, JsonObject>> result);
 
 	void delete(UserInfos user, String blogId, String postId, Handler<Either<String, JsonObject>> result);

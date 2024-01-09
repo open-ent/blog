@@ -101,7 +101,7 @@ public class PostServiceContentTransformerTest {
         final Async async = context.async();
         final String blogId = (String) data.get("BLOGID1");
         final JsonObject post1 = createPost("post1");
-        postService.create(blogId, post1, user, false, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(createdPost -> {
+        postService.create(blogId, post1, user, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(createdPost -> {
             final String postId = createdPost.getString("_id");
             data.put("POSTID1", postId);
             context.assertNotNull(postId);
@@ -131,7 +131,7 @@ public class PostServiceContentTransformerTest {
         final String blogId = (String) data.get("BLOGID1");
         final String postId = (String) data.get("POSTID1");
         final JsonObject post2 = createPost("post2");
-        postService.update(postId, post2, user, false, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(updatedPost -> {
+        postService.update(postId, post2, user, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(updatedPost -> {
             context.assertNotNull(postId);
             postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT))
             .onSuccess(postGet -> {
@@ -248,7 +248,7 @@ public class PostServiceContentTransformerTest {
     private Future<JsonObject> updatePostOrFail(JsonObject post) {
         final Promise<JsonObject> promise = Promise.promise();
         final JsonObject updatedPost = new JsonObject().put("content", "<p>Updated Content</p>" + post.getString("content"));
-        postService.update(post.getString("_id"), updatedPost, user, false, e -> {
+        postService.update(post.getString("_id"), updatedPost, user, e -> {
             if(e.isLeft()) {
                 promise.fail(e.left().getValue());
             } else {
@@ -310,7 +310,7 @@ public class PostServiceContentTransformerTest {
     }
     private Future<JsonObject> createPostOrFail(String blogId, JsonObject postData, UserInfos user, final TestContext context) {
         final Promise<JsonObject> promise = Promise.promise();
-        postService.create(blogId, postData, user, false, e -> {
+        postService.create(blogId, postData, user, e -> {
             if (e.isLeft()) {
                 context.fail("An error occurred while creating the post : " + e.left().getValue());
                 promise.fail(e.left().getValue());
