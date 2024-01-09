@@ -317,14 +317,14 @@ public class DefaultPostService implements PostService {
 					// contentVersion set to 0 to indicate that content has been transformed for the first time.
 					final ContentTransformerResponse transformedContent = response.result();
 					post.put("contentVersion", 0)
-						.put("content", transformedContent.getCleanHtml())
-						.put("jsonContent", transformedContent.getJsonContent());
+						.put("jsonContent", transformedContent.getJsonContent())
+						.put(TRANSFORMED_CONTENT_DB_FIELD_NAME, transformedContent.getCleanHtml());
 					final QueryBuilder findPost = QueryBuilder.start("_id").is(post.getString("_id"));
 					// Cache the products of the transformation so they can be reused until the manager updates the post
 					final MongoUpdateBuilder updateFields = new MongoUpdateBuilder()
 							.set("jsonContent", transformedContent.getJsonContent())
 							.set("contentVersion", 0)
-							.set(TRANSFORMED_CONTENT_DB_FIELD_NAME, post.getString("content"));
+							.set(TRANSFORMED_CONTENT_DB_FIELD_NAME, transformedContent.getCleanHtml());
 					mongo.update(POST_COLLECTION, MongoQueryBuilder.build(findPost), updateFields.build(),e -> {
 						promise.complete(post);
 					});
