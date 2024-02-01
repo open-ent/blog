@@ -44,7 +44,6 @@ export default ({ mode }: { mode: string }) => {
       proxyObj,
     "/blog": proxyObj,
     "/explorer": proxyObj,
-    "/mindmap": proxyObj,
   };
 
   const base = mode === "production" ? "/blog" : "";
