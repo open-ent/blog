@@ -1,44 +1,53 @@
 import { StrictMode } from "react";
 
+import { OdeClientProvider, ThemeProvider } from "@edifice-ui/react";
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ERROR_CODE } from "edifice-ts-client";
 import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
 
+import "./i18n";
+import { router } from "./routes";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement!);
 
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      if (typeof error === "string") {
+        if (error === ERROR_CODE.NOT_LOGGED_IN)
+          window.location.replace("/auth/login");
+      }
+    },
+  }),
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 root.render(
   <StrictMode>
-    <>
-      <h1>How to start?</h1>
-      <div className="card my-24">
-        <h2>Local environnement</h2>
-        <p>You can use one of the following:</p>
-        <ul style={{ textAlign: "left" }}>
-          <li>
-            <code>springboard</code>
-          </li>
-          <li>
-            <code>ode-dev-server</code>
-          </li>
-        </ul>
-        <p style={{ textAlign: "left" }}>
-          This is required to allow Vite proxy to connect your React App to
-          <code> localhost:8090</code>
-        </p>
-      </div>
-      <div className="card my-24">
-        <h2>Remote environnement</h2>
-        <ul style={{ textAlign: "left" }}>
-          <li>
-            <code>cp env.template .env.local</code>
-          </li>
-          <li>Fill in the blank!</li>
-        </ul>
-        <p style={{ textAlign: "left" }}>
-          Vite uses <code>VITE_RECETTE</code> to connect
-        </p>
-      </div>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <OdeClientProvider
+        params={{
+          app: "blog",
+        }}
+      >
+        <ThemeProvider>
+          <RouterProvider router={router(queryClient)} />
+        </ThemeProvider>
+      </OdeClientProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>,
 );

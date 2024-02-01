@@ -52,12 +52,13 @@
     "dayjs": "1.11.10",
     "i18next": "23.8.2",
     "i18next-http-backend": "2.4.3",
+    "ode-explorer": "dev",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "4.0.12",
     "react-hook-form": "7.50.0",
     "react-i18next": "14.0.1",
-    "swiper": "11.0.5",
+    "react-router-dom": "6.21.3",
     "zustand": "4.5.0"
   },
   "devDependencies": {
