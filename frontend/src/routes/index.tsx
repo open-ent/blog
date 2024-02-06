@@ -27,14 +27,25 @@ const routes = (queryClient: QueryClient) => [
           };
         },
       },
-      // TODO postLoader
       // Post is the page containing a spécific post from a blog
       {
-        path: "/id/:blogId/post/:postId",
+        path: "id/:blogId/post/:postId",
         async lazy() {
-          const { PostView } = await import("~/routes/post");
+          const { Component, loader } = await import("~/routes/post");
           return {
-            Component: PostView,
+            loader: loader(queryClient),
+            Component,
+          };
+        },
+      },
+      // RETRO-COMPATIBLE routes below / or 404 ---------
+      {
+        path: "*",
+        async lazy() {
+          const { LoadNgRoutes: loader } = await import("./old-format");
+          return {
+            loader,
+            element: <div>404 - Not found</div>, //FIXME
           };
         },
       },
