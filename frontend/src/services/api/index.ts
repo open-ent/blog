@@ -27,3 +27,11 @@ export function loadPost(blogId: string, postId: string) {
       .get<Post>(`/blog/post/${blogId}/${postId}?state=PUBLISHED`),
   );
 }
+
+export function loadPostsList(blogId: string, page: number) {
+  return notifyOnHttpError(
+    odeServices
+      .http()
+      .get<Post[]>(`/blog/post/list/all/${blogId}?page=${page}`),
+  );
+}

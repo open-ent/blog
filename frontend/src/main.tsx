@@ -13,7 +13,7 @@ import { RouterProvider } from "react-router-dom";
 
 import "./i18n";
 import { router } from "./routes";
-import "./index.css";
+import "./styles/index.css";
 
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement!);
@@ -31,6 +31,7 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
     },
   },
 });

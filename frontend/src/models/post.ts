@@ -7,9 +7,9 @@ export type Post = {
   // "created": {
   //     "$date": 1704384023754
   // },
-  // "modified": {
-  //     "$date": 1704384365271
-  // },
+  modified: {
+    $date: string;
+  };
   author: {
     userId: ID;
     username: string;
