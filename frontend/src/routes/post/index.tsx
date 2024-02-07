@@ -7,7 +7,6 @@ import { LoaderFunctionArgs, useLoaderData } from "react-router-dom";
 import { Post } from "~/models/post";
 import { postQuery } from "~/services/queries";
 
-
 /** Load a blog post content */
 export const loader =
   (queryClient: QueryClient) =>

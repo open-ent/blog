@@ -1,5 +1,7 @@
 import { ID } from "edifice-ts-client";
 
+export type PostState = "PUBLISHED" | "SUBMITTED" | "DRAFT";
+
 export type Post = {
   _id: ID;
   content: string;
@@ -15,7 +17,7 @@ export type Post = {
     username: string;
     login: string;
   };
-  state: string;
+  state: PostState;
   views: number;
   contentVersion: number;
   jsonContent: JSON;

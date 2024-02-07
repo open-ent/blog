@@ -1,24 +1,31 @@
-// import { create } from "zustand";
+import { create } from "zustand";
 
-// import { Post } from "../models/post";
+import { Post } from "../models/post";
+import { PostsFilters } from "~/models/postFilter";
 
-// interface State {
-//   posts: Post[];
-//   updaters: {
-//     setPosts: (posts: Post[]) => void;
-//   };
-// }
+interface State {
+  postsFilters: PostsFilters;
+  posts: Post[];
+  updaters: {
+    setPostsFilter: (postsFilter: PostsFilters) => void;
+    setPosts: (posts: Post[]) => void;
+  };
+}
 
-// export const useStoreContext = create<State>()((set) => ({
-//   blog: undefined,
-//   posts: [],
-//   updaters: {
-//     setPosts: (posts) => set({ posts }),
-//   },
-// }));
+export const useStoreContext = create<State>()((set) => ({
+  postsFilters: { states: [], search: "" },
+  posts: [],
+  updaters: {
+    setPostsFilter: (postsFilters) => set({ postsFilters }),
+    setPosts: (posts) => set({ posts }),
+  },
+}));
 
-// export const usePosts = () => useStoreContext((state) => state.posts);
+export const usePostsFilters = () =>
+  useStoreContext((state) => state.postsFilters);
 
-// /* Export updaters */
-// export const useStoreUpdaters = () =>
-//   useStoreContext((state) => state.updaters);
+export const usePosts = () => useStoreContext((state) => state.posts);
+
+/* Export updaters */
+export const useStoreUpdaters = () =>
+  useStoreContext((state) => state.updaters);

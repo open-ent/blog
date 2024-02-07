@@ -43,3 +43,11 @@
 .summary-list-item:last-child .summary-list-item-symbole:after {
   bottom: 0;
 }
+
+.blog-filter-toolbar .btn {
+  font-weight: normal;
+}
+
+.blog-filter-toolbar .btn.selected {
+  font-weight: 700;
+}

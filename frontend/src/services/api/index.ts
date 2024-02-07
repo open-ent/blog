@@ -1,7 +1,8 @@
 import { ERROR_CODE, odeServices } from "edifice-ts-client";
 
 import { Blog } from "~/models/blog";
-import { Post } from "~/models/post";
+import { BlogCounter } from "~/models/blogCounter";
+import { Post, PostState } from "~/models/post";
 import { notifyError } from "~/utils/BlogEvent";
 
 async function notifyOnHttpError<T>(promise: Promise<T>) {
@@ -20,6 +21,12 @@ export function loadBlog(id: string) {
   return notifyOnHttpError(odeServices.http().get<Blog>(`/blog/${id}`));
 }
 
+export function loadBlogCounter(id: string) {
+  return notifyOnHttpError(
+    odeServices.http().get<BlogCounter>(`/blog/counter/${id}`),
+  );
+}
+
 export function loadPost(blogId: string, postId: string) {
   return notifyOnHttpError(
     odeServices
@@ -28,10 +35,18 @@ export function loadPost(blogId: string, postId: string) {
   );
 }
 
-export function loadPostsList(blogId: string, page: number) {
-  return notifyOnHttpError(
-    odeServices
-      .http()
-      .get<Post[]>(`/blog/post/list/all/${blogId}?page=${page}`),
-  );
+export function loadPostsList(
+  blogId: string,
+  page: number,
+  search?: string,
+  states?: PostState[],
+) {
+  let path = `/blog/post/list/all/${blogId}?page=${page}`;
+  if (search) {
+    path += `&search=${search}`;
+  }
+  if (states?.length) {
+    path += `&states=${states.join(",")}`;
+  }
+  return notifyOnHttpError(odeServices.http().get<Post[]>(path));
 }

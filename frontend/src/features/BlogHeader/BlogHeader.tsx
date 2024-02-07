@@ -6,7 +6,7 @@ import { blogQuery } from "~/services/queries";
 
 // import { useBlog } from "~/store";
 
-const BlogHeader = () => {
+export const BlogHeader = () => {
   const params = useParams();
   const { data: blog } = useQuery(blogQuery(params.blogId as string));
 
@@ -27,5 +27,3 @@ const BlogHeader = () => {
     </AppHeader>
   );
 };
-
-export default BlogHeader;

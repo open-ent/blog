@@ -5,23 +5,27 @@ import { QueryClient } from "@tanstack/react-query";
 import { LoaderFunctionArgs } from "react-router-dom";
 
 import BlogContent from "~/features/BlogContent/BlogContent";
+import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
 import {
+  blogCounterQuery,
   blogQuery,
-  postsListQuery,
+  metadataPostsListQuery,
   useBlog,
-  usePostsList,
+  useMetadataPostsList,
 } from "~/services/queries";
 
 export const blogLoader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
-    const queryPostsList = postsListQuery(params.blogId as string, 0);
+    const queryPostsList = metadataPostsListQuery(params.blogId as string);
+    const queryBlogCounter = blogCounterQuery(params.blogId as string);
 
     const blog = await queryClient.fetchQuery(queryBlog);
     const postsList = await queryClient.fetchInfiniteQuery(queryPostsList);
+    const blogCounter = await queryClient.fetchQuery(queryBlogCounter);
 
-    return { blog, postsList };
+    return { blog, postsList, blogCounter };
   };
 
 export function Blog() {
@@ -31,7 +35,7 @@ export function Blog() {
   const {
     posts,
     query: { fetchNextPage, hasNextPage, status },
-  } = usePostsList();
+  } = useMetadataPostsList();
 
   useEffect(() => {
     if (status === "success" && hasNextPage) {
@@ -43,6 +47,7 @@ export function Blog() {
 
   return (
     <>
+      <BlogHeader />
       <BlogContent />
     </>
   );
