@@ -65,6 +65,8 @@ import org.entcore.common.utils.ResourceUtils;
 import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
 
+import org.entcore.blog.to.PostProjection;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -734,7 +736,7 @@ public class BlogController extends BaseController {
 			}
 			Future<JsonArray> futureList = Future.future();
 			//fetch posts
-			postService.list(blogId, user, null, 0, "", null, true, event -> {
+			postService.list(blogId, user, null, 0, "", null, new PostProjection(true, true, false), event -> {
 				if (event.isRight()) {
 					JsonArray posts = event.right().getValue();
 					futureList.complete(posts);

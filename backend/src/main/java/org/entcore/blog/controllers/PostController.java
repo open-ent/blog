@@ -37,6 +37,7 @@ import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogTimelineService;
 import org.entcore.blog.to.PostFilter;
+import org.entcore.blog.to.PostProjection;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
@@ -53,9 +54,11 @@ import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.http.BaseController;
 import fr.wseduc.webutils.request.RequestUtils;
 import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
+
 
 public class PostController extends BaseController {
 	public static final String LIST_ACTION = "org-entcore-blog-controllers-PostController|list";
@@ -183,6 +186,23 @@ public class PostController extends BaseController {
 		post.get(filter).onComplete(defaultAsyncResultResponseHandler(request));
 	}
 
+	/**
+	 * <h2>Description</h2>
+	 * Fetch all the posts of a blog.
+	 * <h2>GET Params</h2>
+	 * <ul>
+	 *   <li>postId: {@code string}, default {@code null}, id of the unique post to fetch</li>
+	 *   <li>content: {@code boolean}, default {@code false}, {@code true} if we want to fetch the content of the posts, {@code false}
+	 *   otherwise</li>
+	 *   <li>comments: {@code boolean}, default is the value of {@code content}, {@code true} if we want to fetch the comments of the posts, {@code false}
+	 *   otherwise</li>
+	 *   <li>nbComments: {@code boolean}, default {@code false}, {@code true} if we want to fetch the number of comments of the posts, {@code false}
+	 *   otherwise</li>
+	 *   <li>page: {@code int}, default: {@code null}, index of the page to fetch</li>
+	 *   <li>pageSize: {@code int}, default: {@code null}, number of elements per page</li>
+	 * </ul>
+	 * @param request
+	 */
 	@Get("/post/list/all/:blogId")
 	@SecuredAction(value = "blog.read", type = ActionType.RESOURCE)
 	public void list(final HttpServerRequest request) {
@@ -202,9 +222,23 @@ public class PostController extends BaseController {
 			return;
 		}
 
-		final int pagingSize = (page == null) ? 0 : this.pagingSize;
+		final int pagingSize;
+		if(page == null) {
+			pagingSize = 0;
+		} else if(request.params().get("pageSize") != null){
+			try {
+				pagingSize = Integer.parseInt(request.params().get("pageSize"));
+			} catch (NumberFormatException e) {
+				badRequest(request, e.getMessage());
+				return;
+			}
+		} else {
+			pagingSize = this.pagingSize;
+		}
 
-		final boolean withContent = "true".equals(request.params().get("content"));
+
+
+		final PostProjection projection = parsePostProjection(request);
 
 		final String search = request.params().get("search");
 
@@ -220,11 +254,7 @@ public class PostController extends BaseController {
 						if (!StringUtils.isEmpty(statesParam)) {
 							states.addAll(StringUtils.split(statesParam, ","));
 						}
-						if (withContent) {
-							post.listWithComments(blogId, user, page, pagingSize, search, states, true, arrayResponseHandler(request));
-						} else {
-							post.list(blogId, user, page, pagingSize, search, states, arrayResponseHandler(request));
-						}
+						post.list(blogId, user, page, pagingSize, search, states, projection, arrayResponseHandler(request));
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request), user, page, pagingSize, search,
 								arrayResponseHandler(request));
@@ -458,6 +488,16 @@ public class PostController extends BaseController {
 			final String search = request.params().get("search");
 			post.listPublic(blogId, page, pagingSize, search, arrayResponseHandler(request));
 		});
+	}
+
+	private PostProjection parsePostProjection(final HttpServerRequest request) {
+		final MultiMap params = request.params();
+		final boolean withContent = "true".equals(params.get("content"));
+		final boolean withComments = params.contains("comments") ? "true".equals(params.get("comments")) : withContent;
+		final boolean withNbComments = "true".equals(request.params().get("nbComments"));
+		return new PostProjection(
+				withContent, withComments, withNbComments
+		);
 	}
 
 }

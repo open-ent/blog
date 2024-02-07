@@ -33,6 +33,7 @@ import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -45,6 +46,7 @@ import org.entcore.blog.explorer.PostExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.to.PostFilter;
+import org.entcore.blog.to.PostProjection;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
@@ -52,6 +54,8 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 public class DefaultPostService implements PostService {
 	protected static final Logger log = LoggerFactory.getLogger(DefaultBlogService.class);
@@ -349,67 +353,6 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states,final boolean withContent, final Handler<Either<String, JsonArray>> result) {
-		final QueryBuilder accessQuery;
-		if (states == null || states.isEmpty()) {
-			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
-		} else {
-			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
-		}
-
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
-		final JsonObject sort = new JsonObject().put("sorted", -1);
-		final JsonObject projection = defaultKeys.copy();
-		if(!withContent) {
-			projection.remove("content");
-		}
-		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> event) {
-				result.handle(Utils.validResults(event));
-			}
-		};
-
-		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
-			public void handle(Message<JsonObject> event) {
-				JsonObject res = event.body();
-				if(res == null || !"ok".equals(res.getString("status"))){
-					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
-					return;
-				}
-				boolean isManager = 1 == res.getInteger("count", 0);
-
-				accessQuery.or(
-					QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
-					QueryBuilder.start().and(
-						QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-						QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
-					).get(),
-					isManager ?
-						QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
-						QueryBuilder.start().and(
-							QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-							QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
-						).get()
-				);
-
-				final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
-
-				if (query != null) {
-					if (limit > 0 && page == null) {
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
-					} else if (page == null) {
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
-					} else {
-						final int skip = (0 == page) ? -1 : page * limit;
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
-					}
-				}
-			}
-		});
-	}
-
-	@Override
 	public void counter(final String blogId, final UserInfos user,
 	                    final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
@@ -553,7 +496,10 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void listWithComments(String blogId, final UserInfos user, final Integer page, final int limit, final String search, final Set<String> states,final boolean withContent, final Handler<Either<String, JsonArray>> result) {
+	public void list(String blogId, final UserInfos user, final Integer page, final int limit,
+															 final String search, final Set<String> states,
+															 final PostProjection postProjection,
+															 final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder accessQuery;
 		if (states == null || states.isEmpty()) {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
@@ -564,14 +510,57 @@ public class DefaultPostService implements PostService {
 		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("sorted", -1);
 		final JsonObject projection = defaultKeys.copy();
-		if(!withContent) {
+		// If the user doesn't want the content we do not fetch it from the database
+		if(!postProjection.isWithContent()) {
 			projection.remove("content");
+			projection.remove("jsonContent");
 		}
-		projection.put("comments", 1);
+		// So far, we need to fetch the comments if we want to get their number
+		// A better way to do this would be by using an aggregate function instead
+		// of find
+		if(postProjection.isWithComments() || postProjection.isWithNbComments()) {
+			projection.put("comments", 1);
+		} else {
+			projection.remove("comments");
+		}
 		final Handler<Message<JsonObject>> finalHandler = new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
-				result.handle(Utils.validResults(event));
+				// After fetchinf the results, we have some post treatments to do for the comments
+				// and for the content
+				final Either<String, JsonArray> fetchResults = Utils.validResults(event);
+				if(fetchResults.isRight()) {
+					final JsonArray posts = fetchResults.right().getValue();
+					// We calculate the number of comments
+					if(postProjection.isWithNbComments()) {
+						posts.forEach(p -> {
+							final JsonObject post = (JsonObject) p;
+							final JsonArray comments = (JsonArray)post.getJsonArray("comments");
+							if(comments == null) {
+								post.put("nbComments", 0);
+							} else {
+								post.put("nbComments", comments.size());
+							}
+							// We don't send comments back if the user just wanted their number
+							if(!postProjection.isWithComments()) {
+								post.remove("comments");
+							}
+						});
+					}
+					// We have to transform the old content of the posts if the user requested
+					// the content
+					if (postProjection.isWithContent()) {
+						final List<Future> transformedContents = posts.stream()
+								.map(post -> handleOldContent((JsonObject) post, false))
+								.collect(Collectors.toList());
+						CompositeFuture.join(transformedContents).onComplete(e -> result.handle(fetchResults));
+					} else {
+						result.handle(fetchResults);
+					}
+				} else {
+					result.handle(fetchResults);
+				}
+
 			}
 		};
 
