@@ -111,23 +111,27 @@ public class BlogController extends BaseController {
 		eventHelper.onAccess(request);
 		final String view = request.params().get("view");
 		final boolean useNewUi = this.config.getBoolean("use-explorer-ui", true);
-		if("home".equals(view)){
-			if(useNewUi){
-				// use new ui by default
-				renderView(request, new JsonObject(), "blog-explorer.html", null);
-			}else{
-				// use old ui by default
-				renderView(request);
-			}
-		}else if("resource".equals(view)){
-			// force new ui
-			renderView(request, new JsonObject(), "blog-explorer.html", null);
-		}else {
-			// use old ui by default for routing
-			renderView(request);
-		}
+		renderView(request, new JsonObject(), "index.html", null);
 	}
 
+	@Get("/id/:id")
+	@SecuredAction("blog.view")
+	public void displayBlog(HttpServerRequest request) {
+		eventHelper.onAccess(request);
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	/**
+	 * Display react front print /print/id/:id
+	 * @param request
+	 */
+	@Get("/print/id/:id")
+	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+	public void viewPrintById(HttpServerRequest request) {
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	@Deprecated
 	@Get("/print/blog")
 	@SecuredAction("blog.print")
 	public void print(HttpServerRequest request) {
