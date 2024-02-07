@@ -114,7 +114,7 @@ localDep () {
     if [ "$NO_DOCKER" = "true" ] ; then
       pnpm install --no-save edifice-ts-client.tar.gz
     else
-      docker-compose -e NPM_TOKEN -e TIPTAP_PRO_TOKEN  run --rm $USER_OPTION node sh -c "pnpm install --no-save edifice-ts-client.tar.gz"
+      docker-compose run -e NPM_TOKEN -e TIPTAP_PRO_TOKEN --rm $USER_OPTION node sh -c "pnpm install --no-save edifice-ts-client.tar.gz"
     fi
     rm -rf edifice-ts-client.tar edifice-ts-client.tar.gz
   fi
@@ -124,7 +124,7 @@ build () {
   if [ "$NO_DOCKER" = "true" ] ; then
     pnpm build
   else
-    docker-compose -e NPM_TOKEN -e TIPTAP_PRO_TOKEN  run --rm $USER_OPTION node sh -c "pnpm build"
+    docker-compose run -e NPM_TOKEN -e TIPTAP_PRO_TOKEN --rm $USER_OPTION node sh -c "pnpm build"
   fi
   status=$?
   if [ $status != 0 ];
