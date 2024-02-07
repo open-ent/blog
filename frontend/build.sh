@@ -25,12 +25,6 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
-if [ -z ${USER_UID:+x} ]
-then
-  export USER_UID=1000
-  export GROUP_GID=1000
-fi
-
 # options
 SPRINGBOARD="recette"
 for i in "$@"
@@ -44,6 +38,25 @@ case $i in
     ;;
 esac
 done
+
+if [[ "$*" == *"--no-user"* ]]
+then
+  USER_OPTION=""
+else
+  case `uname -s` in
+    MINGW* | Darwin*)
+      USER_UID=1000
+      GROUP_GID=1000
+      ;;
+    *)
+      if [ -z ${USER_UID:+x} ]
+      then
+        USER_UID=`id -u`
+        GROUP_GID=`id -g`
+      fi
+  esac
+  USER_OPTION="-u $USER_UID:$GROUP_GID"
+fi
 
 clean () {
   rm -rf node_modules 
@@ -78,7 +91,7 @@ doInit () {
   if [ "$NO_DOCKER" = "true" ] ; then
     pnpm install
   else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "pnpm install"
+    docker-compose run -e NPM_TOKEN -e TIPTAP_PRO_TOKEN --rm $USER_OPTION node sh -c "pnpm install"
   fi
 
 }
@@ -101,7 +114,7 @@ localDep () {
     if [ "$NO_DOCKER" = "true" ] ; then
       pnpm install --no-save edifice-ts-client.tar.gz
     else
-      docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "pnpm install --no-save edifice-ts-client.tar.gz"
+      docker-compose -e NPM_TOKEN -e TIPTAP_PRO_TOKEN  run --rm $USER_OPTION node sh -c "pnpm install --no-save edifice-ts-client.tar.gz"
     fi
     rm -rf edifice-ts-client.tar edifice-ts-client.tar.gz
   fi
@@ -111,7 +124,7 @@ build () {
   if [ "$NO_DOCKER" = "true" ] ; then
     pnpm build
   else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "pnpm build"
+    docker-compose -e NPM_TOKEN -e TIPTAP_PRO_TOKEN  run --rm $USER_OPTION node sh -c "pnpm build"
   fi
   status=$?
   if [ $status != 0 ];
@@ -125,7 +138,7 @@ publishNPM () {
   if [ "$NO_DOCKER" = "true" ] ; then
     pnpm publish --tag $LOCAL_BRANCH
   else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" node sh -c "pnpm publish --tag $LOCAL_BRANCH"
+    docker-compose run --rm $USER_OPTION node sh -c "pnpm publish --tag $LOCAL_BRANCH"
   fi
 }
 
