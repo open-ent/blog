@@ -10,12 +10,6 @@ const routes = (queryClient: QueryClient) => [
     path: "/",
     element: <Root />,
     children: [
-      {
-        index: true,
-        // TODO remove cast as any when ode-explorer is fixed
-        element: <Explorer config={explorerConfig as any} />,
-      },
-
       // View is the page containing the blog view with all information about the blog and a list of posts
       {
         path: "id/:blogId",
@@ -38,16 +32,24 @@ const routes = (queryClient: QueryClient) => [
           };
         },
       },
-      // RETRO-COMPATIBLE routes below / or 404 ---------
+      // RETRO-COMPATIBLE routes below / or Explorer view ---------
       {
         path: "*",
         async lazy() {
+          // This loader will redirect any old-format route to its react-router equivalent.
+          // If no redirection occurs, the default page is displayed (Explorer here)
           const { LoadNgRoutes: loader } = await import("./old-format");
           return {
             loader,
-            element: <div>404 - Not found</div>, //FIXME
+            // TODO remove cast as any when ode-explorer is fixed
+            element: <Explorer config={explorerConfig as any} />,
           };
         },
+      },
+      {
+        index: true,
+        // TODO remove cast as any when ode-explorer is fixed
+        element: <Explorer config={explorerConfig as any} />,
       },
     ],
   },

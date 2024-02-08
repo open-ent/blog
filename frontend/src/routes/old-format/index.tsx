@@ -60,7 +60,7 @@ export const Component = () => {
 
 /** A loader that manages angularJs-styled routes. */
 export const LoadNgRoutes = () => {
-  if (!location.hash?.startsWith("#")) return null;
+  if (!location.hash?.startsWith("#")) return redirect("/");
 
   const ngLocation = location.hash.substring(1);
   const blog = matchPath("/view/:blogId", ngLocation);
