@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "3.2.0-develop-b2school.20240211154",
+  "version": "3.2.0-develop-b2school.202402081148",
   "description": "Blog tool for ENT Core.",
   "homepage": "https://github.com/opendigitaleducation/blog#readme",
   "bugs": {
@@ -52,7 +52,7 @@
     "dayjs": "1.11.10",
     "i18next": "23.8.2",
     "i18next-http-backend": "2.4.3",
-    "ode-explorer": "dev",
+    "ode-explorer": "develop-b2school",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "4.0.12",
