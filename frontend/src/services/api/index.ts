@@ -5,30 +5,32 @@ import { BlogCounter } from "~/models/blogCounter";
 import { Post, PostState } from "~/models/post";
 import { notifyError } from "~/utils/BlogEvent";
 
-async function notifyOnHttpError<T>(promise: Promise<T>) {
+async function checkHttpError<T>(promise: Promise<T>) {
+  // odeServices.http() methods return never-failing promises.
+  // It is the responsability of the application to check for them.
   const result = await promise;
-  if (odeServices.http().isResponseError()) {
-    notifyError({
-      code: ERROR_CODE.TRANSPORT_ERROR,
-      text: odeServices.http().latestResponse.statusText,
-    });
-    return null;
-  }
-  return result;
+  if (!odeServices.http().isResponseError()) return result;
+
+  notifyError({
+    code: ERROR_CODE.TRANSPORT_ERROR,
+    text: odeServices.http().latestResponse.statusText,
+  });
+  // Throw an error here. React Query will use it effectively.
+  throw odeServices.http().latestResponse.statusText;
 }
 
 export function loadBlog(id: string) {
-  return notifyOnHttpError(odeServices.http().get<Blog>(`/blog/${id}`));
+  return checkHttpError(odeServices.http().get<Blog>(`/blog/${id}`));
 }
 
 export function loadBlogCounter(id: string) {
-  return notifyOnHttpError(
+  return checkHttpError(
     odeServices.http().get<BlogCounter>(`/blog/counter/${id}`),
   );
 }
 
 export function loadPost(blogId: string, postId: string) {
-  return notifyOnHttpError(
+  return checkHttpError(
     odeServices
       .http()
       .get<Post>(`/blog/post/${blogId}/${postId}?state=PUBLISHED`),
@@ -48,5 +50,14 @@ export function loadPostsList(
   if (states?.length) {
     path += `&states=${states.join(",")}`;
   }
-  return notifyOnHttpError(odeServices.http().get<Post[]>(path));
+  return checkHttpError(odeServices.http().get<Post[]>(path));
 }
+
+/**
+ * sessionHasWorkflowRights API
+ * @param actionRights
+ * @returns check if user has rights
+ */
+export const sessionHasWorkflowRights = async (actionRights: string[]) => {
+  return await odeServices.rights().sessionHasWorkflowRights(actionRights);
+};

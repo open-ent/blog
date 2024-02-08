@@ -1,32 +1,43 @@
-import { useRef, useState } from "react";
-
-import { Editor, EditorRef } from "@edifice-ui/editor";
 import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs, useLoaderData } from "react-router-dom";
+import { LoaderFunctionArgs } from "react-router-dom";
 
+import { postContentActions } from "~/config/postContentActions";
+import { PostContent } from "~/features/PostContent/PostContent";
+import { PostHeader } from "~/features/PostHeader/PostHeader";
 import { Post } from "~/models/post";
-import { postQuery } from "~/services/queries";
+import { availableActionsQuery, postQuery, usePost } from "~/services/queries";
 
 /** Load a blog post content */
 export const loader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
     const { blogId, postId } = params;
+    // Prefetch some data, if not done already
+    const actions = availableActionsQuery(postContentActions);
+    await queryClient.fetchQuery(actions);
+
     if (blogId && postId) {
       const query = postQuery(blogId, postId);
-      return (
-        queryClient.getQueryData(query.queryKey) ??
-        (await queryClient.fetchQuery(query))
-      );
+      return {
+        post:
+          queryClient.getQueryData<Post | null>(query.queryKey) ??
+          (await queryClient.fetchQuery(query)),
+      };
     }
-    return Promise.resolve(null);
+    return { post: null };
   };
 
 export function Component() {
-  const post = useLoaderData() as Post | null;
-  const editorRef = useRef<EditorRef>(null);
-  const [content /*, setContent*/] = useState(post?.content ?? "");
-  const [mode /*, setMode*/] = useState<"read" | "edit">("read");
+  const { post } = usePost();
 
-  return <Editor ref={editorRef} content={content} mode={mode}></Editor>;
+  if (!post) {
+    return <></>;
+  }
+
+  return (
+    <>
+      <PostHeader post={post}></PostHeader>
+      <PostContent post={post}></PostContent>
+    </>
+  );
 }
