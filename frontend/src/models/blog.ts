@@ -1,5 +1,8 @@
 import { ID } from "edifice-ts-client";
 
+export type CommentType = "NONE" | "IMMEDIATE" | "RESTRAINT";
+export type PublishType = "IMMEDIATE" | "RESTRAINT";
+
 export type Blog = {
   _id: ID;
   title: string;
@@ -11,10 +14,10 @@ export type Blog = {
   };
   thumbnail: string;
   shared: [];
+  "publish-type": PublishType;
+  "comment-type": CommentType;
   // visibility: "OWNER";
   // thumbnail: "";
-  // "comment-type": "IMMEDIATE";
-  // "publish-type": "RESTRAINT";
   // created: {
   //   $date: 1699370018827;
   // };

@@ -26,15 +26,22 @@ export const PostContent = ({ post }: PostContentProps) => {
   const [mode /*, setMode*/] = useState<"read" | "edit">("read");
   const { t } = useTranslation();
 
-  const { actions } = usePostActions(postContentActions, post);
+  // -- Get all rights the current user has on the post, without constraints on its status.
+  const { actions, mustSubmit } = usePostActions(postContentActions, post);
+
+  // UI may focus on readOnly(=true) mode, or on read / edit mode (=false)
   const readOnly =
-    actions && actions.findIndex((action) => action.id === ACTION.OPEN) < 0;
+    !!actions && actions.findIndex((action) => action.id === ACTION.OPEN) < 0;
+  const canPublish =
+    !!actions &&
+    actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0;
 
   const handlePrintClick = () => alert("print !"); // TODO
   const handleTtsClick = () => editorRef.current?.toogleSpeechSynthetisis();
   const handleEditClick = () => alert("edit !"); // TODO
   const handleDeleteClick = () => alert("delete"); // TODO
-  const handlePublishClick = () => alert("publish"); // TODO
+  const handlePublishOrSubmitClick = () =>
+    mustSubmit ? alert("submit") : alert("publish"); // TODO
   const handleMoveupClick = () => alert("republish"); // TODO
 
   return (
@@ -75,13 +82,16 @@ export const PostContent = ({ post }: PostContentProps) => {
                 {t("edit")}
               </Button>
               <Dropdown>
-                <Dropdown.Trigger>
-                  <IconButton icon={<Options />} variant="outline" />
-                </Dropdown.Trigger>
+                <Dropdown.Trigger icon={<Options />}></Dropdown.Trigger>
                 <Dropdown.Menu>
-                  <Dropdown.Item type="action" onClick={handlePublishClick}>
-                    {t("blog.publish")}
-                  </Dropdown.Item>
+                  {canPublish && (
+                    <Dropdown.Item
+                      type="action"
+                      onClick={handlePublishOrSubmitClick}
+                    >
+                      {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+                    </Dropdown.Item>
+                  )}
                   <Dropdown.Item
                     type="action"
                     icon={<ArrowUp />}

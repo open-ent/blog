@@ -117,12 +117,15 @@ export const useActionDefinitions = (
 
       // Managers have all rights
       if (rights.creator || rights.manager) {
-        authorized.push(ACTION.OPEN, ACTION.DELETE, ACTION.PUBLISH);
+        authorized.push(ACTION.OPEN, ACTION.DELETE);
+        if (post.state !== "PUBLISHED") authorized.push(ACTION.PUBLISH);
         if (post.state === "PUBLISHED") authorized.push(ACTION.MOVE);
       }
       // Contributors have limited actions rights on their own posts
       else if (rights.contrib && isPostAuthor) {
-        authorized.push(ACTION.OPEN, ACTION.DELETE, ACTION.PUBLISH);
+        authorized.push(ACTION.OPEN, ACTION.DELETE);
+        if (!(post.state in ["PUBLISHED", "SUBMITTED"]))
+          authorized.push(ACTION.PUBLISH);
       }
 
       return (action: IAction) => authorized.indexOf(action.id) >= 0;
@@ -136,10 +139,18 @@ export const useActionDefinitions = (
     [availableActions, filterActionsForPost],
   );
 
+  /** Check if a publish restriction applies on a post. */
+  const isPublishRestraintForPost = (post: Post) =>
+    blog?.["publish-type"] === "RESTRAINT" &&
+    rights.contrib &&
+    !(rights.manager || rights.creator) &&
+    post.author.userId === user?.userId;
+
   return {
     availableActions,
     ...rights,
     hasRight,
     availableActionsForPost,
+    isPublishRestraintForPost,
   };
 };
