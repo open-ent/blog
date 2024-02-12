@@ -1,3 +1,13 @@
+main {
+  overflow: clip;
+}
+.blog-summary-list {
+  max-height: 100vh;
+  position: sticky;
+  overflow: auto;
+  top: 0;
+}
+
 .summary-list-item-symbole {
   position: relative;
   width: 20px;
@@ -10,7 +20,7 @@
   top: 0;
   height: 8px;
   left: 50%;
-  border-left: 2px solid currentcolor;
+  border-left: 2px solid var(--edifice-secondary-300);
   transform: translate(-50%);
 }
 
@@ -20,7 +30,7 @@
 
 .summary-list-item-symbole-circle {
   position: relative;
-  border: 1.5px solid currentcolor;
+  border: 1.5px solid var(--edifice-secondary-300);
   border-radius: 3px;
   background: transparent;
   z-index: 1;
@@ -36,7 +46,7 @@
   top: 18px;
   bottom: -8px;
   left: 50%;
-  border-left: 2px solid currentcolor;
+  border-left: 2px solid var(--edifice-secondary-300);
   transform: translate(-50%);
 }
 

@@ -1,6 +1,10 @@
 import { ID } from "edifice-ts-client";
 
-export type PostState = "PUBLISHED" | "SUBMITTED" | "DRAFT";
+export enum PostState {
+  PUBLISHED = "PUBLISHED",
+  SUBMITTED = "SUBMITTED",
+  DRAFT = "DRAFT",
+}
 
 export type Post = {
   _id: ID;

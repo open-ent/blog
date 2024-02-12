@@ -10,7 +10,7 @@ import {
   sessionHasWorkflowRights,
 } from "../api";
 import { Post, PostState } from "~/models/post";
-import { usePostsFilters } from "~/store";
+import { usePostPageSize, usePostsFilters } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
 /** Query metadata of a blog */
@@ -36,22 +36,35 @@ export const postQuery = (blogId: string, postId: string) => {
   };
 };
 
-export const metadataPostsListQuery = (
+export const postsListQuery = (
   blogId: string,
+  pageSize?: number,
   search?: string,
   states?: PostState[],
-) => ({
-  queryKey: ["postList", { blogId, search, states }],
-  queryFn: ({ pageParam = 0 }) =>
-    loadPostsList(blogId, pageParam, search, states),
-  initialPageParam: 0,
-  getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
-    if (lastPage.length === 0) {
-      return undefined;
-    }
-    return lastPageParam + 1;
-  },
-});
+) => {
+  const queryKey: any = { blogId };
+  if (search) {
+    queryKey.search = search;
+  }
+  if (states && states.length > 0) {
+    queryKey.states = states;
+  }
+  return {
+    queryKey: ["postList", queryKey],
+    queryFn: ({ pageParam = 0 }) =>
+      loadPostsList(blogId, pageParam, search, states),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
+      if (
+        (pageSize && lastPage.length < pageSize) ||
+        (!pageSize && lastPage.length === 0)
+      ) {
+        return undefined;
+      }
+      return lastPageParam + 1;
+    },
+  };
+};
 
 /** Query actions availability depending on workflow rights */
 export const availableActionsQuery = (actions: IActionDefinition[]) => {
@@ -137,9 +150,10 @@ export const usePost = (blogId?: string, postId?: string) => {
  * @param blogId the blog id string
  * @returns list of posts metadata
  */
-export const useMetadataPostsList = (blogId?: string) => {
+export const usePostsList = (blogId?: string) => {
   const params = useParams<{ blogId: string }>();
   const { states, search } = usePostsFilters();
+  const pageSize = usePostPageSize();
 
   if (!blogId) {
     if (!params.blogId) {
@@ -149,7 +163,7 @@ export const useMetadataPostsList = (blogId?: string) => {
   }
 
   const query = useInfiniteQuery(
-    metadataPostsListQuery(blogId!, search, states),
+    postsListQuery(blogId!, pageSize, search, states),
   );
 
   return {

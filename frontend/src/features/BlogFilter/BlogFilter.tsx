@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import {
+  Badge,
   SearchBar,
   Toolbar,
   ToolbarItem,
@@ -46,7 +47,7 @@ export const BlogFilter = () => {
   };
 
   useEffect(() => {
-    setPostsFilter(localPostsFilters);
+    setPostsFilter(debouncePostsFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncePostsFilters]);
 
@@ -56,8 +57,9 @@ export const BlogFilter = () => {
       name: "published",
       props: {
         className: clsx({
-          "bg-primary-200 selected":
-            localPostsFilters.states.includes("PUBLISHED"),
+          "bg-primary-200 selected": localPostsFilters.states.includes(
+            PostState.PUBLISHED,
+          ),
         }),
         children: (
           <span>
@@ -66,7 +68,7 @@ export const BlogFilter = () => {
           </span>
         ),
         onClick: () => {
-          handleFilter("PUBLISHED");
+          handleFilter(PostState.PUBLISHED);
         },
       },
     },
@@ -75,17 +77,29 @@ export const BlogFilter = () => {
       name: "submitted",
       props: {
         className: clsx({
-          "bg-primary-200 selected":
-            localPostsFilters.states.includes("SUBMITTED"),
+          "bg-primary-200 selected": localPostsFilters.states.includes(
+            PostState.SUBMITTED,
+          ),
         }),
         children: (
           <>
             <span>{t("À valider")} </span>
-            {counters?.countSubmitted}
+            {counters?.countSubmitted ? (
+              <Badge
+                variant={{
+                  level: "warning",
+                  type: "notification",
+                }}
+              >
+                {counters.countSubmitted}
+              </Badge>
+            ) : (
+              0
+            )}
           </>
         ),
         onClick: () => {
-          handleFilter("SUBMITTED");
+          handleFilter(PostState.SUBMITTED);
         },
       },
     },
@@ -94,7 +108,9 @@ export const BlogFilter = () => {
       name: "draft",
       props: {
         className: clsx({
-          "bg-primary-200 selected": localPostsFilters.states.includes("DRAFT"),
+          "bg-primary-200 selected": localPostsFilters.states.includes(
+            PostState.DRAFT,
+          ),
         }),
         children: (
           <>
@@ -103,7 +119,7 @@ export const BlogFilter = () => {
           </>
         ),
         onClick: () => {
-          handleFilter("DRAFT");
+          handleFilter(PostState.DRAFT);
         },
       },
     },
@@ -112,14 +128,14 @@ export const BlogFilter = () => {
     <div className="d-flex pb-16">
       <SearchBar
         isVariant
-        className="flex-fill"
+        className="d-none d-md-flex me-16 flex-fill "
         onChange={handlerSearch}
         placeholder={t("Rechercher un billet ou un auteur")}
         size="md"
       />
       <Toolbar
         variant="no-shadow"
-        className="ms-16 ps-4 py-2 border border-primary-200 rounded-3 blog-filter-toolbar"
+        className="ps-4 py-2 border border-primary-200 rounded-3 blog-filter-toolbar"
         items={filterToolbar}
       ></Toolbar>
     </div>
