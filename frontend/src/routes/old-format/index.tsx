@@ -3,12 +3,7 @@ import { useEffect } from "react";
 import { useOdeTheme } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import {
-  LoaderFunctionArgs,
-  matchPath,
-  redirect,
-  useLoaderData,
-} from "react-router-dom";
+import { LoaderFunctionArgs, useLoaderData } from "react-router-dom";
 
 import { Post } from "~/models/post";
 import { postQuery } from "~/services/queries";
@@ -56,22 +51,4 @@ export const Component = () => {
       }}
     />
   );
-};
-
-/** A loader that manages angularJs-styled routes. */
-export const LoadNgRoutes = () => {
-  if (!location.hash?.startsWith("#")) return redirect("/");
-
-  const ngLocation = location.hash.substring(1);
-  const blog = matchPath("/view/:blogId", ngLocation);
-  if (blog) {
-    return redirect(`id/${blog.params.blogId}`);
-  }
-
-  const post = matchPath("/detail/:blogId/:postId", ngLocation);
-  if (post) {
-    return redirect(`id/${post.params.blogId}/post/${post.params.postId}`);
-  }
-
-  throw "404";
 };

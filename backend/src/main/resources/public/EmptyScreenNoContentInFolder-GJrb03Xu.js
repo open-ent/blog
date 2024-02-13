@@ -1,0 +1,1 @@
+import{d as r,b as s,j as a,E as o,f as l}from"./index-XY-EGNwC.js";import"/assets/js/edifice-ts-client/index.js";function m(){const[n]=l(),{appCode:e}=r(),{t}=s();return a.jsx(o,{imageSrc:`${n}/emptyscreen/illu-no-content-in-folder.svg`,imageAlt:t("explorer.emptyScreen.folder.empty.alt",{ns:e}),text:t("explorer.emptyScreen.label",{ns:e})})}export{m as default};

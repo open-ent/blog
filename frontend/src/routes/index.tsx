@@ -10,6 +10,11 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
     path: "/",
     element: <Root />,
     children: [
+      {
+        index: true,
+        // TODO remove cast as any when ode-explorer is fixed
+        element: <Explorer config={explorerConfig as any} />,
+      },
       // View is the page containing the blog view with all information about the blog and a list of posts
       {
         path: "id/:blogId",
@@ -21,7 +26,7 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
           };
         },
       },
-      // Post is the page containing a spécific post from a blog
+      // Post is the page containing a specific post from a blog
       {
         path: "id/:blogId/post/:postId",
         async lazy() {
@@ -31,25 +36,6 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
             Component,
           };
         },
-      },
-      // RETRO-COMPATIBLE routes below / or Explorer view ---------
-      {
-        path: "*",
-        async lazy() {
-          // This loader will redirect any old-format route to its react-router equivalent.
-          // If no redirection occurs, the default page is displayed (Explorer here)
-          const { LoadNgRoutes: loader } = await import("./old-format");
-          return {
-            loader,
-            // TODO remove cast as any when ode-explorer is fixed
-            element: <Explorer config={explorerConfig as any} />,
-          };
-        },
-      },
-      {
-        index: true,
-        // TODO remove cast as any when ode-explorer is fixed
-        element: <Explorer config={explorerConfig as any} />,
       },
     ],
   },

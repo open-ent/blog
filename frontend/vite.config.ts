@@ -44,6 +44,8 @@ export default ({ mode }: { mode: string }) => {
       proxyObj,
     "^/blog(?!#)/": proxyObj,
     "/explorer": proxyObj,
+    "/xiti": proxyObj,
+    "/analyticsConf": proxyObj,
   };
 
   const base = mode === "production" ? "/blog" : "";
