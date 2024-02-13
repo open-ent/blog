@@ -1,0 +1,42 @@
+<div class="toggle-buttons" ng-class="{ hide: currentFolder.selectedLength < 1 }">
+    <div class="row toggle">
+        <div>
+            <!-- Both-->
+            <button ng-click="open(currentFolder.selection[0])" ng-if="currentFolder.selection.length === 1"><i18n>open</i18n></button>
+        </div>
+        <div ng-if="currentFolder.selectionIsFolders">
+            <!-- Exclusive to folders-->
+            <button ng-click="lightbox('renameFolder')" ng-if="currentFolder.selection.length === 1"><i18n>rename</i18n></button>
+        </div>
+        <div ng-if="currentFolder.selectionIsRessources">
+            <!-- Exclusive to blogs-->
+            <resource-right name="removeBlog" resource="currentFolder.selection">
+                <button ng-click="editBlogProperties()" ng-if="currentFolder.selection.length === 1">
+                    <i18n>properties</i18n>
+                </button>
+            </resource-right>
+            <resource-right name="share" resource="currentFolder.selection">
+              <button ng-click="shareBlog()">
+                <i18n>share</i18n>
+              </button>
+            </resource-right>
+            <resource-right name="manager" resource="currentFolder.selection">
+                <button library-resource="currentFolder.selection[0]"
+                        workflow="blog.publish"
+                        ng-if="currentFolder.selection.length === 1 && isABlog(currentFolder.selection[0])">
+                    <i18n>bpr.publish</i18n></button>
+            </resource-right>
+        </div>
+        <div>
+            <!-- Both -->
+            <button ng-click="lightbox('move')" workflow="blog.createFolder"><i18n>move</i18n></button>
+            <button workflow="blog.print"
+              ng-if="currentFolder.selection.length === 1 && isABlog(currentFolder.selection[0])"
+              ng-click="printBlog(currentFolder.selection[0])"
+            >
+                <i18n>blog.print</i18n>
+            </button>
+            <button ng-click="tryTrashSelection()" ng-if="can('removeBlog')"><i18n>remove</i18n></button>
+        </div>
+    </div>
+</div>

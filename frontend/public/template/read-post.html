@@ -1,0 +1,98 @@
+<h2 ng-click="openClosePost(blog, post)">
+		<i class="no-1d" ng-if="post.slided">&#9662</i><i class="no-1d" ng-if="!post.slided">&#9656</i>&nbsp;
+	<span ng-if="post.state !== 'PUBLISHED'" class="warning-text">[[lang.translate(post.state.toLowerCase())]]</span>
+	[[post.title]]<i class="small-arrow"></i>
+	<strong class="subtitle"><i18n>blog.by</i18n> <a ng-href="/userbook/annuaire#/user-view/[[post.author.userId]]">[[post.author.username]]</a> <i18n>blog.on.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]</strong>
+</h2>
+<div ng-if="post.slided">
+    <div bind-html="post.content"> </div>
+</div>
+
+
+<div class="row">
+	<div class="cell twelve-mobile">
+		<a ng-click="post.showComments = !post.showComments;" class="cell comment" ng-if="post.state === 'PUBLISHED'">
+            <i18n>blog.comments</i18n> ([[post.comments.length()]])
+		</a>
+	</div>
+
+	<div>
+    	<plus class="right-magnet">
+    		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="showEditPost(blog, post)"><i18n>edit</i18n></button>
+    		<button ng-if="(blog.myRights.share || post.author.userId === me.userId) && blog.posts.all.indexOf(post) !== 0" ng-click="post.showConfirmUp = true"><i18n>goUp</i18n></button>
+			<button authorize="print" ng-click="printPost(post)"><i18n>print</i18n></button>
+    		<button ng-if="blog.myRights.share || post.author.userId === me.userId" ng-click="post.showConfirmRemove = true"><i18n>remove</i18n></button>
+    	</plus>
+	</div>
+
+	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
+		<h2><i18n>remove</i18n></h2>
+		<p><i18n>confirm.remove.post</i18n></p>
+		<div class="row">
+			<button class="right-magnet" ng-click="removePost(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
+			<button type="button" class="right-magnet cancel" ng-click="post.showConfirmRemove = false;"><i18n>cancel</i18n></button>
+		</div>
+	</lightbox>
+	<lightbox show="post.showConfirmUp" on-close="post.showConfirmUp = false">
+		<h2><i18n>goUp</i18n></h2>
+		<p><i18n>confirm.up.post</i18n></p>
+		<div class="row">
+			<button class="right-magnet" ng-click="republish(blog, post); post.showConfirmUp = false;"><i18n>goUp</i18n></button>
+			<button type="button" class="right-magnet cancel" ng-click="post.showConfirmUp = false;"><i18n>cancel</i18n></button>
+		</div>
+	</lightbox>
+	<button ng-click="post.showComments = true;" class="right-magnet" ng-disabled="post.showComments" ng-if="post.state === 'PUBLISHED' && blog.myRights.comment">
+		<i18n>comment</i18n>
+	</button>
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state !== 'PUBLISHED' && (blog.myRights.publishPost || blog['publish-type'] === 'IMMEDIATE')">
+		<i18n>publish</i18n>
+	</button>
+	<button ng-click="publishPost(post)" class="right-magnet" ng-if="post.state === 'DRAFT' && !blog.myRights.publishPost && blog['publish-type'] === 'RESTRAINT'">
+		<i18n>submit</i18n>
+	</button>
+</div>
+<div class="row" ng-if="post.showComments">
+	<form guard-root reset-guard="postComment(comment, post)">
+		<div class="row" ng-if="blog.myRights.comment">
+			<textarea ng-model="comment.comment" i18n-placeholder="blog.label.write.your.comment" required input-guard></textarea>
+			<button class="right-magnet">
+				<i18n>save</i18n>
+			</button>
+		</div>
+	</form>
+
+	<article class="comment" ng-repeat="comment in post.comments.all">
+		<div class="row">
+			<div class="cell">
+				<em>
+					<a href="/userbook/annuaire#/user-view/[[comment.author.userId]]">[[comment.author.username]]</a>, [[comment.created.fromNow()]]
+					<span ng-if="comment.modified">
+						,  <i18n>blog.comment.update.date</i18n> [[comment.modified.format('dddd DD MMMM YYYY HH:mm')]]
+					</span>
+					<span ng-if="comment.coauthor && comment.author.userId !== comment.coauthor.userId">
+                        , <i18n>blog.comment.update.by</i18n> <a href="/userbook/annuaire#/user-view/[[comment.coauthor.userId]]">[[comment.coauthor.username]]</a>
+                     </span>
+				</em>
+			</div>
+			<div class="cell right-magnet" ng-if="comment.author.userId === me.userId || blog.myRights.removeComment">
+				<a ng-click="comment.editing=true"><i18n>edit</i18n></a>
+				<a ng-click="post.comments.remove(comment)"><i18n>remove</i18n></a>
+			</div>
+		</div>
+		<div class="row" ng-if="!comment.editing">
+			[[comment.comment]]
+		</div>
+		<form ng-submit="updateComment(comment, post)">
+			<div class="row" ng-if="comment.editing">
+				<textarea ng-model="comment.comment" i18n-placeholder="blog.label.write.your.comment" required></textarea>
+				<button ng-click="comment.editing=false" class="right-magnet">
+					<i18n>cancel</i18n>
+				</button>
+				<button class="right-magnet">
+					<i18n>save</i18n>
+				</button>
+			</div>
+		</form>
+
+	</article>
+</div>

@@ -1,0 +1,101 @@
+<resource-right name="update" resource="blog" class="articles-sniplet zero-mobile">
+    <div class="row" style="min-height: 20px">
+        <input type="button" ng-click="newPost.showCreateBlog=true" target="_blank" i18n-value="sniplet.add.post"/>
+    </div>
+    <hr class="row"/>
+    <article class="row vertical-spacing" ng-if="newPost.showCreateBlog">
+		<form data-ng-submit="addPost()">
+			<div class="twelve cell">
+				<div class="row">
+					<input type="text" class="twelve cell" ng-model="newPost.title" i18n-placeholder="post.title.placeholder" required />
+				</div>
+				<div class="row">
+					<editor ng-model="newPost.content"></editor>
+				</div>
+				<div class="row">
+					<button class="right-magnet">
+						<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+						<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+					</button>
+					<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelNewPost()" />
+				</div>
+			</div>
+		</form>
+    </article>
+</resource-right>
+
+<div ng-if="!foundBlog">
+    <h1><i class="oops"></i><i18n>oops</i18n></h1>
+    <article>
+        <div class="row">
+            <i18n>blog.sniplet.notfound</i18n>
+        </div>
+    </article>
+</div>
+
+<article
+        ng-repeat="post in blog.posts.all | orderBy:'-firstPublishDate.$date'"
+        ng-init="$first ? slidePost(post) : ''"
+        class="articles-sniplet">
+	<div class="row" ng-if="!post.edit">
+		<div class="cell">
+			<h2 class="upper-title" ng-click="slidePost(post)">
+				<span class="warning-text-badge" ng-if="post.state === 'DRAFT'"><i18n>draft</i18n></span>
+				<span class="warning-text-badge" ng-if="post.state === 'SUBMITTED'"><i18n>submitted</i18n></span>
+				[[post.title]]
+			</h2>
+			<em class="subtitle">
+				<i18n>post.author</i18n> <a href="/directory/annuaire#[[post.author.userId]]">[[post.author.username]]</a> <i18n>post.date</i18n> [[post.modified.format('dddd DD MMMM YYYY')]]
+			</em>
+		</div>
+		<div class="right-magnet cell zero-mobile">
+			<button ng-if="post.state === 'DRAFT'" ng-click="publish(post)" class="cell">
+				<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+				<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+			</button>
+			<resource-right class="cell" name="publishPost" resource="blog">
+				<button ng-click="publish(post)" ng-if="post.state === 'SUBMITTED'">
+					<i18n>publish</i18n>
+				</button>
+			</resource-right>
+			<resource-right class="cell" name="editPost" resource="blog">
+				<button type="button" ng-click="slidePost(post); post.edit = true;" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+					<i18n>edit</i18n>
+				</button>
+			</resource-right>
+			<resource-right class="cell" name="removePost" resource="blog">
+				<button type="button" ng-click="post.showConfirmRemove = true" ng-if="post.author.userId === me.userId || blog.owner.userId === me.userId">
+					<i18n>remove</i18n>
+				</button>
+			</resource-right>
+		</div>
+	</div>
+	<div class="row" ng-if="post.edit">
+		<form data-ng-submit="saveEdit(post)">
+			<div class="row">
+				<input type="text" class="twelve cell" ng-model="post.title" required />
+			</div>
+			<div class="row">
+				<editor ng-model="post.content"></editor>
+			</div>
+			<div class="row">
+				<button class="right-magnet cell">
+					<i18n ng-if="blog.myRights.publishPost">publish</i18n>
+					<i18n ng-if="!blog.myRights.publishPost">blog.submitPost</i18n>
+				</button>
+				<input type="button" class="cancel right-magnet" i18n-value="cancel" ng-click="cancelEditing(post)"/>
+			</div>
+		</form>
+	</div>
+	<div class="row" ng-if="!post.edit && post.slided">
+		<div bind-html="post.content"></div>
+	</div>
+	<lightbox show="post.showConfirmRemove" on-close="post.showConfirmRemove = false">
+		<h2><i18n>remove</i18n></h2>
+		<p><i18n>confirm.remove.post</i18n></p>
+		<div class="row">
+			<button class="right-magnet" ng-click="removePost(post); post.showConfirmRemove = false;"><i18n>remove</i18n></button>
+			<button type="button" class="right-magnet cancel" ng-click="post.showConfirmRemove = false;"><i18n>cancel</i18n></button>
+		</div>
+	</lightbox>
+</article>

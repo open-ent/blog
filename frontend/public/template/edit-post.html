@@ -1,0 +1,12 @@
+<form guard-root reset-guard="saveOrCreates(post);">
+	<input type="text" ng-model="post.title" class="twelve cell" required input-guard />
+	<editor onboardingvideo ng-model="post.content" visibility="currentVisibility()" input-guard></editor>
+
+	<button type="button" class="right-magnet" reset-guard="saveModifications(post);">
+		<i18n>save</i18n>
+	</button>
+	<button type="button" class="right-magnet cancel" ng-click="cancelEditing(post)">
+		<i18n>cancel</i18n>
+	</button>
+</form>
+<div class="row"><hr /></div>
