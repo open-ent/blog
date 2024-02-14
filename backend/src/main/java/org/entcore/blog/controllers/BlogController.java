@@ -122,6 +122,16 @@ public class BlogController extends BaseController {
 	}
 
 	/**
+	 * Display react front post page /id/:id/post/:postid
+	 * @param request
+	 */
+	@Get("/id/:id/post/:postid")
+	@SecuredAction(value = "blog.view")
+	public void viewPostById(HttpServerRequest request) {
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	/**
 	 * Display react front print /print/id/:id
 	 * @param request
 	 */
