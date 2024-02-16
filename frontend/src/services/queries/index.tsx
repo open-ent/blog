@@ -40,19 +40,16 @@ export const postsListQuery = (
   blogId: string,
   pageSize?: number,
   search?: string,
-  states?: PostState[],
+  state = PostState.PUBLISHED,
 ) => {
-  const queryKey: any = { blogId };
+  const queryKey: any = { blogId, state };
   if (search) {
     queryKey.search = search;
-  }
-  if (states && states.length > 0) {
-    queryKey.states = states;
   }
   return {
     queryKey: ["postList", queryKey],
     queryFn: ({ pageParam = 0 }) =>
-      loadPostsList(blogId, pageParam, search, states),
+      loadPostsList(blogId, pageParam, state, search),
     initialPageParam: 0,
     getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
       if (
@@ -152,7 +149,7 @@ export const usePost = (blogId?: string, postId?: string) => {
  */
 export const usePostsList = (blogId?: string) => {
   const params = useParams<{ blogId: string }>();
-  const { states, search } = usePostsFilters();
+  const { state, search } = usePostsFilters();
   const pageSize = usePostPageSize();
 
   if (!blogId) {
@@ -163,7 +160,7 @@ export const usePostsList = (blogId?: string) => {
   }
 
   const query = useInfiniteQuery(
-    postsListQuery(blogId!, pageSize, search, states),
+    postsListQuery(blogId!, pageSize, search, state),
   );
 
   return {

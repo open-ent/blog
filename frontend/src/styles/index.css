@@ -1,6 +1,7 @@
 main {
   overflow: clip;
 }
+
 .blog-summary-list {
   max-height: 100vh;
   position: sticky;
@@ -8,49 +9,50 @@ main {
   top: 0;
 }
 
-.summary-list-item-symbole {
+.summary-list-item {
   position: relative;
-  width: 20px;
 }
 
-.summary-list-item-symbole:before {
+.summary-list-item:before {
   content: "";
   position: absolute;
   z-index: 0;
   top: 0;
-  height: 8px;
-  left: 50%;
+  height: 6px;
+  left: 12px;
   border-left: 2px solid var(--edifice-secondary-300);
-  transform: translate(-50%);
 }
 
-.summary-list-item:first-child .summary-list-item-symbole:before {
+.summary-list-item:first-child:before {
   border-color: transparent;
 }
+.summary-list-item-date {
+  padding-left: 26px;
+}
 
-.summary-list-item-symbole-circle {
-  position: relative;
+.summary-list-item-title:before {
+  content: " ";
   border: 1.5px solid var(--edifice-secondary-300);
   border-radius: 3px;
   background: transparent;
   z-index: 1;
   width: 10px;
   height: 10px;
-  margin: 8px auto;
+  display: inline-block;
+  margin: 0 8px;
 }
 
-.summary-list-item-symbole:after {
+.summary-list-item:after {
   content: "";
   position: absolute;
   z-index: 0;
-  top: 18px;
-  bottom: -8px;
-  left: 50%;
+  top: 15px;
+  bottom: 0;
+  left: 12px;
   border-left: 2px solid var(--edifice-secondary-300);
-  transform: translate(-50%);
 }
 
-.summary-list-item:last-child .summary-list-item-symbole:after {
+.summary-list-item:last-child:after {
   bottom: 0;
 }
 
@@ -60,4 +62,47 @@ main {
 
 .blog-filter-toolbar .btn.selected {
   font-weight: 700;
+}
+
+.blog-post-badge-highlight {
+  border-color: var(--edifice-card-selected);
+  border-width: 0.2rem;
+}
+
+.blog-post-badge {
+  font-family: var(--edifice-body-font-family) !important;
+  text-transform: none;
+}
+
+.blog-post-image {
+  position: relative;
+  flex: 1;
+}
+
+.blog-post-more-image {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.blog-post-preview {
+  display: block;
+  display: -webkit-box;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-height: calc(var(--edifice-body-line-height) * 2.5em);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+@supports (-webkit-line-clamp: 2) {
+  .blog-post-preview {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    max-height: none;
+  }
 }

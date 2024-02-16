@@ -20,11 +20,11 @@ async function checkHttpError<T>(promise: Promise<T>) {
 }
 
 export function loadBlog(id: string) {
-  return checkHttpError(odeServices.http().get<Blog>(`/blog/${id}`));
+  return checkHttpError<Blog>(odeServices.http().get<Blog>(`/blog/${id}`));
 }
 
 export function loadBlogCounter(id: string) {
-  return checkHttpError(
+  return checkHttpError<BlogCounter>(
     odeServices.http().get<BlogCounter>(`/blog/counter/${id}`),
   );
 }
@@ -40,17 +40,14 @@ export function loadPost(blogId: string, postId: string) {
 export function loadPostsList(
   blogId: string,
   page: number,
+  state: PostState,
   search?: string,
-  states?: PostState[],
 ) {
-  let path = `/blog/post/list/all/${blogId}?page=${page}`;
+  let path = `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=true&states=${state}`;
   if (search) {
     path += `&search=${search}`;
   }
-  if (states?.length) {
-    path += `&states=${states.join(",")}`;
-  }
-  return checkHttpError(odeServices.http().get<Post[]>(path));
+  return checkHttpError<Post[]>(odeServices.http().get<Post[]>(path));
 }
 
 /**

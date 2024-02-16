@@ -10,6 +10,7 @@ import {
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
+import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import { PostState } from "~/models/post";
 import { PostsFilters } from "~/models/postFilter";
 import { useBlogCounter } from "~/services/queries";
@@ -19,13 +20,14 @@ export const BlogFilter = () => {
   const { t } = useTranslation();
 
   const [localPostsFilters, setLocalPostsFilter] = useState<PostsFilters>({
-    states: [],
+    state: PostState.PUBLISHED,
     search: "",
   });
   const debouncePostsFilters = useDebounce(localPostsFilters, 500);
   const { setPostsFilter } = useStoreUpdaters();
 
   const { counters } = useBlogCounter();
+  const { contrib, manager, creator } = useActionDefinitions([]);
 
   const handlerSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newText = event.target.value;
@@ -33,16 +35,9 @@ export const BlogFilter = () => {
   };
 
   const handleFilter = (filterState: PostState) => {
-    let newStatesList = localPostsFilters.states.includes(filterState)
-      ? localPostsFilters.states.filter((state) => state !== filterState)
-      : [...localPostsFilters.states, filterState];
-
-    if (newStatesList.length === 3) {
-      newStatesList = [];
-    }
     setLocalPostsFilter({
       ...localPostsFilters,
-      states: newStatesList,
+      state: filterState,
     });
   };
 
@@ -57,9 +52,8 @@ export const BlogFilter = () => {
       name: "published",
       props: {
         className: clsx({
-          "bg-primary-200 selected": localPostsFilters.states.includes(
-            PostState.PUBLISHED,
-          ),
+          "bg-primary-200 selected":
+            localPostsFilters.state === PostState.PUBLISHED,
         }),
         children: (
           <span>
@@ -77,13 +71,12 @@ export const BlogFilter = () => {
       name: "submitted",
       props: {
         className: clsx({
-          "bg-primary-200 selected": localPostsFilters.states.includes(
-            PostState.SUBMITTED,
-          ),
+          "bg-primary-200 selected":
+            localPostsFilters.state === PostState.SUBMITTED,
         }),
         children: (
           <>
-            <span>{t("À valider")} </span>
+            <span>{t(creator || manager ? "À valider" : "Envoyés")} </span>
             {counters?.countSubmitted ? (
               <Badge
                 variant={{
@@ -108,9 +101,8 @@ export const BlogFilter = () => {
       name: "draft",
       props: {
         className: clsx({
-          "bg-primary-200 selected": localPostsFilters.states.includes(
-            PostState.DRAFT,
-          ),
+          "bg-primary-200 selected":
+            localPostsFilters.state === PostState.DRAFT,
         }),
         children: (
           <>
@@ -133,11 +125,13 @@ export const BlogFilter = () => {
         placeholder={t("Rechercher un billet ou un auteur")}
         size="md"
       />
-      <Toolbar
-        variant="no-shadow"
-        className="ps-4 py-2 border border-primary-200 rounded-3 blog-filter-toolbar"
-        items={filterToolbar}
-      ></Toolbar>
+      {(manager || creator || contrib) && (
+        <Toolbar
+          variant="no-shadow"
+          className="ps-4 py-2 border border-primary-200 rounded-3 blog-filter-toolbar"
+          items={filterToolbar}
+        ></Toolbar>
+      )}
     </div>
   );
 };

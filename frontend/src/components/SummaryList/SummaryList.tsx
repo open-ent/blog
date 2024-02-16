@@ -36,7 +36,7 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
     <>
       {list.map((item) => (
         <div
-          className="pb-8 d-flex summary-list-item"
+          className="pb-8 d-flex summary-list-item flex-column "
           key={item.id}
           onClick={() => {
             handleOnClick(item);
@@ -44,14 +44,11 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
           role="button"
           tabIndex={0}
         >
-          <div className="summary-list-item-symbole">
-            <div className="summary-list-item-symbole-circle"></div>
+          <div className="summary-list-item-title small flex-fill">
+            {item.title}
           </div>
-          <div className="flex-fill">
-            <div className="small">{item.title}</div>
-            <div className="small text-gray-700">
-              {item.date && displayDate(item.date)}
-            </div>
+          <div className="summary-list-item-date small text-gray-700">
+            {item.date && displayDate(item.date)}
           </div>
         </div>
       ))}

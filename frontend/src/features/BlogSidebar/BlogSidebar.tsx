@@ -9,10 +9,13 @@ const BlogSidebar = () => {
   const { blog } = useBlog();
   const { posts } = usePostsList();
   const { currentApp } = useOdeClient();
-  const { setSidebarPostSelected } = useStoreUpdaters();
+  const { setSidebarHighlightedPost } = useStoreUpdaters();
 
   const handleOnClick = (id: string) => {
-    setSidebarPostSelected(posts?.find((post) => post._id === id));
+    setSidebarHighlightedPost(posts?.find((post) => post._id === id));
+    setTimeout(() => {
+      setSidebarHighlightedPost();
+    }, 4000);
   };
 
   const {
@@ -30,7 +33,14 @@ const BlogSidebar = () => {
           ratio="16"
         />
       ) : (
-        <AppIcon app={currentApp} iconFit="ratio" size="80" variant="rounded" />
+        <div className="w-100 rounded color-app-blog d-flex justify-content-center align-items-center ratio ratio-16x9">
+          <AppIcon
+            app={currentApp}
+            iconFit="ratio"
+            variant="rounded"
+            className="w-100 h-100"
+          />
+        </div>
       )}
       {posts && (
         <div className="mt-8 py-8 blog-summary-list">

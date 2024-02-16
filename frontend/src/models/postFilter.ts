@@ -1,6 +1,6 @@
 import { PostState } from "./post";
 
 export type PostsFilters = {
-  states: PostState[];
+  state: PostState;
   search: string;
 };

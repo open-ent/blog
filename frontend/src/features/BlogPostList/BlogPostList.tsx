@@ -3,8 +3,9 @@ import { useEffect } from "react";
 import { Button } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
+import { BlogPostCard } from "~/components/BlogPostCard/BlogPostCard";
 import { usePostsList } from "~/services/queries";
-import { useSidebarPostSelected } from "~/store";
+import { useSidebarHighlightedPost } from "~/store";
 
 const BlogPostList = () => {
   const { t } = useTranslation();
@@ -12,30 +13,22 @@ const BlogPostList = () => {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
   } = usePostsList();
-  const sidebarPostSelected = useSidebarPostSelected();
+  const sidebarHighlightedPost = useSidebarHighlightedPost();
 
   useEffect(() => {
-    if (sidebarPostSelected) {
+    if (sidebarHighlightedPost) {
       // Scroll to the selected post
-      const selectedPost = document.getElementById(sidebarPostSelected._id);
-      selectedPost?.scrollIntoView({ behavior: "smooth" });
+      const selectedPost = document.querySelector(".card.is-selected");
+      selectedPost?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
-  }, [sidebarPostSelected]);
+  }, [sidebarHighlightedPost]);
 
   return (
-    <>
-      <h1>List of posts</h1>
-      {posts?.map((post) => (
-        <div key={post._id} id={post._id} className="pt-8 pb-32 mb-32">
-          <h2>{post.title}</h2>
-          <div>
-            Lorem ipsum dolor sit amet consectetur. Curabitur phasellus a ut
-            duis lacus. Porttitor tincidunt ac sed laoreet. Nunc quam aliquam
-            eget risus nullam auctor mattis cursus. Convallis et volutpat amet
-            accumsan morbi elit noniopuuyyu...{" "}
-          </div>
-        </div>
-      ))}
+    <div className="d-flex flex-column gap-24">
+      {posts?.map((post) => <BlogPostCard key={post._id} post={post} />)}
       {hasNextPage && (
         <div className="d-flex justify-content-center">
           <Button
@@ -48,7 +41,7 @@ const BlogPostList = () => {
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
