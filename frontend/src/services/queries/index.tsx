@@ -5,11 +5,12 @@ import { useParams } from "react-router-dom";
 import {
   loadBlog,
   loadBlogCounter,
+  loadOriginalPost,
   loadPost,
   loadPostsList,
   sessionHasWorkflowRights,
 } from "../api";
-import { Post, PostState } from "~/models/post";
+import { Post, PostMetadata, PostState } from "~/models/post";
 import { usePostPageSize, usePostsFilters } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
@@ -29,10 +30,17 @@ export const blogCounterQuery = (blogId: string) => {
 };
 
 /** Query metadata of a post */
-export const postQuery = (blogId: string, postId: string) => {
+export const postQuery = (blogId: string, post: PostMetadata) => {
   return {
-    queryKey: ["post", postId],
-    queryFn: () => loadPost(blogId, postId),
+    queryKey: ["post", post._id, post.state],
+    queryFn: () => loadPost(blogId, post),
+  };
+};
+
+export const originalPostQuery = (blogId: string, post: PostMetadata) => {
+  return {
+    queryKey: ["original-post", post._id, post.state],
+    queryFn: () => loadOriginalPost(blogId, post),
   };
 };
 
@@ -117,27 +125,6 @@ export const useBlogCounter = (blogId?: string) => {
 
   return {
     counters: query.data,
-    query,
-  };
-};
-
-/**
- * usePost query
- * @param blogId the blog id string
- * @param postId the post id string
- * @returns post data
- */
-export const usePost = (blogId?: string, postId?: string) => {
-  const params = useParams<{ blogId: string; postId: string }>();
-  if (!blogId) blogId = params.blogId;
-  if (!blogId) throw "blogId is not defined";
-  if (!postId) postId = params.postId;
-  if (!postId) throw "postId is not defined";
-
-  const query = useQuery(postQuery(blogId, postId));
-
-  return {
-    post: query.data,
     query,
   };
 };

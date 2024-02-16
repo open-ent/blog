@@ -1,10 +1,9 @@
 import { AppHeader, Breadcrumb } from "@edifice-ui/react";
 
-import { Post } from "~/models/post";
+import { usePostContext } from "./PostProvider";
 
-type PostHeaderProps = { post: Post };
-
-export const PostHeader = ({ post }: PostHeaderProps) => {
+export const PostViewHeader = () => {
+  const { post } = usePostContext();
   return (
     <AppHeader>
       <Breadcrumb
@@ -17,7 +16,7 @@ export const PostHeader = ({ post }: PostHeaderProps) => {
           name: "",
           scope: [],
         }}
-        name={post?.title}
+        name={post.title}
       />
     </AppHeader>
   );

@@ -2,7 +2,7 @@ import { ERROR_CODE, odeServices } from "edifice-ts-client";
 
 import { Blog } from "~/models/blog";
 import { BlogCounter } from "~/models/blogCounter";
-import { Post, PostState } from "~/models/post";
+import { Post, PostMetadata, PostState } from "~/models/post";
 import { notifyError } from "~/utils/BlogEvent";
 
 async function checkHttpError<T>(promise: Promise<T>) {
@@ -29,11 +29,52 @@ export function loadBlogCounter(id: string) {
   );
 }
 
-export function loadPost(blogId: string, postId: string) {
+/** Use to get a the state of a post */
+export async function loadPostMetadata(blogId: string, postId: string) {
+  const results = await checkHttpError(
+    odeServices
+      .http()
+      .get<PostMetadata[]>(`/blog/post/list/all/${blogId}?postId=${postId}`),
+  );
+  return results[0];
+}
+
+export function loadPost(blogId: string, post: PostMetadata) {
+  const { _id: postId, state } = post;
   return checkHttpError(
     odeServices
       .http()
-      .get<Post>(`/blog/post/${blogId}/${postId}?state=PUBLISHED`),
+      .get<Post>(`/blog/post/${blogId}/${postId}?state=${state}`),
+  );
+}
+
+export function loadOriginalPost(blogId: string, post: PostMetadata) {
+  const { _id: postId, state } = post;
+  return checkHttpError(
+    odeServices
+      .http()
+      .get<Post>(
+        `/blog/post/${blogId}/${postId}?state=${state}&originalFormat=true`,
+      ),
+  );
+}
+
+export function savePost(blogId: string, post: Post) {
+  const { _id: postId, title, content } = post;
+  return checkHttpError(
+    odeServices.http().putJson<PostMetadata>(`/blog/post/${blogId}/${postId}`, {
+      title,
+      content,
+    }),
+  );
+}
+
+export function publishPost(blogId: string, post: Post) {
+  const { _id: postId } = post;
+  return checkHttpError(
+    odeServices
+      .http()
+      .putJson<Post>(`/blog/post/publish/${blogId}/${postId}`, {}),
   );
 }
 

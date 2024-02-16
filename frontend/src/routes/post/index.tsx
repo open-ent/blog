@@ -1,11 +1,13 @@
 import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs } from "react-router-dom";
+import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { postContentActions } from "~/config/postContentActions";
-import { PostContent } from "~/features/PostContent/PostContent";
-import { PostHeader } from "~/features/PostHeader/PostHeader";
+import { PostProvider } from "~/features/Post/PostProvider";
+import { PostViewContent } from "~/features/Post/PostViewContent";
+import { PostViewHeader } from "~/features/Post/PostViewHeader";
 import { Post } from "~/models/post";
-import { availableActionsQuery, postQuery, usePost } from "~/services/queries";
+import { loadPostMetadata } from "~/services/api";
+import { availableActionsQuery, postQuery } from "~/services/queries";
 
 /** Load a blog post content */
 export const loader =
@@ -17,27 +19,27 @@ export const loader =
     await queryClient.fetchQuery(actions);
 
     if (blogId && postId) {
-      const query = postQuery(blogId, postId);
-      return {
-        post:
-          queryClient.getQueryData<Post | null>(query.queryKey) ??
-          (await queryClient.fetchQuery(query)),
-      };
+      const postMetadata = await loadPostMetadata(blogId, postId);
+      const query = postQuery(blogId, postMetadata);
+      const post = await queryClient.fetchQuery(query);
+      return post;
     }
-    return { post: null };
+
+    return null;
   };
 
 export function Component() {
-  const { post } = usePost();
+  const { blogId } = useParams();
+  const post = useLoaderData() as Post | null;
 
-  if (!post) {
+  if (!blogId || !post) {
     return <></>;
   }
 
   return (
-    <>
-      <PostHeader post={post}></PostHeader>
-      <PostContent post={post}></PostContent>
-    </>
+    <PostProvider blogId={blogId} post={post}>
+      <PostViewHeader />
+      <PostViewContent />
+    </PostProvider>
   );
 }

@@ -6,21 +6,22 @@ import { useTranslation } from "react-i18next";
 import { LoaderFunctionArgs, useLoaderData } from "react-router-dom";
 
 import { Post } from "~/models/post";
-import { postQuery } from "~/services/queries";
+import { loadPostMetadata } from "~/services/api";
+import { originalPostQuery } from "~/services/queries";
 
-/** Load a blog post content */
+/** Load a blog post OLD-FORMAT content */
 export const loader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
     const { blogId, postId } = params;
     if (blogId && postId) {
-      const query = postQuery(blogId, postId);
-      return (
-        queryClient.getQueryData(query.queryKey) ??
-        (await queryClient.fetchQuery(query))
-      );
+      const postMetadata = await loadPostMetadata(blogId, postId);
+      const query = originalPostQuery(blogId, postMetadata);
+      const post = await queryClient.fetchQuery(query);
+      return post;
     }
-    return Promise.resolve(null);
+
+    return null;
   };
 
 export const Component = () => {

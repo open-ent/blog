@@ -6,9 +6,8 @@ export enum PostState {
   DRAFT = "DRAFT",
 }
 
-export type Post = {
+export type PostMetadata = {
   _id: ID;
-  content: string;
   title: string;
   // "created": {
   //     "$date": 1704384023754
@@ -23,6 +22,10 @@ export type Post = {
   };
   state: PostState;
   views: number;
+};
+
+export type Post = PostMetadata & {
+  content: string;
   contentVersion: number;
   jsonContent: JSON;
 };
