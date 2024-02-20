@@ -120,7 +120,7 @@ export const BlogFilter = () => {
     <div className="d-flex pb-16">
       <SearchBar
         isVariant
-        className="d-none d-md-flex me-16 flex-fill "
+        className="d-none d-md-flex flex-fill "
         onChange={handlerSearch}
         placeholder={t("Rechercher un billet ou un auteur")}
         size="md"
@@ -128,7 +128,7 @@ export const BlogFilter = () => {
       {(manager || creator || contrib) && (
         <Toolbar
           variant="no-shadow"
-          className="ps-4 py-2 border border-primary-200 rounded-3 blog-filter-toolbar"
+          className="ps-4 py-2 ms-md-16 border border-primary-200 rounded-3 blog-filter-toolbar"
           items={filterToolbar}
         ></Toolbar>
       )}

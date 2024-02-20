@@ -25,6 +25,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   const directoryService = odeServices.directory();
   const sidebarHighlightedPost = useSidebarHighlightedPost();
   const editorRef = useRef<EditorRef>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const { contrib, manager, creator } = useActionDefinitions([]);
   const navigate = useNavigate();
 
@@ -46,6 +47,16 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   const handleOnClick = (post: Post) => {
     navigate(`./post/${post?._id}`);
   };
+
+  useEffect(() => {
+    if (sidebarHighlightedPost?._id === post._id) {
+      cardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+    }
+  }, [sidebarHighlightedPost, post]);
 
   useEffect(() => {
     let contentHTML = post.content;
@@ -91,6 +102,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
       onClick={() => {
         handleOnClick(post);
       }}
+      ref={cardRef}
     >
       <div className="d-flex gap-12">
         <div className="blog-post-user-image">
@@ -138,7 +150,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
         </div>
       </div>
       <Card.Body space="0">
-        <div className="d-flex flex-fill flex-column gap-16 py-16">
+        <div className="d-flex flex-fill flex-column gap-16 pt-16">
           <div className="d-none">
             <Editor
               ref={editorRef}
@@ -150,10 +162,10 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
           <div className="flex-fill blog-post-preview">
             {summaryContentPlain}
           </div>
-          <div className="d-flex align-items-center justify-content-center gap-24 mx-32">
+          <div className="d-flex align-items-center justify-content-around gap-24 mx-32">
             {mediaURLs.slice(0, MAX_NUMBER_MEDIA_DISPLAY).map((url, index) => (
               <div
-                className={clsx("blog-post-image", {
+                className={clsx("blog-post-image col-12 col-md-4 ", {
                   "d-none d-md-block": index >= 1,
                 })}
                 key={url}

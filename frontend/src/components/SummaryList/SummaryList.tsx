@@ -44,7 +44,7 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
           role="button"
           tabIndex={0}
         >
-          <div className="summary-list-item-title small flex-fill">
+          <div className="summary-list-item-title small flex-fill text-truncate">
             {item.title}
           </div>
           <div className="summary-list-item-date small text-gray-700">
