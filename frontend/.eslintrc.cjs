@@ -17,12 +17,14 @@ module.exports = {
     project: ["./tsconfig.json"],
     tsconfigRootDir: __dirname,
   },
-  plugins: ["react", "import", "jsx-a11y"],
+  plugins: ["react", "import", "jsx-a11y", "unused-imports"],
   rules: {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-types": "off",
+    "no-unused-vars": "off",
+    "unused-imports/no-unused-imports": "error",
     "import/order": [
       "error",
       {
