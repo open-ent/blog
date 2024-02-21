@@ -1,1 +1,0 @@
-import{d as r,b as a,j as n,E as p,f as o}from"./index-XY-EGNwC.js";import"/assets/js/edifice-ts-client/index.js";function m(){const{appCode:e}=r(),[s]=o(),{t}=a();return n.jsx(p,{imageSrc:`${s}/emptyscreen/illu-search.svg`,imageAlt:t("explorer.emptyScreen.search.alt",{ns:e}),text:t("explorer.emptyScreen.search.text",{ns:e})})}export{m as default};

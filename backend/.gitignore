@@ -22,21 +22,15 @@ mods
 */mods
 data
 developer.id
-*.mod.json
-**/ts/entcore
-**/ts/**/*.js
-**/ts/*.js
-**/ts/**/*.js.map
-**/ts/*.js.map
-**/js/*.js
-**/template/entcore
-**/temp
-**/dist
-**/.DS_Store
-**/view
-node_modules
-package-lock.json
+/coverage/front/cobertura-coverage.xml
+rev-manifest.json
+/build
+/bin
+node_modules/
 gradle/
 gradlew*
-rev-manifest.json
-.env
+# Ignore the entire "resources" folder except jsonchema
+src/main/resources/public/*.js
+src/main/resources/public/*.css
+src/main/resources/view/index.html
+# src/main/resources/view

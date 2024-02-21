@@ -1,1 +1,0 @@
-import{b as t,j as s,E as o,f as a}from"./index-XY-EGNwC.js";import"/assets/js/edifice-ts-client/index.js";function p(){const[e]=a(),{t:r}=t();return s.jsx(o,{imageSrc:`${e}/emptyscreen/illu-error.svg`,imageAlt:r("explorer.emptyScreen.error.alt"),text:"explorer.emptyScreen.error.text"})}export{p as default};
