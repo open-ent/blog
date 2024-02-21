@@ -6,6 +6,7 @@ import { needRedirect } from "~/utils/redirectBlogNGLocation";
 export const loader = async () => {
   const redirectPath = needRedirect();
   if (redirectPath) {
+    location.href = location.origin + redirectPath;
     return redirect(redirectPath);
   }
 

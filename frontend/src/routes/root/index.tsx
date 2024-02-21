@@ -7,13 +7,15 @@ import { needRedirect } from "~/utils/redirectBlogNGLocation";
 export const rootLoader = () => async () => {
   const redirectPath = needRedirect();
   if (redirectPath) {
+    location.href = location.origin + redirectPath;
     return redirect(redirectPath);
   }
 
-  return;
+  return null;
 };
 
 export const Root = () => {
+  console.log("root");
   return (
     <Layout>
       <Outlet />

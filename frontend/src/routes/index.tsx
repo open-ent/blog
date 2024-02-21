@@ -4,13 +4,17 @@ import { RouteObject, createBrowserRouter } from "react-router-dom";
 
 import PageError from "./page-error";
 import { explorerConfig } from "~/config/config";
-import { Root, rootLoader } from "~/routes/root";
 
 const routes = (queryClient: QueryClient): RouteObject[] => [
   {
     path: "/",
-    loader: rootLoader,
-    element: <Root />,
+    async lazy() {
+      const { Root, rootLoader } = await import("~/routes/root");
+      return {
+        loader: rootLoader(),
+        Component: Root,
+      };
+    },
     children: [
       {
         index: true,
