@@ -1,18 +1,22 @@
-import { LoadingScreen, Layout } from "@edifice-ui/react";
-import { Outlet } from "react-router-dom";
+import { Layout } from "@edifice-ui/react";
+import { Outlet, redirect } from "react-router-dom";
 
-import { useBlogRedirect } from "~/hooks/useBlogRedirect";
+import { needRedirect } from "~/utils/redirectBlogNGLocation";
 
-function Root() {
-  const isLoading = useBlogRedirect();
+/** Check old format URL and redirect if needed */
+export const rootLoader = () => async () => {
+  const redirectPath = needRedirect();
+  if (redirectPath) {
+    return redirect(redirectPath);
+  }
 
-  if (isLoading) return <LoadingScreen position={false} />;
+  return;
+};
 
+export const Root = () => {
   return (
     <Layout>
       <Outlet />
     </Layout>
   );
-}
-
-export default Root;
+};
