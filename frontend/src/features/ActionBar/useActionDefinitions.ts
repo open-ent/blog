@@ -85,7 +85,10 @@ export const useActionDefinitions = (
    * Roles order is `creator` > `manager` > `contrib` > `read`
    */
   const hasRight = useCallback(
-    (action: IAction) => {
+    (id: ActionType) => {
+      const action = availableActions?.find((action) => action.id === id);
+      if (!action) return false;
+
       const rolesPrecedence = [
         "creator",
         "manager",
@@ -139,18 +142,17 @@ export const useActionDefinitions = (
     [availableActions, filterActionsForPost],
   );
 
-  /** Check if a publish restriction applies on a post. */
-  const isPublishRestraintForPost = (post: Post) =>
+  /** Check if a publish restriction applies on a new post. */
+  const mustSubmit =
     blog?.["publish-type"] === "RESTRAINT" &&
     rights.contrib &&
-    !(rights.manager || rights.creator) &&
-    post.author.userId === user?.userId;
+    !(rights.manager || rights.creator);
 
   return {
     availableActions,
     ...rights,
     hasRight,
+    mustSubmit,
     availableActionsForPost,
-    isPublishRestraintForPost,
   };
 };

@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { IAction } from "edifice-ts-client";
 import { useParams } from "react-router-dom";
 
@@ -8,6 +13,7 @@ import {
   loadOriginalPost,
   loadPost,
   loadPostsList,
+  savePost,
   sessionHasWorkflowRights,
 } from "../api";
 import { Post, PostMetadata, PostState } from "~/models/post";
@@ -154,4 +160,18 @@ export const usePostsList = (blogId?: string) => {
     posts: query.data?.pages.flatMap((page) => page) as Post[],
     query,
   };
+};
+
+export const useSavePost = (blogId: string, post: Post) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => savePost(blogId, post),
+    onSuccess: (result) => {
+      // Saving a post may change its state. Update the query data accordingly.
+      queryClient.setQueryData(postQuery(blogId, post).queryKey, {
+        ...post,
+        state: result.state,
+      });
+    },
+  });
 };

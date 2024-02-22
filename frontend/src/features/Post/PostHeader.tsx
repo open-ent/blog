@@ -2,7 +2,7 @@ import { AppHeader, Breadcrumb } from "@edifice-ui/react";
 
 import { usePostContext } from "./PostProvider";
 
-export const PostViewHeader = () => {
+export const PostHeader = () => {
   const { post } = usePostContext();
   return (
     <AppHeader>

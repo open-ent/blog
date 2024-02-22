@@ -69,12 +69,24 @@ export function savePost(blogId: string, post: Post) {
   );
 }
 
-export function publishPost(blogId: string, post: Post) {
+export function publishPost(blogId: string, post: Post, mustSubmit: boolean) {
   const { _id: postId } = post;
   return checkHttpError(
     odeServices
       .http()
-      .putJson<Post>(`/blog/post/publish/${blogId}/${postId}`, {}),
+      .putJson<Post>(
+        `/blog/post/${mustSubmit ? "submit" : "publish"}/${blogId}/${postId}`,
+        {},
+      ),
+  );
+}
+
+export function createPost(blogId: string, title: string, content: string) {
+  return checkHttpError(
+    odeServices.http().postJson<Post>(`/blog/post/${blogId}`, {
+      title,
+      content,
+    }),
   );
 }
 

@@ -17,13 +17,11 @@ export const postContentActions: Array<IActionDefinition> = [
     // print
     id: ACTION.PRINT,
     workflow: workflows.access,
-    target: "actionbar",
   },
   {
     // delete
     id: ACTION.DELETE,
     workflow: workflows.access,
-    target: "actionbar",
   },
   {
     // publish a post
@@ -34,6 +32,5 @@ export const postContentActions: Array<IActionDefinition> = [
     // republish / move top up
     id: ACTION.MOVE,
     workflow: workflows.access,
-    target: "actionbar",
   },
 ];

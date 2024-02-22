@@ -35,6 +35,17 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       },
       // Post is the page containing a specific post from a blog
       {
+        path: "id/:blogId/post/edit",
+        async lazy() {
+          const { Component, loader } = await import("~/routes/post-edit");
+          return {
+            loader: loader(queryClient),
+            Component,
+          };
+        },
+      },
+      // Post is the page containing a specific post from a blog
+      {
         path: "id/:blogId/post/:postId",
         async lazy() {
           const { Component, loader } = await import("~/routes/post");

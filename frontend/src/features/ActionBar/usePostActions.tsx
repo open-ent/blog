@@ -8,7 +8,7 @@ export const usePostActions = (
   actionDefinitions: IActionDefinition[],
   post: Post,
 ) => {
-  const { availableActionsForPost, isPublishRestraintForPost } =
+  const { availableActionsForPost, mustSubmit } =
     useActionDefinitions(actionDefinitions);
 
   const actions = useMemo(
@@ -18,6 +18,6 @@ export const usePostActions = (
 
   return {
     actions,
-    mustSubmit: isPublishRestraintForPost(post),
+    mustSubmit,
   };
 };
