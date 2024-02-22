@@ -8,6 +8,7 @@ import { BlogFilter } from "~/features/BlogFilter/BlogFilter";
 import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
 import BlogPostList from "~/features/BlogPostList/BlogPostList";
 import BlogSidebar from "~/features/BlogSidebar/BlogSidebar";
+import { PostState } from "~/models/post";
 import {
   blogCounterQuery,
   blogQuery,
@@ -19,10 +20,20 @@ import { useStoreUpdaters } from "~/store";
 
 export const blogLoader =
   (queryClient: QueryClient) =>
-  async ({ params }: LoaderFunctionArgs) => {
+  async ({ params, request }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
-    const queryPostsList = postsListQuery(params.blogId as string);
     const queryBlogCounter = blogCounterQuery(params.blogId as string);
+
+    const url = new URL(request.url);
+    const state =
+      (url.searchParams.get("state") as PostState) || PostState.PUBLISHED;
+    const search = url.searchParams.get("search") || "";
+    const queryPostsList = postsListQuery(
+      params.blogId as string,
+      0,
+      search,
+      state,
+    );
 
     const blog = await queryClient.fetchQuery(queryBlog);
     const postsList = await queryClient.fetchInfiniteQuery(queryPostsList);

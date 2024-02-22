@@ -16,8 +16,9 @@ import {
   savePost,
   sessionHasWorkflowRights,
 } from "../api";
+import usePostsFilter from "~/hooks/usePostsFilter";
 import { Post, PostMetadata, PostState } from "~/models/post";
-import { usePostPageSize, usePostsFilters } from "~/store";
+import { usePostPageSize } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
 /** Query metadata of a blog */
@@ -142,7 +143,7 @@ export const useBlogCounter = (blogId?: string) => {
  */
 export const usePostsList = (blogId?: string) => {
   const params = useParams<{ blogId: string }>();
-  const { state, search } = usePostsFilters();
+  const { postsFilters } = usePostsFilter();
   const pageSize = usePostPageSize();
 
   if (!blogId) {
@@ -153,7 +154,7 @@ export const usePostsList = (blogId?: string) => {
   }
 
   const query = useInfiniteQuery(
-    postsListQuery(blogId!, pageSize, search, state),
+    postsListQuery(blogId!, pageSize, postsFilters.search, postsFilters.state),
   );
 
   return {

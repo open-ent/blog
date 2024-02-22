@@ -56,14 +56,6 @@ main {
   bottom: 0;
 }
 
-.blog-filter-toolbar .btn {
-  font-weight: normal;
-}
-
-.blog-filter-toolbar .btn.selected {
-  font-weight: 700;
-}
-
 .blog-post-badge-highlight {
   border-color: var(--edifice-card-selected);
   border-width: 0.2rem;

@@ -11,20 +11,18 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
+import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
 import { PostsFilters } from "~/models/postFilter";
 import { useBlogCounter } from "~/services/queries";
-import { useStoreUpdaters } from "~/store";
 
 export const BlogFilter = () => {
   const { t } = useTranslation();
+  const { postsFilters, setPostsFilters } = usePostsFilter();
 
-  const [localPostsFilters, setLocalPostsFilter] = useState<PostsFilters>({
-    state: PostState.PUBLISHED,
-    search: "",
-  });
-  const debouncePostsFilters = useDebounce(localPostsFilters, 500);
-  const { setPostsFilter } = useStoreUpdaters();
+  const [localPostsFilters, setLocalPostsFilter] =
+    useState<PostsFilters>(postsFilters);
+  const debouncePostsFilters = useDebounce(localPostsFilters, 600);
 
   const { counters } = useBlogCounter();
   const { contrib, manager, creator } = useActionDefinitions([]);
@@ -42,7 +40,7 @@ export const BlogFilter = () => {
   };
 
   useEffect(() => {
-    setPostsFilter(debouncePostsFilters);
+    setPostsFilters(debouncePostsFilters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncePostsFilters]);
 
@@ -51,8 +49,8 @@ export const BlogFilter = () => {
       type: "button",
       name: "published",
       props: {
-        className: clsx({
-          "bg-primary-200 selected":
+        className: clsx("fw-normal", {
+          "bg-primary-200 fw-bold":
             localPostsFilters.state === PostState.PUBLISHED,
         }),
         children: (
@@ -70,8 +68,8 @@ export const BlogFilter = () => {
       type: "button",
       name: "submitted",
       props: {
-        className: clsx({
-          "bg-primary-200 selected":
+        className: clsx("fw-normal", {
+          "bg-primary-200 fw-bold":
             localPostsFilters.state === PostState.SUBMITTED,
         }),
         children: (
@@ -100,9 +98,8 @@ export const BlogFilter = () => {
       type: "button",
       name: "draft",
       props: {
-        className: clsx({
-          "bg-primary-200 selected":
-            localPostsFilters.state === PostState.DRAFT,
+        className: clsx("fw-normal", {
+          "bg-primary-200 fw-bold": localPostsFilters.state === PostState.DRAFT,
         }),
         children: (
           <>
@@ -120,7 +117,7 @@ export const BlogFilter = () => {
     <div className="d-flex pb-16">
       <SearchBar
         isVariant
-        className="d-none d-md-flex flex-fill "
+        className="d-none d-md-flex flex-fill"
         onChange={handlerSearch}
         placeholder={t("Rechercher un billet ou un auteur")}
         size="md"
