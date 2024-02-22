@@ -14,6 +14,7 @@ import {
   blogQuery,
   postsListQuery,
   useBlog,
+  useBlogCounter,
   usePostsList,
 } from "~/services/queries";
 import { useStoreUpdaters } from "~/store";
@@ -44,6 +45,7 @@ export const blogLoader =
 
 export function Blog() {
   const { blog } = useBlog();
+  const { counters } = useBlogCounter();
   const { setPostPageSize } = useStoreUpdaters();
 
   // Load all posts with recurcive fetchNextPage calls.
@@ -76,8 +78,8 @@ export function Blog() {
       <BlogHeader />
       <div className="d-flex flex-fill">
         <BlogSidebar />
-        <div className="flex-fill py-16 ps-16">
-          <BlogFilter />
+        <div className="flex-fill py-16 ps-16 d-flex flex-column">
+          {!!counters?.countAll && <BlogFilter />}
           <BlogPostList />
         </div>
       </div>

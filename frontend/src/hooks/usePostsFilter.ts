@@ -15,6 +15,7 @@ function usePostsFilter(): {
   };
 
   const setPostsFilters = (newPostsFilters: PostsFilters) => {
+    if (!newPostsFilters.search) delete newPostsFilters.search;
     setSearchParams(newPostsFilters, { replace: true });
   };
 
