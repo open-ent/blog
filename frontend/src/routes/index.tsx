@@ -82,7 +82,9 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
   },
 ];
 
+export const basename = import.meta.env.PROD ? "/blog" : "/";
+
 export const router = (queryClient: QueryClient) =>
   createBrowserRouter(routes(queryClient), {
-    basename: import.meta.env.PROD ? "/blog" : "/",
+    basename: basename,
   });
