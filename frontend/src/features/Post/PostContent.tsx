@@ -88,7 +88,7 @@ export const PostContent = () => {
   return (
     <>
       {mode === "read" ? (
-        <div className="d-flex justify-content-between align-items-center">
+        <div className="d-flex justify-content-between align-items-center mx-lg-48">
           <Button
             type="button"
             color="tertiary"
@@ -126,7 +126,6 @@ export const PostContent = () => {
                 </Button>
 
                 <IconButton
-                  color="secondary"
                   variant="outline"
                   icon={<Options />}
                   onClick={toggleBar}
@@ -136,7 +135,6 @@ export const PostContent = () => {
                   {canPublish ? (
                     <Button
                       type="button"
-                      color="primary"
                       variant="filled"
                       onClick={handlePublishOrSubmitClick}
                     >
@@ -169,8 +167,8 @@ export const PostContent = () => {
           </div>
         </div>
       ) : (
-        <>
-          <FormControl id="postTitle" isRequired className="mx-md-16">
+        <div className="mt-24 mx-md-16 mx-lg-64">
+          <FormControl id="postTitle" isRequired>
             <Label>{t("blog.post.title-helper")}</Label>
             <Input
               ref={titleRef}
@@ -181,12 +179,12 @@ export const PostContent = () => {
               onChange={(e) => setTitle(e.target.value)}
             ></Input>
           </FormControl>
-          <FormControl id="postContent" className="mt-16 mx-md-16">
+          <FormControl id="postContent" className="mt-16">
             <Label>{t("blog.post.content-helper")}</Label>
           </FormControl>
-        </>
+        </div>
       )}
-      <div className="mx-md-16">
+      <div className="mx-md-16 mx-lg-64">
         <Editor
           ref={editorRef}
           content={content}
@@ -195,7 +193,7 @@ export const PostContent = () => {
         ></Editor>
       </div>
       {mode === "edit" && (
-        <div className="d-flex gap-8 justify-content-end mt-16 mx-md-16">
+        <div className="d-flex gap-8 justify-content-end my-16 mx-md-16 mx-lg-64">
           <Button type="button" variant="ghost" onClick={handleCancelClick}>
             {t("cancel")}
           </Button>
