@@ -91,75 +91,123 @@ public class DefaultPostService implements PostService {
 		this.contentTransformerClient = contentTransformerClient;
 	}
 
+	/** 
+	 * Check if the current user has manager access to this blog. Never fails.
+	 * @return Truthy future if user has manager access, falsy otherwise.
+	 */
+	private Future<Boolean> checkIsManagerOfBlog(final String blogId, final UserInfos user) {
+		final Promise<Boolean> promise = Promise.promise();
+		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user, true);
+		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
+			public void handle(Message<JsonObject> event) {
+				JsonObject res = event.body();
+				if (res == null || !"ok".equals(res.getString("status")) || 1 != res.getInteger("count", 0)) {
+					promise.complete(Boolean.FALSE);
+				} else {
+					promise.complete(Boolean.TRUE);
+				}
+			}
+		});
+		return promise.future();
+	}
+
+	/** Append filters to a post selection query, related to the current user. */
+	private void appendUserVisibilityQuery( final QueryBuilder query, final UserInfos user, final boolean isManager ) {
+		query.or(
+			QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
+			QueryBuilder.start().and(
+					QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+					QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
+			).get(),
+			isManager 
+			? QueryBuilder.start().or(
+				QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get(),
+				QueryBuilder.start().and(
+					QueryBuilder.start("author-role").is("manager").get(), // #WB-2383
+					QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
+				).get()
+			  ).get()
+			: QueryBuilder.start().and(
+				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
+				QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
+			  ).get()
+		);
+	}
+
 	@Override
 	public void create(String blogId, JsonObject post, UserInfos author,
 					   final Handler<Either<String, JsonObject>> result) {
-		final long version = System.currentTimeMillis();
-		JsonObject now = MongoDb.nowISO();
-		JsonObject blogRef = new JsonObject()
-				.put("$ref", "blogs")
-				.put("$id", blogId);
-		JsonObject owner = new JsonObject()
-				.put("userId", author.getUserId())
-				.put("username", author.getUsername())
-				.put("login", author.getLogin());
-		post.put("created", now)
-				.put("modified", now)
-				.put("author", owner)
-				.put("state", StateType.DRAFT.name())
-				.put("comments", new JsonArray())
-				.put("views", 0)
-				.put("blog", blogRef);
-		JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
-		if (validationError(result, b)) return;
-		b.put("sorted", now);
+		// Check author's role on this blog
+		checkIsManagerOfBlog(blogId, author)
+		.onSuccess( isManager -> {
+			final long version = System.currentTimeMillis();
+			JsonObject now = MongoDb.nowISO();
+			JsonObject blogRef = new JsonObject()
+					.put("$ref", "blogs")
+					.put("$id", blogId);
+			JsonObject owner = new JsonObject()
+					.put("userId", author.getUserId())
+					.put("username", author.getUsername())
+					.put("login", author.getLogin());
+			post.put("created", now)
+					.put("modified", now)
+					.put("author", owner)
+					.put("state", StateType.DRAFT.name())
+					.put("comments", new JsonArray())
+					.put("views", 0)
+					.put("blog", blogRef)
+					.put("author-role", isManager ? "manager" : "contrib" ); // #WB-2383
+			JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
+			if (validationError(result, b)) return;
+			b.put("sorted", now);
 
-		Future<ContentTransformerResponse> contentTransformerResponseFuture;
-		if (b.containsKey("content")) {
-			contentTransformerResponseFuture = contentTransformerClient
-					.transform(new ContentTransformerRequest(
-							new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML, ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
-							b.getInteger("contentVersion", 0),
-							b.getString("content", ""),
-							null));
-		} else {
-			contentTransformerResponseFuture = Future.succeededFuture();
-		}
-		contentTransformerResponseFuture.onComplete(transformerResponse -> {
-			if (transformerResponse.failed()) {
-				log.error("Error while transforming the content", transformerResponse.cause());
+			Future<ContentTransformerResponse> contentTransformerResponseFuture;
+			if (b.containsKey("content")) {
+				contentTransformerResponseFuture = contentTransformerClient
+						.transform(new ContentTransformerRequest(
+								new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML, ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
+								b.getInteger("contentVersion", 0),
+								b.getString("content", ""),
+								null));
 			} else {
-				if (transformerResponse.result() == null) {
-					log.debug("No content transformed.");
-				} else {
-					b.put("contentVersion", transformerResponse.result().getContentVersion());
-					b.put("content", transformerResponse.result().getCleanHtml());
-					b.put("jsonContent", transformerResponse.result().getJsonContent());
-					b.put("contentPlain", transformerResponse.result().getPlainTextContent());
-				}
+				contentTransformerResponseFuture = Future.succeededFuture();
 			}
-			plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
-			mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
-				if(event.isLeft()){
-					log.error("Failed to create post: ", event.left().getValue());
-					result.handle(event);
-					return;
-				}
-				//#29106 avoid fetch after save
-				final String id = event.right().getValue().getString("_id");
-				b.put("_id", id);
-				//must set id before notify
-				plugin.notifyUpsert(blogId, author, b).onComplete(e->{
-					if(e.failed()){
-						plugin.setIngestJobState(b, IngestJobState.SEND_KO);
-						log.error("Failed to notify upsert post: ", e.cause());
+			contentTransformerResponseFuture.onComplete(transformerResponse -> {
+				if (transformerResponse.failed()) {
+					log.error("Error while transforming the content", transformerResponse.cause());
+				} else {
+					if (transformerResponse.result() == null) {
+						log.debug("No content transformed.");
 					} else {
-						plugin.setIngestJobState(b, IngestJobState.SENT);
+						b.put("contentVersion", transformerResponse.result().getContentVersion());
+						b.put("content", transformerResponse.result().getCleanHtml());
+						b.put("jsonContent", transformerResponse.result().getJsonContent());
+						b.put("contentPlain", transformerResponse.result().getPlainTextContent());
 					}
-					// TODO JBER update here the state in mongo
-					result.handle(new Either.Right<>(b));
-				});
-			}));
+				}
+				plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
+				mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
+					if(event.isLeft()){
+						log.error("Failed to create post: ", event.left().getValue());
+						result.handle(event);
+						return;
+					}
+					//#29106 avoid fetch after save
+					final String id = event.right().getValue().getString("_id");
+					b.put("_id", id);
+					//must set id before notify
+					plugin.notifyUpsert(blogId, author, b).onComplete(e->{
+						if(e.failed()){
+							plugin.setIngestJobState(b, IngestJobState.SEND_KO);
+							log.error("Failed to notify upsert post: ", e.cause());
+						} else {
+							plugin.setIngestJobState(b, IngestJobState.SENT);
+						}
+						// TODO JBER update here the state in mongo
+						result.handle(new Either.Right<>(b));
+					});
+				}));
+			});
 		});
 	}
 
@@ -178,6 +226,9 @@ public class DefaultPostService implements PostService {
 				final JsonObject validatedPost = Utils.validAndGet(post, UPDATABLE_FIELDS, Collections.<String>emptyList());
 
 				if (validationError(result, validatedPost)) return;
+
+				final JsonObject blogRef = postFromDb.getJsonObject("blog", new JsonObject());
+				final String blogId = blogRef.getString("$id");
 
 				Future<ContentTransformerResponse> contentTransformerResponseFuture;
 				if (validatedPost.containsKey("content")) {
@@ -210,7 +261,14 @@ public class DefaultPostService implements PostService {
 					validatedPost.put("state", StateType.DRAFT.name());
 				}
 
-				contentTransformerResponseFuture.onComplete(response -> {
+				// Check author's role on this blog
+				checkIsManagerOfBlog(blogId, user)
+				.compose( isManager -> {
+					// Update the author-role
+					validatedPost.put("author-role", isManager ? "manager" : "contrib" ); // #WB-2383
+					return contentTransformerResponseFuture;
+				})
+				.onComplete(response -> {
 					if (response.failed()) {
 						log.error("Content transformation failed");
 					} else {
@@ -233,8 +291,6 @@ public class DefaultPostService implements PostService {
 					plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
 					mongo.update(POST_COLLECTION, jQuery, modifier.build(), updateResponse -> {
 						if ("ok".equals(updateResponse.body().getString("status"))) {
-							final JsonObject blogRef = postFromDb.getJsonObject("blog");
-							final String blogId = blogRef.getString("$id");
 							plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
 							plugin.notifyUpsert(blogId, user, validatedPost.put("_id", postId)).onComplete(e->{
 								if(e.failed()){
@@ -352,7 +408,6 @@ public class DefaultPostService implements PostService {
 	public void counter(final String blogId, final UserInfos user,
 	                    final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject projection = new JsonObject();
 		projection.put("state", 1);
 		projection.put("_id", -1);
@@ -364,30 +419,11 @@ public class DefaultPostService implements PostService {
 			}
 		};
 
-		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
-			public void handle(Message<JsonObject> event) {
-				JsonObject res = event.body();
-				if (res == null || !"ok".equals(res.getString("status"))) {
-					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
-					return;
-				}
-				boolean isManager = 1 == res.getInteger("count", 0);
-
-				query.or(
-						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
-						QueryBuilder.start().and(
-								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
-						).get(),
-						isManager ?
-								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
-								QueryBuilder.start().and(
-										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
-								).get()
-				);
-    			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
-			}
+		// Check author's role on this blog
+		checkIsManagerOfBlog(blogId, user)
+		.onSuccess( isManager -> {
+			appendUserVisibilityQuery( query, user, isManager );
+			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
 		});
 	}
 
@@ -503,7 +539,6 @@ public class DefaultPostService implements PostService {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").in(states);
 		}
 
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("sorted", -1);
 		final JsonObject projection = defaultKeys.copy();
 		// If the user doesn't want the content we do not fetch it from the database
@@ -560,40 +595,21 @@ public class DefaultPostService implements PostService {
 			}
 		};
 
-		mongo.count("blogs", MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
-			public void handle(Message<JsonObject> event) {
-				JsonObject res = event.body();
-				if(res == null || !"ok".equals(res.getString("status"))){
-					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
-					return;
-				}
-				boolean isManager = 1 == res.getInteger("count", 0);
+		// Check author's role on this blog
+		checkIsManagerOfBlog(blogId, user)
+		.onSuccess( isManager -> {
+			appendUserVisibilityQuery( accessQuery, user, isManager );
 
-				accessQuery.or(
-						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
-						QueryBuilder.start().and(
-								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
-						).get(),
-						isManager ?
-								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
-								QueryBuilder.start().and(
-										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
-								).get()
-				);
+			final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
 
-				final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
-
-				if (query != null) {
-					if (limit > 0 && page == null) {
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
-					} else if (page == null) {
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
-					} else {
-						final int skip = (0 == page) ? -1 : page * limit;
-						mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
-					}
+			if (query != null) {
+				if (limit > 0 && page == null) {
+					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
+				} else if (page == null) {
+					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
+				} else {
+					final int skip = (0 == page) ? -1 : page * limit;
+					mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, skip, limit, limit, finalHandler);
 				}
 			}
 		});
@@ -621,7 +637,6 @@ public class DefaultPostService implements PostService {
 	@Override
 	public void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("_id").is(postId);
-		final QueryBuilder isManagerQuery = getDefautQueryBuilderForList(blogId, user,true);
 		final JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = defaultKeys.copy();
 		projection.remove("content");
@@ -633,30 +648,11 @@ public class DefaultPostService implements PostService {
 			}
 		};
 
-		mongo.count(DefaultBlogService.BLOG_COLLECTION, MongoQueryBuilder.build(isManagerQuery), new Handler<Message<JsonObject>>() {
-			public void handle(Message<JsonObject> event) {
-				JsonObject res = event.body();
-				if(res == null || !"ok".equals(res.getString("status"))){
-					result.handle(new Either.Left<String, JsonArray>(event.body().encodePrettily()));
-					return;
-				}
-				boolean isManager = 1 == res.getInteger("count", 0);
-
-				query.or(
-						QueryBuilder.start("state").is(StateType.PUBLISHED.name()).get(),
-						QueryBuilder.start().and(
-								QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-								QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
-						).get(),
-						isManager ?
-								QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get() :
-								QueryBuilder.start().and(
-										QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-										QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get()
-								).get()
-				);
-				mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
-			}
+		// Check author's role on this blog
+		checkIsManagerOfBlog(blogId, user)
+		.onSuccess( isManager -> {
+			appendUserVisibilityQuery( query, user, isManager );
+			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, finalHandler);
 		});
 	}
 
