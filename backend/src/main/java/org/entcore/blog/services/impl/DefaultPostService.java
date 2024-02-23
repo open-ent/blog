@@ -123,7 +123,7 @@ public class DefaultPostService implements PostService {
 			? QueryBuilder.start().or(
 				QueryBuilder.start("state").is(StateType.SUBMITTED.name()).get(),
 				QueryBuilder.start().and(
-					QueryBuilder.start("author-role").is("manager").get(), // #WB-2383
+					QueryBuilder.start("created_as").is("manager").get(), // #WB-2383
 					QueryBuilder.start("state").is(StateType.DRAFT.name()).get()
 				).get()
 			  ).get()
@@ -155,11 +155,11 @@ public class DefaultPostService implements PostService {
 					.put("state", StateType.DRAFT.name())
 					.put("comments", new JsonArray())
 					.put("views", 0)
-					.put("blog", blogRef)
-					.put("author-role", isManager ? "manager" : "contrib" ); // #WB-2383
+					.put("blog", blogRef);
 			JsonObject b = Utils.validAndGet(post, FIELDS, FIELDS);
 			if (validationError(result, b)) return;
-			b.put("sorted", now);
+			b.put("sorted", now)
+			.put("created_as", isManager ? "manager" : "contrib" ); // #WB-2383
 
 			Future<ContentTransformerResponse> contentTransformerResponseFuture;
 			if (b.containsKey("content")) {
@@ -264,8 +264,8 @@ public class DefaultPostService implements PostService {
 				// Check author's role on this blog
 				checkIsManagerOfBlog(blogId, user)
 				.compose( isManager -> {
-					// Update the author-role
-					validatedPost.put("author-role", isManager ? "manager" : "contrib" ); // #WB-2383
+					// Update the created_as
+					validatedPost.put("created_as", isManager ? "manager" : "contrib" ); // #WB-2383
 					return contentTransformerResponseFuture;
 				})
 				.onComplete(response -> {
