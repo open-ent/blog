@@ -8,6 +8,7 @@ import { IAction } from "edifice-ts-client";
 import { useParams } from "react-router-dom";
 
 import {
+  deletePost,
   loadBlog,
   loadBlogCounter,
   loadOriginalPost,
@@ -55,16 +56,13 @@ export const postsListQuery = (
   blogId: string,
   pageSize?: number,
   search?: string,
-  state = PostState.PUBLISHED,
+  state?: PostState,
 ) => {
-  const queryKey: any = { blogId, state };
-  if (search) {
-    queryKey.search = search;
-  }
+  const queryKey: any = { state, search };
   return {
-    queryKey: ["postList", queryKey],
+    queryKey: ["postList", blogId, queryKey],
     queryFn: ({ pageParam = 0 }) =>
-      loadPostsList(blogId, pageParam, state, search),
+      loadPostsList(blogId, pageParam, state ?? PostState.PUBLISHED, search),
     initialPageParam: 0,
     getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
       if (
@@ -174,5 +172,23 @@ export const useSavePost = (blogId: string, post: Post) => {
         state: result.state,
       });
     },
+  });
+};
+
+export const useDeletePost = (blogId: string, postId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deletePost(blogId, postId),
+    onSuccess: () =>
+      Promise.all([
+        // Deleting a post invalidates some queries.
+        queryClient.invalidateQueries(postsListQuery(blogId)),
+        queryClient.invalidateQueries(blogCounterQuery(blogId)),
+        Promise.resolve(
+          queryClient.removeQueries(
+            postQuery(blogId, { _id: postId } as PostMetadata),
+          ),
+        ),
+      ]),
   });
 };

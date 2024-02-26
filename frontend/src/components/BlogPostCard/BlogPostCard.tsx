@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Editor, EditorRef } from "@edifice-ui/editor";
 import { Avatar, Badge, Card, Image, useDate } from "@edifice-ui/react";
 import clsx from "clsx";
-import { odeServices } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { Post, PostState } from "~/models/post";
 import { useSidebarHighlightedPost } from "~/store";
+import { getAvatarURL } from "~/utils/PostUtils";
 
 export type BlogPostCardProps = {
   /**
@@ -22,8 +22,6 @@ export type BlogPostCardProps = {
 export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   const { fromNow } = useDate();
   const { t } = useTranslation();
-
-  const directoryService = odeServices.directory();
 
   const sidebarHighlightedPost = useSidebarHighlightedPost();
   const { contrib, manager, creator } = useActionDefinitions([]);
@@ -38,10 +36,6 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
 
   // Number of media to display on the preview card
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
-
-  const getAvatarURL = (post: Post): string => {
-    return directoryService.getAvatarUrl(post.author.userId, "user");
-  };
 
   const displayDate = (date: string) => {
     return fromNow(date);

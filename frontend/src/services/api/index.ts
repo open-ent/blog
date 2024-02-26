@@ -59,6 +59,12 @@ export function loadOriginalPost(blogId: string, post: PostMetadata) {
   );
 }
 
+export function deletePost(blogId: string, postId: string) {
+  return checkHttpError(
+    odeServices.http().delete<void>(`/blog/post/${blogId}/${postId}`),
+  );
+}
+
 export function savePost(blogId: string, post: Post) {
   const { _id: postId, title, content } = post;
   return checkHttpError(

@@ -1,44 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
-import {
-  ArrowLeft,
-  Edit,
-  Options,
-  Print,
-  Save,
-  Send,
-  TextToSpeech,
-} from "@edifice-ui/icons";
-import {
-  Button,
-  FormControl,
-  IconButton,
-  Input,
-  Label,
-  useToggle,
-} from "@edifice-ui/react";
+import { Save, Send } from "@edifice-ui/icons";
+import { Button, FormControl, Input, Label } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { usePostContext } from "./PostProvider";
-import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
+import { PostTitle } from "./PostTitle";
 import { publishPost } from "~/services/api";
 
 export const PostContent = () => {
-  const { blogId, post, mustSubmit, readOnly, canPublish, save } =
-    usePostContext();
+  const { blogId, post, mustSubmit, save, trash } = usePostContext();
 
   const editorRef = useRef<EditorRef>(null);
   const titleRef = useRef(null);
+
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [mode, setMode] = useState<"read" | "edit">("read");
   const [variant, setVariant] = useState<"ghost" | "outline">("ghost");
-  const [isBarOpen, toggleBar] = useToggle();
 
   const { t } = useTranslation("blog");
-  const { t: common_t } = useTranslation("common");
 
   const navigate = useNavigate();
 
@@ -46,17 +29,21 @@ export const PostContent = () => {
     setVariant(mode === "read" ? "ghost" : "outline");
   }, [mode]);
 
-  const handleBackwardClick = () => navigate(-1); // TODO
-  const handlePrintClick = () => alert("print !"); // TODO
-  const handleTtsClick = () => editorRef.current?.toogleSpeechSynthetisis();
-
-  const handleEditClick = () => {
-    setMode("edit");
+  const postHeaderEventsHandler = {
+    onBackward: () => {
+      navigate(-1);
+    },
+    onDelete: () => {
+      trash();
+      navigate(`/id/${blogId}`);
+    },
+    onEdit: () => {
+      setMode("edit");
+    },
+    onPrint: () => alert("print !"), // TODO
+    onPublish: () => (mustSubmit ? alert("submit") : alert("publish")), // TODO
+    onTts: () => editorRef.current?.toogleSpeechSynthetisis(),
   };
-
-  const handleDeleteClick = () => alert("delete"); // TODO
-  const handlePublishOrSubmitClick = () =>
-    mustSubmit ? alert("submit") : alert("publish"); // TODO
 
   const handleCancelClick = () => {
     setMode("read");
@@ -64,7 +51,7 @@ export const PostContent = () => {
     setContent(post?.content ?? "");
   };
 
-  const handleSaveClick = async () => {
+  const handleSaveClick = () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
     if (!post || !title || title.trim().length == 0 || !contentHtml) return;
     post.title = title;
@@ -77,7 +64,7 @@ export const PostContent = () => {
     if (!blogId || !post) return;
     //TODO mustSubmit ? alert("submit") : alert("publish");
     try {
-      await handleSaveClick();
+      handleSaveClick();
       await publishPost(blogId, post, mustSubmit);
       // TODO update state
     } catch (e) {
@@ -87,86 +74,12 @@ export const PostContent = () => {
 
   return (
     <>
-      {mode === "read" ? (
-        <div className="d-flex justify-content-between align-items-center mx-lg-48">
-          <Button
-            type="button"
-            color="tertiary"
-            variant="ghost"
-            leftIcon={<ArrowLeft />}
-            onClick={handleBackwardClick}
-          >
-            {common_t("back")}
-          </Button>
-          <div className="d-flex m-16 gap-12">
-            {readOnly ? (
-              <>
-                <IconButton
-                  icon={<Print />}
-                  color="primary"
-                  variant="outline"
-                  aria-label={t("print")}
-                  onClick={handlePrintClick}
-                />
-                <IconButton
-                  icon={<TextToSpeech />}
-                  color="primary"
-                  variant="outline"
-                  className={
-                    editorRef.current?.isSpeeching() ? "bg-secondary" : ""
-                  }
-                  aria-label={t("tiptap.toolbar.tts")}
-                  onClick={handleTtsClick}
-                />
-              </>
-            ) : (
-              <>
-                <Button leftIcon={<Edit />} onClick={handleEditClick}>
-                  {common_t("edit")}
-                </Button>
-
-                <IconButton
-                  variant="outline"
-                  icon={<Options />}
-                  onClick={toggleBar}
-                />
-
-                <ActionBarContainer visible={isBarOpen}>
-                  {canPublish ? (
-                    <Button
-                      type="button"
-                      variant="filled"
-                      onClick={handlePublishOrSubmitClick}
-                    >
-                      {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
-                    </Button>
-                  ) : (
-                    <></>
-                  )}
-
-                  <Button
-                    type="button"
-                    color="primary"
-                    variant="filled"
-                    onClick={handlePrintClick}
-                  >
-                    {t("blog.print")}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    color="primary"
-                    variant="filled"
-                    onClick={handleDeleteClick}
-                  >
-                    {t("blog.delete.post")}
-                  </Button>
-                </ActionBarContainer>
-              </>
-            )}
-          </div>
-        </div>
-      ) : (
+      <PostTitle
+        isSpeeching={editorRef.current?.isSpeeching()}
+        mode={mode}
+        {...postHeaderEventsHandler}
+      />
+      {mode === "edit" && (
         <div className="mt-24 mx-md-16 mx-lg-64">
           <FormControl id="postTitle" isRequired>
             <Label>{t("blog.post.title-helper")}</Label>

@@ -5,7 +5,7 @@ import { ACTION, IAction } from "edifice-ts-client";
 import { usePostActions } from "../ActionBar/usePostActions";
 import { postContentActions } from "~/config/postContentActions";
 import { Post } from "~/models/post";
-import { useSavePost } from "~/services/queries";
+import { useDeletePost, useSavePost } from "~/services/queries";
 
 export interface PostProps {
   blogId: string;
@@ -22,6 +22,7 @@ export interface PostContextProps {
   readOnly: boolean;
   canPublish: boolean;
   save: () => void;
+  trash: () => void;
 }
 
 export const PostContext = createContext<PostContextProps | null>(null!);
@@ -30,6 +31,7 @@ export function PostProvider({ blogId, post, children }: PostProps) {
   // -- Get all rights the current user has on the post, without constraints on its status.
   const { actions, mustSubmit } = usePostActions(postContentActions, post);
   const saveMutation = useSavePost(blogId, post);
+  const deleteMutation = useDeletePost(blogId, post._id);
 
   const values = {
     blogId,
@@ -42,6 +44,7 @@ export function PostProvider({ blogId, post, children }: PostProps) {
       !!actions &&
       actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0,
     save: () => saveMutation.mutate(),
+    trash: () => deleteMutation.mutate(),
   };
 
   return <PostContext.Provider value={values}>{children}</PostContext.Provider>;

@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { createPostActions } from "~/config/createPostActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
+import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
 import { CreatePost } from "~/features/Post/CreatePost";
 import { availableActionsQuery } from "~/services/queries";
 
@@ -31,5 +32,10 @@ export function Component() {
     return <></>;
   }
 
-  return <CreatePost blogId={blogId} />;
+  return (
+    <>
+      <BlogHeader />
+      <CreatePost blogId={blogId} />
+    </>
+  );
 }

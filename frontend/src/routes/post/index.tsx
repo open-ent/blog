@@ -2,8 +2,8 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { postContentActions } from "~/config/postContentActions";
+import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
 import { PostContent } from "~/features/Post/PostContent";
-import { PostHeader } from "~/features/Post/PostHeader";
 import { PostProvider } from "~/features/Post/PostProvider";
 import { PostMetadata } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
@@ -36,7 +36,7 @@ export function Component() {
 
   return (
     <PostProvider blogId={blogId} post={query.data}>
-      <PostHeader />
+      <BlogHeader />
       <PostContent />
     </PostProvider>
   );

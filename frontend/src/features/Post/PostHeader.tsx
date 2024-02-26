@@ -1,23 +1,19 @@
-import { AppHeader, Breadcrumb } from "@edifice-ui/react";
+import { AppHeader, Breadcrumb, useOdeClient } from "@edifice-ui/react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 
-import { usePostContext } from "./PostProvider";
+import { blogQuery } from "~/services/queries";
 
-export const PostHeader = () => {
-  const { post } = usePostContext();
+// import { useBlog } from "~/store";
+
+export const BlogHeader = () => {
+  const params = useParams();
+  const { data: blog } = useQuery(blogQuery(params.blogId as string));
+  const { currentApp } = useOdeClient();
+
   return (
     <AppHeader>
-      <Breadcrumb
-        app={{
-          address: "/blog",
-          display: false,
-          displayName: "Blog",
-          icon: "",
-          isExternal: false,
-          name: "",
-          scope: [],
-        }}
-        name={post.title}
-      />
+      {currentApp && <Breadcrumb app={currentApp} name={blog?.title} />}
     </AppHeader>
   );
 };
