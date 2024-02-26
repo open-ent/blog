@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { Button, EmptyScreen, usePaths } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
-import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import { BlogPostCard } from "~/components/BlogPostCard/BlogPostCard";
+import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
 import { useBlogCounter, usePostsList } from "~/services/queries";

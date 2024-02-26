@@ -4,10 +4,10 @@ import { LoadingScreen } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { LoaderFunctionArgs } from "react-router-dom";
 
-import { BlogFilter } from "~/features/BlogFilter/BlogFilter";
-import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
-import BlogPostList from "~/features/BlogPostList/BlogPostList";
-import BlogSidebar from "~/features/BlogSidebar/BlogSidebar";
+import { BlogFilter } from "~/features/Blog/BlogFilter/BlogFilter";
+import { BlogHeader } from "~/features/Blog/BlogHeader/BlogHeader";
+import BlogPostList from "~/features/Blog/BlogPostList/BlogPostList";
+import BlogSidebar from "~/features/Blog/BlogSidebar/BlogSidebar";
 import { PostState } from "~/models/post";
 import {
   blogCounterQuery,
