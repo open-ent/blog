@@ -6,7 +6,7 @@ import { blogQuery } from "~/services/queries";
 
 // import { useBlog } from "~/store";
 
-export const BlogHeader = () => {
+export const PostHeader = () => {
   const params = useParams();
   const { data: blog } = useQuery(blogQuery(params.blogId as string));
   const { currentApp } = useOdeClient();

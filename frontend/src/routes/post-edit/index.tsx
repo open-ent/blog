@@ -6,8 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { createPostActions } from "~/config/createPostActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import { BlogHeader } from "~/features/BlogHeader/BlogHeader";
 import { CreatePost } from "~/features/Post/CreatePost";
+import { PostHeader } from "~/features/Post/PostHeader";
 import { availableActionsQuery } from "~/services/queries";
 
 export const loader = (queryClient: QueryClient) => async () => {
@@ -34,7 +34,7 @@ export function Component() {
 
   return (
     <>
-      <BlogHeader />
+      <PostHeader />
       <CreatePost blogId={blogId} />
     </>
   );
