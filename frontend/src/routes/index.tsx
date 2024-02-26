@@ -8,7 +8,7 @@ import { Root } from "~/routes/root";
 
 const routes = (queryClient: QueryClient): RouteObject[] => [
   {
-    path: "/",
+    path: "/*",
     element: <Root />,
     children: [
       {
@@ -66,16 +66,6 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       return {
         loader: loader(queryClient),
         Component,
-      };
-    },
-    errorElement: <PageError />,
-  },
-  {
-    path: "/*",
-    async lazy() {
-      const { redirectLoader } = await import("./redirect");
-      return {
-        loader: redirectLoader,
       };
     },
     errorElement: <PageError />,
