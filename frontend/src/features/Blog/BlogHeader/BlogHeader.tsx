@@ -1,29 +1,31 @@
 import { AppHeader, Breadcrumb } from "@edifice-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
 
-import { blogQuery } from "~/services/queries";
+import { BlogActionBar } from "../BlogActionBar/BlogActionBar";
+import { Blog } from "~/models/blog";
+import { basename } from "~/routes";
 
-// import { useBlog } from "~/store";
+export interface BlogProps {
+  blog: Blog;
+}
 
-export const BlogHeader = () => {
-  const params = useParams();
-  const { data: blog } = useQuery(blogQuery(params.blogId as string));
-
+export const BlogHeader = ({ blog }: BlogProps) => {
   return (
     <AppHeader>
-      <Breadcrumb
-        app={{
-          address: "/blog",
-          display: false,
-          displayName: "Blog",
-          icon: "",
-          isExternal: false,
-          name: "",
-          scope: [],
-        }}
-        name={blog?.title}
-      />
+      <div className="d-flex justify-content-between flex-fill ">
+        <Breadcrumb
+          app={{
+            address: basename,
+            display: false,
+            displayName: "Blog",
+            icon: "",
+            isExternal: false,
+            name: "",
+            scope: [],
+          }}
+          name={blog?.title}
+        />
+        <BlogActionBar blog={blog} />
+      </div>
     </AppHeader>
   );
 };

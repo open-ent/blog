@@ -4,6 +4,7 @@ import { useUser } from "@edifice-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { ACTION, ActionType, IAction, RightRole } from "edifice-ts-client";
 
+import { Blog } from "~/models/blog";
 import { Post } from "~/models/post";
 import { availableActionsQuery, useBlog } from "~/services/queries";
 import { IActionDefinition } from "~/utils/types";
@@ -148,11 +149,37 @@ export const useActionDefinitions = (
     rights.contrib &&
     !(rights.manager || rights.creator);
 
+  const availableActionsForBlog = useCallback(
+    (blog: Blog) => {
+      if (!availableActions || availableActions?.length === 0) return [];
+
+      const isBlogAuthor = blog.author.userId === user?.userId;
+      const authorized: ActionType[] = [ACTION.PRINT];
+
+      // Managers have all rights
+      if (rights.creator || rights.manager) {
+        authorized.push(ACTION.CREATE, ACTION.DELETE, ACTION.SHARE);
+
+        if (isBlogAuthor) {
+          authorized.push(ACTION.PUBLISH);
+        }
+      }
+
+      return (
+        availableActions?.filter(
+          (action) => authorized.indexOf(action.id) >= 0,
+        ) || []
+      );
+    },
+    [rights.creator, rights.manager, user?.userId, availableActions],
+  );
+
   return {
     availableActions,
     ...rights,
     hasRight,
     mustSubmit,
     availableActionsForPost,
+    availableActionsForBlog,
   };
 };

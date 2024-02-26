@@ -4,12 +4,14 @@ import { LoadingScreen } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { LoaderFunctionArgs } from "react-router-dom";
 
+import { blogContentActions } from "~/config/blogContentActions";
 import { BlogFilter } from "~/features/Blog/BlogFilter/BlogFilter";
 import { BlogHeader } from "~/features/Blog/BlogHeader/BlogHeader";
 import BlogPostList from "~/features/Blog/BlogPostList/BlogPostList";
 import BlogSidebar from "~/features/Blog/BlogSidebar/BlogSidebar";
 import { PostState } from "~/models/post";
 import {
+  availableActionsQuery,
   blogCounterQuery,
   blogQuery,
   postsListQuery,
@@ -24,6 +26,7 @@ export const blogLoader =
   async ({ params, request }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
     const queryBlogCounter = blogCounterQuery(params.blogId as string);
+    const actions = availableActionsQuery(blogContentActions);
 
     const url = new URL(request.url);
     const state =
@@ -36,11 +39,14 @@ export const blogLoader =
       state,
     );
 
-    const blog = await queryClient.fetchQuery(queryBlog);
-    const postsList = await queryClient.fetchInfiniteQuery(queryPostsList);
-    const blogCounter = await queryClient.fetchQuery(queryBlogCounter);
+    await Promise.all([
+      queryClient.fetchQuery(queryBlog),
+      queryClient.fetchInfiniteQuery(queryPostsList),
+      queryClient.fetchQuery(queryBlogCounter),
+      queryClient.fetchQuery(actions),
+    ]);
 
-    return { blog, postsList, blogCounter };
+    return null;
   };
 
 export function Blog() {
@@ -75,7 +81,7 @@ export function Blog() {
 
   return (
     <>
-      <BlogHeader />
+      <BlogHeader blog={blog} />
       <div className="d-flex flex-fill">
         <BlogSidebar />
         <div className="flex-fill py-16 ps-16 d-flex flex-column">
