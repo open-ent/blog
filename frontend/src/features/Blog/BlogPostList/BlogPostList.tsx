@@ -56,6 +56,13 @@ const BlogPostList = () => {
     return "";
   };
 
+  const emptyScreenText = (): string => {
+    if (counters?.countAll === 0) {
+      return t("blog.empty.text");
+    }
+    return "";
+  };
+
   return (
     <div className="d-flex flex-column gap-24 flex-fill">
       {posts?.length === 0 && isFetching === false && (
@@ -63,6 +70,7 @@ const BlogPostList = () => {
           <EmptyScreen
             imageSrc={`${imagePath}/emptyscreen/illu-blog.svg`}
             title={emptyScreenTitle()}
+            text={emptyScreenText()}
           />
         </div>
       )}
