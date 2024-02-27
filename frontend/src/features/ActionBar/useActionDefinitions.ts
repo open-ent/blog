@@ -158,7 +158,13 @@ export const useActionDefinitions = (
 
       // Managers have all rights
       if (rights.creator || rights.manager) {
-        authorized.push(ACTION.CREATE, ACTION.DELETE, ACTION.SHARE);
+        authorized.push(
+          ACTION.CREATE,
+          ACTION.CREATE_PUBLIC,
+          ACTION.DELETE,
+          ACTION.SHARE,
+          ACTION.EDIT,
+        );
 
         if (isBlogAuthor) {
           authorized.push(ACTION.PUBLISH);

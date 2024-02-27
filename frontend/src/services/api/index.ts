@@ -19,13 +19,23 @@ async function checkHttpError<T>(promise: Promise<T>) {
   throw odeServices.http().latestResponse.statusText;
 }
 
-export function loadBlog(id: string) {
-  return checkHttpError<Blog>(odeServices.http().get<Blog>(`/blog/${id}`));
+/**
+ * Load a blog
+ * @param blogId blog id
+ * @returns
+ */
+export function loadBlog(blogId: string) {
+  return checkHttpError<Blog>(odeServices.http().get<Blog>(`/blog/${blogId}`));
 }
 
-export function loadBlogCounter(id: string) {
+/**
+ * Load counters of a blog
+ * @param blogId blog id
+ * @returns counter of the blog (number of posts , published posts, submitted posts, draft posts)
+ */
+export function loadBlogCounter(blogId: string) {
   return checkHttpError<BlogCounter>(
-    odeServices.http().get<BlogCounter>(`/blog/counter/${id}`),
+    odeServices.http().get<BlogCounter>(`/blog/counter/${blogId}`),
   );
 }
 
@@ -96,6 +106,14 @@ export function createPost(blogId: string, title: string, content: string) {
   );
 }
 
+/**
+ * Load the list of posts of a blog
+ * @param blogId the blog concerned
+ * @param page the page number
+ * @param state the state of the posts (PUBLISHED, SUBMITTED, DRAFT)
+ * @param search the search string
+ * @returns the list of posts Post[]
+ */
 export function loadPostsList(
   blogId: string,
   page: number,

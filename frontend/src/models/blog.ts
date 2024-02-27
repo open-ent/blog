@@ -16,12 +16,13 @@ export type Blog = {
   shared: [];
   "publish-type": PublishType;
   "comment-type": CommentType;
-  // visibility: "OWNER";
-  // thumbnail: "";
-  // created: {
-  //   $date: 1699370018827;
-  // };
-  // modified: {
-  //   $date: 1699370018827;
-  // };
+  visibility: "OWNER" | "PUBLIC";
+  slug: string;
+  version: number;
+  created: {
+    $date: string;
+  };
+  modified: {
+    $date: string;
+  };
 };

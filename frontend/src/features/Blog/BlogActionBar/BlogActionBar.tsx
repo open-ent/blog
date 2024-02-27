@@ -1,27 +1,48 @@
+import { Suspense, lazy } from "react";
+
 import { Add, Options } from "@edifice-ui/icons";
-import { Button, IconButton, useToggle } from "@edifice-ui/react";
+import {
+  Button,
+  IconButton,
+  LoadingScreen,
+  useToggle,
+  BlogPublic,
+} from "@edifice-ui/react";
 import { ACTION, ActionType } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
+import { useUpdateBlog } from "~/services/queries";
 
 export interface BlogActionBarProps {
   blog: Blog;
 }
 
+const UpdateModal = lazy(
+  async () => await import("~/features/ActionBar/Resource/ResourceModal"),
+);
+
 export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const { t } = useTranslation("blog");
+  const navigate = useNavigate();
 
   const [isBarOpen, toggleBar] = useToggle();
+  const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();
 
   const handleAddClick = () => {
-    console.log("add click");
+    navigate(`./post/edit`);
   };
 
-  const handleManageClick = () => {
-    console.log("manage click");
+  const handleEditClick = () => {
+    toogleUpdateModalOpen();
+  };
+
+  const handleEditClose = () => {
+    toogleUpdateModalOpen();
+    toggleBar();
   };
 
   const handleDeleteClick = () => {
@@ -40,7 +61,8 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
     console.log("print click");
   };
 
-  const { actions: availableActions } = useBlogActions(blog!);
+  const { actions: availableActions } = useBlogActions(blog);
+  const updateBlog = useUpdateBlog(blog);
 
   function isActionAvailable(action: ActionType) {
     return availableActions?.some((act) => act.id === action);
@@ -63,12 +85,12 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
         />
 
         <ActionBarContainer visible={isBarOpen}>
-          {isActionAvailable(ACTION.MANAGE) ? (
+          {isActionAvailable(ACTION.EDIT) ? (
             <Button
               type="button"
               color="primary"
               variant="filled"
-              onClick={handleManageClick}
+              onClick={handleEditClick}
             >
               {t("blog.edit.title")}
             </Button>
@@ -121,6 +143,34 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           )}
         </ActionBarContainer>
       </div>
+
+      <Suspense fallback={<LoadingScreen />}>
+        {isUpdateModalOpen && (
+          <UpdateModal
+            mode="update"
+            isOpen={isUpdateModalOpen}
+            resourceId={blog._id}
+            updateResource={updateBlog}
+            onCancel={handleEditClose}
+            onSuccess={handleEditClose}
+          >
+            {(resource, isUpdating, watch, setValue, register) => {
+              return (
+                isActionAvailable(ACTION.CREATE_PUBLIC) && (
+                  <BlogPublic
+                    appCode="blog"
+                    isUpdating={isUpdating}
+                    resource={resource}
+                    watch={watch}
+                    setValue={setValue}
+                    register={register}
+                  />
+                )
+              );
+            }}
+          </UpdateModal>
+        )}
+      </Suspense>
     </>
   );
 };
