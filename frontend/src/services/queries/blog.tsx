@@ -1,7 +1,6 @@
 import { useUpdateMutation } from "@edifice-ui/react";
 import {
   useInfiniteQuery,
-  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -9,18 +8,14 @@ import { IAction, UpdateParameters, UpdateResult } from "edifice-ts-client";
 import { useParams } from "react-router-dom";
 
 import {
-  deletePost,
   loadBlog,
   loadBlogCounter,
-  loadOriginalPost,
-  loadPost,
   loadPostsList,
-  savePost,
   sessionHasWorkflowRights,
-} from "../api";
+} from "../api/blog";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { Blog } from "~/models/blog";
-import { Post, PostMetadata, PostState } from "~/models/post";
+import { Post, PostState } from "~/models/post";
 import { usePostPageSize } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
@@ -39,28 +34,13 @@ export const blogCounterQuery = (blogId: string) => {
   };
 };
 
-/** Query metadata of a post */
-export const postQuery = (blogId: string, post: PostMetadata) => {
-  return {
-    queryKey: ["post", post._id, post.state],
-    queryFn: () => loadPost(blogId, post),
-  };
-};
-
-export const originalPostQuery = (blogId: string, post: PostMetadata) => {
-  return {
-    queryKey: ["original-post", post._id, post.state],
-    queryFn: () => loadOriginalPost(blogId, post),
-  };
-};
-
 export const postsListQuery = (
   blogId: string,
   pageSize?: number,
   search?: string,
   state?: PostState,
 ) => {
-  const queryKey: any = { state, search };
+  const queryKey: any = state || search ? { state, search } : undefined;
   return {
     queryKey: ["postList", blogId, queryKey],
     queryFn: ({ pageParam = 0 }) =>
@@ -161,38 +141,6 @@ export const usePostsList = (blogId?: string) => {
     posts: query.data?.pages.flatMap((page) => page) as Post[],
     query,
   };
-};
-
-export const useSavePost = (blogId: string, post: Post) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => savePost(blogId, post),
-    onSuccess: (result) => {
-      // Saving a post may change its state. Update the query data accordingly.
-      queryClient.setQueryData(postQuery(blogId, post).queryKey, {
-        ...post,
-        state: result.state,
-      });
-    },
-  });
-};
-
-export const useDeletePost = (blogId: string, postId: string) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: () => deletePost(blogId, postId),
-    onSuccess: () =>
-      Promise.all([
-        // Deleting a post invalidates some queries.
-        queryClient.invalidateQueries(postsListQuery(blogId)),
-        queryClient.invalidateQueries(blogCounterQuery(blogId)),
-        Promise.resolve(
-          queryClient.removeQueries(
-            postQuery(blogId, { _id: postId } as PostMetadata),
-          ),
-        ),
-      ]),
-  });
 };
 
 export const useUpdateBlog = (blog: Blog) => {

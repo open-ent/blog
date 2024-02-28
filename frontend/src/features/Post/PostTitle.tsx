@@ -16,8 +16,8 @@ import {
 } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
-import { usePostContext } from "./PostProvider";
 import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
+import { PostActions } from "../ActionBar/usePostActions";
 import { Post } from "~/models/post";
 import { getAvatarURL, getDatedKey } from "~/utils/PostUtils";
 
@@ -26,6 +26,8 @@ const ConfirmModal = lazy(
 );
 
 export interface PostTitleProps {
+  post: Post;
+  postActions: PostActions;
   mode: "edit" | "read";
   isSpeeching?: boolean;
   onBackward: () => void;
@@ -37,6 +39,8 @@ export interface PostTitleProps {
 }
 
 export const PostTitle = ({
+  post,
+  postActions,
   mode,
   isSpeeching,
   onBackward,
@@ -49,7 +53,7 @@ export const PostTitle = ({
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
   const { fromNow } = useDate();
-  const { post, mustSubmit, readOnly, canPublish } = usePostContext();
+  const { mustSubmit, readOnly, canPublish } = postActions;
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [isBarOpen, toggleBar] = useToggle();

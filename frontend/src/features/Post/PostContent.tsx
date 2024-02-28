@@ -6,16 +6,25 @@ import { Button, FormControl, Input, Label } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { usePostContext } from "./PostProvider";
 import { PostTitle } from "./PostTitle";
-import { publishPost } from "~/services/api";
+import { usePostActions } from "../ActionBar/usePostActions";
+import { postContentActions } from "~/config/postContentActions";
+import { Post } from "~/models/post";
 
-export const PostContent = () => {
-  const { blogId, post, mustSubmit, save, trash } = usePostContext();
+export interface PostContentProps {
+  blogId: string;
+  post: Post;
+}
+
+export const PostContent = ({ blogId, post }: PostContentProps) => {
+  // Get available actions and requirements for the post.
+  const postActions = usePostActions(postContentActions, blogId, post);
+  const { mustSubmit, save, trash, publish } = postActions;
 
   const editorRef = useRef<EditorRef>(null);
   const titleRef = useRef(null);
 
+  // Variables for edit mode
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
   const [mode, setMode] = useState<"read" | "edit">("read");
@@ -25,11 +34,13 @@ export const PostContent = () => {
 
   const navigate = useNavigate();
 
+  // Changing mode displays another variant of the editor.
   useEffect(() => {
     setVariant(mode === "read" ? "ghost" : "outline");
   }, [mode]);
 
-  const postHeaderEventsHandler = {
+  // Handlers for actions triggered from the post title component.
+  const postActionsHandlers = {
     onBackward: () => {
       navigate(-1);
     },
@@ -41,16 +52,20 @@ export const PostContent = () => {
       setMode("edit");
     },
     onPrint: () => alert("print !"), // TODO
-    onPublish: () => (mustSubmit ? alert("submit") : alert("publish")), // TODO
+    onPublish: () => {
+      publish();
+    },
     onTts: () => editorRef.current?.toogleSpeechSynthetisis(),
   };
 
+  // Cancel modifications
   const handleCancelClick = () => {
     setMode("read");
     // Restore previous content
     setContent(post?.content ?? "");
   };
 
+  // Save modifications
   const handleSaveClick = () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
     if (!post || !title || title.trim().length == 0 || !contentHtml) return;
@@ -60,24 +75,23 @@ export const PostContent = () => {
     setMode("read");
   };
 
+  // Publish or submit modifications
   const handlePublishClick = async () => {
-    if (!blogId || !post) return;
-    //TODO mustSubmit ? alert("submit") : alert("publish");
-    try {
-      handleSaveClick();
-      await publishPost(blogId, post, mustSubmit);
-      // TODO update state
-    } catch (e) {
-      // HTTP failure has already been notified to the user.
-    }
+    const contentHtml = editorRef.current?.getContent("html") as string;
+    if (!post || !title || title.trim().length == 0 || !contentHtml) return;
+    post.title = title;
+    post.content = contentHtml;
+    publish();
   };
 
   return (
     <>
       <PostTitle
+        post={post}
+        postActions={postActions}
         isSpeeching={editorRef.current?.isSpeeching()}
         mode={mode}
-        {...postHeaderEventsHandler}
+        {...postActionsHandlers}
       />
       {mode === "edit" && (
         <div className="mt-24 mx-md-16 mx-lg-64">

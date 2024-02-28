@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
-import { createPost, publishPost } from "~/services/api";
+import { useCreatePost, usePublishPost } from "~/services/queries";
 
 export interface CreatePostProps {
   blogId: string;
@@ -21,12 +21,14 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const navigate = useNavigate();
 
   const { mustSubmit } = useActionDefinitions([]);
+  const createMutation = useCreatePost(blogId);
+  const publishMutation = usePublishPost(blogId);
 
   const create = async () => {
-    const contentHtml = editorRef.current?.getContent("html") as string;
+    const content = editorRef.current?.getContent("html") as string;
     const title = titleRef.current?.value;
-    if (!blogId || !title || title.trim().length == 0 || !contentHtml) return;
-    return await createPost(blogId, title, contentHtml);
+    if (!blogId || !title || title.trim().length == 0 || !content) return;
+    return await createMutation.mutateAsync({ title, content });
   };
 
   const handleCancelClick = () => {
@@ -35,14 +37,14 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
 
   const handleSaveClick = async () => {
     const post = await create();
-    if (post) navigate(`../${post?._id}`);
+    if (post) navigate(`/id/${blogId}/post/${post?._id}`);
   };
 
   const handlePublishClick = async () => {
     const post = await create();
     if (post) {
-      await publishPost(blogId, post, mustSubmit);
-      navigate(`../..`);
+      await publishMutation.mutate({ post, mustSubmit });
+      navigate(`/id/${blogId}/post/${post?._id}`);
     }
   };
 

@@ -4,7 +4,6 @@ import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 import { postContentActions } from "~/config/postContentActions";
 import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
-import { PostProvider } from "~/features/Post/PostProvider";
 import { PostMetadata } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
 import { availableActionsQuery, postQuery } from "~/services/queries";
@@ -35,9 +34,9 @@ export function Component() {
   }
 
   return (
-    <PostProvider blogId={blogId} post={query.data}>
+    <>
       <PostHeader />
-      <PostContent />
-    </PostProvider>
+      <PostContent blogId={blogId} post={query.data} />
+    </>
   );
 }

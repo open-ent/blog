@@ -1,4 +1,9 @@
-import { ErrorCode, LayerName, odeServices } from "edifice-ts-client";
+import {
+  ErrorCode,
+  LayerName,
+  ERROR_CODE,
+  odeServices,
+} from "edifice-ts-client";
 
 export interface IBlogError {
   code: ErrorCode;
@@ -23,4 +28,18 @@ export function notifyError(error: IBlogError) {
     name: "error",
     data: error,
   });
+}
+
+export async function checkHttpError<T>(promise: Promise<T>) {
+  // odeServices.http() methods return never-failing promises.
+  // It is the responsability of the application to check for them.
+  const result = await promise;
+  if (!odeServices.http().isResponseError()) return result;
+
+  notifyError({
+    code: ERROR_CODE.TRANSPORT_ERROR,
+    text: odeServices.http().latestResponse.statusText,
+  });
+  // Throw an error here. React Query will use it effectively.
+  throw odeServices.http().latestResponse.statusText;
 }
