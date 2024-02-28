@@ -7,6 +7,8 @@ import {
   LoadingScreen,
   useToggle,
   BlogPublic,
+  ShareModal,
+  ShareBlog,
 } from "@edifice-ui/react";
 import { ACTION, ActionType } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
@@ -15,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
-import { useUpdateBlog } from "~/services/queries";
+import { useShareBlog, useUpdateBlog } from "~/services/queries";
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -31,6 +33,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const [isBarOpen, toggleBar] = useToggle();
   const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();
+  const [isShareModalOpen, toogleShareModalOpen] = useToggle();
 
   const handleAddClick = () => {
     navigate(`./post/edit`);
@@ -54,7 +57,12 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   };
 
   const handleShareClick = () => {
-    console.log("share click");
+    toogleShareModalOpen();
+  };
+
+  const handleShareClose = () => {
+    toogleShareModalOpen();
+    toggleBar();
   };
 
   const handlePrintClick = () => {
@@ -63,6 +71,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const { actions: availableActions } = useBlogActions(blog);
   const updateBlog = useUpdateBlog(blog);
+  const shareBlog = useShareBlog(blog);
 
   function isActionAvailable(action: ActionType) {
     return availableActions?.some((act) => act.id === action);
@@ -154,21 +163,32 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             onCancel={handleEditClose}
             onSuccess={handleEditClose}
           >
-            {(resource, isUpdating, watch, setValue, register) => {
-              return (
-                isActionAvailable(ACTION.CREATE_PUBLIC) && (
-                  <BlogPublic
-                    appCode="blog"
-                    isUpdating={isUpdating}
-                    resource={resource}
-                    watch={watch}
-                    setValue={setValue}
-                    register={register}
-                  />
-                )
-              );
-            }}
+            {(resource, isUpdating, watch, setValue, register) =>
+              isActionAvailable(ACTION.CREATE_PUBLIC) && (
+                <BlogPublic
+                  appCode="blog"
+                  isUpdating={isUpdating}
+                  resource={resource}
+                  watch={watch}
+                  setValue={setValue}
+                  register={register}
+                />
+              )
+            }
           </UpdateModal>
+        )}
+        {isShareModalOpen && (
+          <ShareModal
+            isOpen={isShareModalOpen}
+            resourceId={blog._id}
+            shareResource={shareBlog}
+            onCancel={handleShareClose}
+            onSuccess={handleShareClose}
+          >
+            {(ressource) => (
+              <ShareBlog resource={ressource} updateResource={updateBlog} />
+            )}
+          </ShareModal>
         )}
       </Suspense>
     </>
