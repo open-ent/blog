@@ -19,7 +19,7 @@ import { Post, PostState } from "~/models/post";
 import { usePostPageSize } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
-/** Query metadata of a blog */
+/** Query blog data */
 export const blogQuery = (blogId: string) => {
   return {
     queryKey: ["blog", blogId],

@@ -2,13 +2,20 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { postContentActions } from "~/config/postContentActions";
+import { CommentsCreate } from "~/features/Comments/CommentsCreate";
+import { CommentsHeader } from "~/features/Comments/CommentsHeader";
+import { CommentsList } from "~/features/Comments/CommentsList";
 import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
 import { PostMetadata } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
-import { availableActionsQuery, postQuery } from "~/services/queries";
+import {
+  availableActionsQuery,
+  commentListQuery,
+  postQuery,
+} from "~/services/queries";
 
-/** Load a blog post content */
+/** Load a blog post content + comments */
 export const loader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
@@ -18,6 +25,9 @@ export const loader =
     await queryClient.fetchQuery(actions);
 
     if (blogId && postId) {
+      const comments = commentListQuery(blogId, postId);
+      await queryClient.fetchQuery(comments);
+
       return await loadPostMetadata(blogId, postId);
     }
 
@@ -25,9 +35,10 @@ export const loader =
   };
 
 export function Component() {
-  const { blogId } = useParams();
+  const { blogId, postId } = useParams();
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const query = useQuery(postQuery(blogId!, postMetadata));
+  const { data: comments } = useQuery(commentListQuery(blogId!, postId!));
 
   if (!blogId || !query.data) {
     return <></>;
@@ -37,6 +48,11 @@ export function Component() {
     <>
       <PostHeader />
       <PostContent blogId={blogId} post={query.data} />
+      <div className="mx-md-16 mx-lg-64">
+        <CommentsHeader comments={comments ?? []} />
+        <CommentsCreate comments={comments ?? []} />
+        <CommentsList comments={comments ?? []} />
+      </div>
     </>
   );
 }
