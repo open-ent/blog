@@ -154,30 +154,24 @@ export const useActionDefinitions = (
       if (!availableActions || availableActions?.length === 0) return [];
 
       const isBlogAuthor = blog.author.userId === user?.userId;
-      const authorized: ActionType[] = [ACTION.PRINT];
-
-      // Managers have all rights
-      if (rights.creator || rights.manager) {
-        authorized.push(
-          ACTION.CREATE,
-          ACTION.CREATE_PUBLIC,
-          ACTION.DELETE,
-          ACTION.SHARE,
-          ACTION.EDIT,
+      const authorizedActions: IAction[] = availableActions.filter((action) =>
+        hasRight(action.id),
+      );
+      if (isBlogAuthor) {
+        const publishAction = availableActions.find(
+          (action) => action.id === ACTION.PUBLISH,
         );
-
-        if (isBlogAuthor) {
-          authorized.push(ACTION.PUBLISH);
+        if (
+          publishAction &&
+          !authorizedActions.some((action) => action.id === ACTION.PUBLISH)
+        ) {
+          authorizedActions.push(publishAction);
         }
       }
 
-      return (
-        availableActions?.filter(
-          (action) => authorized.indexOf(action.id) >= 0,
-        ) || []
-      );
+      return authorizedActions || [];
     },
-    [rights.creator, rights.manager, user?.userId, availableActions],
+    [availableActions, user?.userId, hasRight],
   );
 
   return {

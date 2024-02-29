@@ -1,15 +1,8 @@
 import { Suspense, lazy } from "react";
 
 import { Add, Options } from "@edifice-ui/icons";
-import {
-  Button,
-  IconButton,
-  LoadingScreen,
-  useToggle,
-  BlogPublic,
-  ShareModal,
-  ShareBlog,
-} from "@edifice-ui/react";
+import { Button, IconButton, useToggle } from "@edifice-ui/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ACTION, ActionType } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -17,23 +10,52 @@ import { useNavigate } from "react-router-dom";
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
-import { useShareBlog, useUpdateBlog } from "~/services/queries";
+import { blogQuery, useDeleteBlog } from "~/services/queries";
 
 export interface BlogActionBarProps {
   blog: Blog;
 }
 
 const UpdateModal = lazy(
-  async () => await import("~/features/ActionBar/Resource/ResourceModal"),
+  async () => await import("~/features/ActionBar/Modal/ResourceModal"),
+);
+
+const BlogPublic = lazy(
+  async () => await import("~/features/ActionBar/Modal/BlogPublic"),
+);
+
+const DeleteModal = lazy(
+  async () => await import("~/components/ConfirmModal/ConfirmModal"),
+);
+
+const PublishModal = lazy(
+  async () => await import("~/features/ActionBar/Modal/PublishModal"),
+);
+
+const ShareModal = lazy(
+  async () => await import("~/features/ActionBar/Modal/ShareModal"),
+);
+
+const ShareBlog = lazy(
+  async () => await import("~/features/ActionBar/Modal/ShareBlog"),
 );
 
 export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [isBarOpen, toggleBar] = useToggle();
   const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();
   const [isShareModalOpen, toogleShareModalOpen] = useToggle();
+  const [isPublishModalOpen, tooglePublishModalOpen] = useToggle();
+  const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
+
+  const invalidateQueries = () => {
+    queryClient.invalidateQueries(blogQuery(blog._id));
+  };
+
+  const deleteMutation = useDeleteBlog(blog._id);
 
   const handleAddClick = () => {
     navigate(`./post/edit`);
@@ -45,15 +67,33 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handleEditClose = () => {
     toogleUpdateModalOpen();
-    toggleBar();
+  };
+
+  const handleEditSuccess = () => {
+    invalidateQueries();
+    handleEditClose();
   };
 
   const handleDeleteClick = () => {
-    console.log("delete click");
+    toogleDeleteModalOpen();
+  };
+
+  const handleDeleteClose = () => {
+    toogleDeleteModalOpen();
+  };
+
+  const handleDeleteSuccess = () => {
+    deleteMutation.mutateAsync().then(() => {
+      navigate("../..");
+    });
   };
 
   const handlePublishClick = () => {
-    console.log("publish click");
+    tooglePublishModalOpen();
+  };
+
+  const handlePublishClose = () => {
+    tooglePublishModalOpen();
   };
 
   const handleShareClick = () => {
@@ -62,16 +102,18 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handleShareClose = () => {
     toogleShareModalOpen();
-    toggleBar();
+  };
+
+  const handleShareSuccess = () => {
+    invalidateQueries();
+    handleShareClose();
   };
 
   const handlePrintClick = () => {
-    console.log("print click");
+    window.open(`/id/${blog._id}/print`, "_blank");
   };
 
   const { actions: availableActions } = useBlogActions(blog);
-  const updateBlog = useUpdateBlog(blog);
-  const shareBlog = useShareBlog(blog);
 
   function isActionAvailable(action: ActionType) {
     return availableActions?.some((act) => act.id === action);
@@ -153,15 +195,14 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
         </ActionBarContainer>
       </div>
 
-      <Suspense fallback={<LoadingScreen />}>
+      <Suspense>
         {isUpdateModalOpen && (
           <UpdateModal
             mode="update"
             isOpen={isUpdateModalOpen}
             resourceId={blog._id}
-            updateResource={updateBlog}
             onCancel={handleEditClose}
-            onSuccess={handleEditClose}
+            onSuccess={handleEditSuccess}
           >
             {(resource, isUpdating, watch, setValue, register) =>
               isActionAvailable(ACTION.CREATE_PUBLIC) && (
@@ -181,14 +222,35 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           <ShareModal
             isOpen={isShareModalOpen}
             resourceId={blog._id}
-            shareResource={shareBlog}
             onCancel={handleShareClose}
-            onSuccess={handleShareClose}
+            onSuccess={handleShareSuccess}
           >
-            {(ressource) => (
-              <ShareBlog resource={ressource} updateResource={updateBlog} />
-            )}
+            {(ressource) => <ShareBlog resource={ressource} />}
           </ShareModal>
+        )}
+        {isPublishModalOpen && (
+          <PublishModal
+            isOpen={isPublishModalOpen}
+            resourceId={blog._id}
+            onCancel={handlePublishClose}
+            onSuccess={handlePublishClose}
+          />
+        )}
+        {isDeleteModalOpen && (
+          <DeleteModal
+            id="confirmDeleteModal"
+            isOpen={isDeleteModalOpen}
+            header={<>{t("blog.delete")}</>}
+            body={
+              <p className="body">
+                <p>{t("confirm.remove.blog")}</p>
+                {blog.visibility === "PUBLIC" &&
+                  t("confirm.remove.blog.publication")}
+              </p>
+            }
+            onSuccess={handleDeleteSuccess}
+            onCancel={handleDeleteClose}
+          />
         )}
       </Suspense>
     </>

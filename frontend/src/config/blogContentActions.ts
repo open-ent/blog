@@ -28,18 +28,20 @@ export const blogContentActions: Array<IActionDefinition> = [
   {
     id: ACTION.CREATE,
     workflow: workflows.create,
+    right: "manager",
     target: "tree",
   },
   {
     id: ACTION.CREATE_PUBLIC,
     workflow: workflows.createPublic,
+    right: "manager",
     target: "tree",
   },
   {
     id: ACTION.MOVE,
     workflow: workflows.access,
     target: "actionbar",
-    right: "read",
+    right: "manager",
   },
   {
     id: ACTION.PUBLISH,
@@ -57,6 +59,6 @@ export const blogContentActions: Array<IActionDefinition> = [
     id: ACTION.DELETE,
     workflow: workflows.access,
     target: "actionbar",
-    right: "read",
+    right: "manager",
   },
 ];

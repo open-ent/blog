@@ -1,6 +1,6 @@
-import { useShareMutation, useUpdateMutation } from "@edifice-ui/react";
 import {
   useInfiniteQuery,
+  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -8,13 +8,13 @@ import { IAction } from "edifice-ts-client";
 import { useParams } from "react-router-dom";
 
 import {
+  deleteBlog,
   loadBlog,
   loadBlogCounter,
   loadPostsList,
   sessionHasWorkflowRights,
 } from "../api/blog";
 import usePostsFilter from "~/hooks/usePostsFilter";
-import { Blog } from "~/models/blog";
 import { Post, PostState } from "~/models/post";
 import { usePostPageSize } from "~/store";
 import { IActionDefinition } from "~/utils/types";
@@ -37,14 +37,22 @@ export const blogCounterQuery = (blogId: string) => {
 export const postsListQuery = (
   blogId: string,
   pageSize?: number,
-  search?: string,
   state?: PostState,
+  search?: string,
+  nbComments: boolean = true,
 ) => {
-  const queryKey: any = state || search ? { state, search } : undefined;
+  const queryKey: any = {};
+  if (state) {
+    queryKey.state = state;
+  }
+  if (search) {
+    queryKey.search = search;
+  }
+
   return {
-    queryKey: ["postList", blogId, queryKey],
+    queryKey: ["postList", blogId, queryKey.length > 0 ? queryKey : undefined],
     queryFn: ({ pageParam = 0 }) =>
-      loadPostsList(blogId, pageParam, state ?? PostState.PUBLISHED, search),
+      loadPostsList(blogId, pageParam, state, search, nbComments),
     initialPageParam: 0,
     getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
       if (
@@ -117,11 +125,11 @@ export const useBlogCounter = (blogId?: string) => {
 };
 
 /**
- * useMetadataPostsList query
+ * usePostsList query
  * @param blogId the blog id string
- * @returns list of posts metadata
+ * @returns list of posts
  */
-export const usePostsList = (blogId?: string) => {
+export const usePostsList = (blogId?: string, getAll?: boolean) => {
   const params = useParams<{ blogId: string }>();
   const { postsFilters } = usePostsFilter();
   const pageSize = usePostPageSize();
@@ -134,7 +142,13 @@ export const usePostsList = (blogId?: string) => {
   }
 
   const query = useInfiniteQuery(
-    postsListQuery(blogId!, pageSize, postsFilters.search, postsFilters.state),
+    postsListQuery(
+      blogId!,
+      pageSize,
+      !getAll ? postsFilters.state : undefined,
+      !getAll ? postsFilters.search : undefined,
+      !getAll,
+    ),
   );
 
   return {
@@ -143,26 +157,15 @@ export const usePostsList = (blogId?: string) => {
   };
 };
 
-export const useUpdateBlog = (blog: Blog) => {
+export const useDeleteBlog = (blogId: string) => {
   const queryClient = useQueryClient();
-  return useUpdateMutation({
-    application: "blog",
-    options: {
-      onSuccess: async () => {
-        return queryClient.invalidateQueries(blogQuery(blog._id));
-      },
-    },
-  });
-};
-
-export const useShareBlog = (blog: Blog) => {
-  const queryClient = useQueryClient();
-  return useShareMutation({
-    application: "blog",
-    options: {
-      onSuccess: async () => {
-        return queryClient.invalidateQueries(blogQuery(blog._id));
-      },
-    },
+  return useMutation({
+    mutationFn: () => deleteBlog(blogId),
+    onSuccess: () =>
+      Promise.all([
+        // Deleting  some queries.
+        queryClient.removeQueries(postsListQuery(blogId)),
+        queryClient.removeQueries(blogCounterQuery(blogId)),
+      ]),
   });
 };

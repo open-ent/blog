@@ -12,8 +12,8 @@ import { postContentActions } from "~/config/postContentActions";
 import { Post } from "~/models/post";
 
 export interface PostContentProps {
-  blogId: string;
   post: Post;
+  blogId: string;
 }
 
 export const PostContent = ({ blogId, post }: PostContentProps) => {

@@ -158,7 +158,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
           <div className="flex-fill blog-post-preview">
             {summaryContentPlain}
           </div>
-          <div className="d-flex align-items-center justify-content-around gap-24 mx-32">
+          <div className="d-flex align-items-center justify-content-center gap-24 mx-32">
             {mediaURLs.slice(0, MAX_NUMBER_MEDIA_DISPLAY).map((url, index) => (
               <div
                 className={clsx("blog-post-image col-12 col-md-4 ", {

@@ -6,9 +6,10 @@ import { basename } from "~/routes";
 
 export interface BlogProps {
   blog: Blog;
+  print?: boolean;
 }
 
-export const BlogHeader = ({ blog }: BlogProps) => {
+export const BlogHeader = ({ blog, print }: BlogProps) => {
   return (
     <AppHeader>
       <div className="d-flex justify-content-between flex-fill ">
@@ -24,7 +25,7 @@ export const BlogHeader = ({ blog }: BlogProps) => {
           }}
           name={blog?.title}
         />
-        <BlogActionBar blog={blog} />
+        {!print && <BlogActionBar blog={blog} />}
       </div>
     </AppHeader>
   );

@@ -36,10 +36,14 @@ export function loadBlogCounter(blogId: string) {
 export function loadPostsList(
   blogId: string,
   page: number,
-  state: PostState,
+  state?: PostState,
   search?: string,
+  nbComments: boolean = true,
 ) {
-  let path = `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=true&states=${state}`;
+  let path = `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=${nbComments}`;
+  if (state) {
+    path += `&state=${state}`;
+  }
   if (search) {
     path += `&search=${search}`;
   }
@@ -54,3 +58,12 @@ export function loadPostsList(
 export const sessionHasWorkflowRights = async (actionRights: string[]) => {
   return await odeServices.rights().sessionHasWorkflowRights(actionRights);
 };
+
+/**
+ * Delete a blog
+ * @param blogId
+ * @returns
+ */
+export function deleteBlog(blogId: string) {
+  return checkHttpError(odeServices.http().delete<void>(`/blog/${blogId}`));
+}

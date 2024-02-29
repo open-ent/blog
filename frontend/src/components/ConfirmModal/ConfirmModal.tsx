@@ -14,6 +14,8 @@ interface ConfirmModalProps {
   isOpen: boolean;
   header: JSX.Element;
   body: JSX.Element;
+  okText?: string;
+  koText?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -24,6 +26,8 @@ export default function ConfirmModal({
   isOpen,
   header,
   body,
+  okText,
+  koText,
   onSuccess = () => ({}),
   onCancel = () => ({}),
 }: ConfirmModalProps) {
@@ -42,7 +46,7 @@ export default function ConfirmModal({
           type="button"
           variant="ghost"
         >
-          {ko[variant]}
+          {koText ? t(koText) : ko[variant]}
         </Button>
         <Button
           color="danger"
@@ -50,7 +54,7 @@ export default function ConfirmModal({
           type="button"
           variant="filled"
         >
-          {ok[variant]}
+          {okText ? t(okText) : ok[variant]}
         </Button>
       </Modal.Footer>
     </Modal>

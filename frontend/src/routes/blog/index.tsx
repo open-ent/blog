@@ -35,8 +35,8 @@ export const blogLoader =
     const queryPostsList = postsListQuery(
       params.blogId as string,
       0,
-      search,
       state,
+      search,
     );
 
     await Promise.all([
