@@ -39,7 +39,7 @@ export const CommentCard = ({ comment, className }: CommentProps) => {
               {t("post.dated.published", { date: fromNow(comment.created) })}
             </span>
           </div>
-          <div className="ms-">{comment.comment}</div>
+          <div>{comment.comment}</div>
         </div>
         <div>
           <Button variant="ghost" color="tertiary" size="sm">

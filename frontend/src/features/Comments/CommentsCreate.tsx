@@ -54,7 +54,7 @@ export const CommentsCreate = ({ comments }: CommentsCreateProps) => {
           />
           <div className="d-flex gap-12 justify-content-end align-items-center">
             <span className="small text-gray-700">
-              {inputLength}/{MAX_COMMENT_LENGTH}
+              {inputLength} / {MAX_COMMENT_LENGTH}
             </span>
             <Button leftIcon={<Send />} variant="ghost" size="lg">
               {t("blog.comment.post")}

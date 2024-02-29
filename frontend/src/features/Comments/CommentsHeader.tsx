@@ -11,9 +11,9 @@ export const CommentsHeader = ({ comments }: CommentsHeaderProps) => {
 
   return (
     <div className="d-flex justify-content-between align-items-center px-12 py-16">
-      <h2>
+      <h3>
         {comments.length} {t("blog.comments")}
-      </h2>
+      </h3>
     </div>
   );
 };

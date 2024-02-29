@@ -148,7 +148,7 @@ export const PostTitle = ({
 
       <div className={classes}>
         <h2>{post.title}</h2>
-        <div className="d-flex align-items-center gap-12 my-16 mt-md-8">
+        <div className="d-flex align-items-center gap-12 mb-16 mb-md-24 mt-8">
           <Avatar
             alt={t("post.author.avatar")}
             size="sm"

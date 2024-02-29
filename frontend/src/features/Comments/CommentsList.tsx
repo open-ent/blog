@@ -13,7 +13,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
   const { t } = useTranslation("blog");
 
   return comments.length ? (
-    <div>
+    <div className="mb-48">
       {comments.map((comment) => (
         <CommentCard key={comment.id} comment={comment} className="mt-16" />
       ))}
