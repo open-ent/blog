@@ -42,7 +42,7 @@ export function loadPostsList(
 ) {
   let path = `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=${nbComments}`;
   if (state) {
-    path += `&state=${state}`;
+    path += `&states=${state}`;
   }
   if (search) {
     path += `&search=${search}`;
