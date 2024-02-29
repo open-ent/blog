@@ -22,6 +22,7 @@ export type PostMetadata = {
   };
   state: PostState;
   views: number;
+  nbComments: number;
 };
 
 export type Post = PostMetadata & {

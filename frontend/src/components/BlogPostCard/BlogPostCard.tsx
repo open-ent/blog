@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
+import { MessageInfo, See } from "@edifice-ui/icons";
 import { Avatar, Badge, Card, Image, useDate } from "@edifice-ui/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -189,6 +190,18 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                   )}
               </div>
             ))}
+          </div>
+          <div className="d-flex justify-content-between">
+            <div className="d-flex gap-12 small text-gray-700">
+              <div className="d-flex align-items-center gap-8">
+                <span>{post.views}</span>
+                <See />
+              </div>
+              <div className="d-flex align-items-center gap-8 border border-gray-500 border-top-0 border-end-0 border-bottom-0 ps-12">
+                <span>{post.nbComments}</span>
+                <MessageInfo />
+              </div>
+            </div>
           </div>
         </div>
       </Card.Body>
