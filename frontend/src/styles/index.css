@@ -18,14 +18,15 @@ main {
   position: absolute;
   z-index: 0;
   top: 0;
-  height: 6px;
+  bottom: 0;
   left: 12px;
   border-left: 2px solid var(--edifice-secondary-300);
 }
 
 .summary-list-item:first-child:before {
-  border-color: transparent;
+  top: 8px;
 }
+
 .summary-list-item-date {
   padding-left: 26px;
 }
@@ -34,7 +35,8 @@ main {
   content: " ";
   border: 1.5px solid var(--edifice-secondary-300);
   border-radius: 3px;
-  background: transparent;
+  background: var(--edifice-white);
+  position: relative;
   z-index: 1;
   width: 10px;
   height: 10px;
@@ -42,22 +44,8 @@ main {
   margin: 0 8px;
 }
 
-.summary-list-item:after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  top: 15px;
-  bottom: 0;
-  left: 12px;
-  border-left: 2px solid var(--edifice-secondary-300);
-}
-
-.summary-list-item:last-child:after {
-  bottom: 0;
-}
-
 .blog-post-badge-highlight {
-  border-color: var(--edifice-card-selected);
+  border-color: var(--edifice-secondary-300) !important;
   border-width: 0.2rem;
 }
 

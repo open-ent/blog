@@ -101,7 +101,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
       }}
       ref={cardRef}
     >
-      <div className="d-flex gap-12 ">
+      <div className="d-flex gap-12">
         <div className="blog-post-user-image">
           <Avatar
             alt={t("Avatar utilisateur")}
@@ -110,7 +110,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
             variant="circle"
           />
         </div>
-        <div className="d-flex flex-column">
+        <div className="d-flex flex-column gap-2">
           <h5 className="d-flex align-items-center">
             {post.title}
             {post.state === PostState.DRAFT &&
@@ -139,10 +139,11 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
               </Badge>
             )}
           </h5>
-          <div className="text-gray-700 small gap-4 d-flex flex-column flex-md-row ">
-            <div>{post.author.username}</div>
-            <div className="d-none d-md-block ">|</div>
-            <div>{t("Envoyé le") + " " + displayDate(post.modified.$date)}</div>
+          <div className="text-gray-700 small gap-12 d-flex flex-column flex-md-row">
+            <span>{post.author.username}</span>
+            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
+              {t("Envoyé le") + " " + displayDate(post.modified.$date)}
+            </span>
           </div>
         </div>
       </div>
@@ -197,7 +198,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                 <span>{post.views}</span>
                 <See />
               </div>
-              <div className="d-flex align-items-center gap-8 border border-gray-500 border-top-0 border-end-0 border-bottom-0 ps-12">
+              <div className="d-flex align-items-center gap-8 border border-gray-600 border-top-0 border-end-0 border-bottom-0 ps-12">
                 <span>{post.nbComments}</span>
                 <MessageInfo />
               </div>

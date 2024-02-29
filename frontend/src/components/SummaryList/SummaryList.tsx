@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useDate } from "@edifice-ui/react";
+import clsx from "clsx";
 
 // TODO Move to edifice-ui (don't forget css) css
 
@@ -34,9 +35,11 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
 
   return (
     <>
-      {list.map((item) => (
+      {list.map((item, index) => (
         <div
-          className="pb-8 d-flex summary-list-item flex-column "
+          className={clsx("pb-8 d-flex summary-list-item flex-column", {
+            "pt-8": index !== 0,
+          })}
           key={item.id}
           onClick={() => {
             handleOnClick(item);

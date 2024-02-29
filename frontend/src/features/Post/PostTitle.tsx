@@ -157,8 +157,9 @@ export const PostTitle = ({
           />
           <div className="text-gray-700 small gap-2 d-flex flex-column flex-md-row">
             <span>{post.author.username}</span>
-            <span className="d-none d-md-block mx-8">&nbsp;|&nbsp;</span>
-            <span>{getDatedState(post)}</span>
+            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
+              {getDatedState(post)}
+            </span>
           </div>
         </div>
       </div>

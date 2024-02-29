@@ -10,7 +10,7 @@ export const CommentsHeader = ({ comments }: CommentsHeaderProps) => {
   const { t } = useTranslation("blog");
 
   return (
-    <div className="d-flex justify-content-between align-items-center px-12 py-16">
+    <div className="d-flex justify-content-between align-items-center px-12 pt-24 pb-16">
       <h3>
         {comments.length} {t("blog.comments")}
       </h3>
