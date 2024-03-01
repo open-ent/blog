@@ -187,7 +187,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleDeleteClick}
             >
-              {t("blog.delete.blog")}
+              {t("blog.delete")}
             </Button>
           ) : (
             <></>
