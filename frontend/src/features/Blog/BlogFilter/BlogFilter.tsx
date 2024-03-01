@@ -17,7 +17,7 @@ import { PostsFilters } from "~/models/postFilter";
 import { useBlogCounter } from "~/services/queries";
 
 export const BlogFilter = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("blog");
   const { postsFilters, setPostsFilters } = usePostsFilter();
 
   const [localPostsFilters, setLocalPostsFilter] =
@@ -55,8 +55,7 @@ export const BlogFilter = () => {
         }),
         children: (
           <span>
-            <span>{t("Publiés")} </span>
-            {counters?.countPublished}
+            {t("filters.published", { count: counters?.countPublished })}{" "}
           </span>
         ),
         onClick: () => {
@@ -74,7 +73,9 @@ export const BlogFilter = () => {
         }),
         children: (
           <>
-            <span>{t(creator || manager ? "À valider" : "Envoyés")} </span>
+            <span>
+              {t(creator || manager ? "filters.submitted" : "filters.sent")}{" "}
+            </span>
             {counters?.countSubmitted ? (
               <Badge
                 variant={{
@@ -102,10 +103,7 @@ export const BlogFilter = () => {
           "bg-primary-200 fw-bold": localPostsFilters.state === PostState.DRAFT,
         }),
         children: (
-          <>
-            <span>{t("Brouillons")} </span>
-            {counters?.countDraft}
-          </>
+          <span>{t("filters.drafts", { count: counters?.countDraft })} </span>
         ),
         onClick: () => {
           handleFilter(PostState.DRAFT);

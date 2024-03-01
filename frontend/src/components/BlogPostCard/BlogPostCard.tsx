@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { Post, PostState } from "~/models/post";
 import { useSidebarHighlightedPost } from "~/store";
-import { getAvatarURL } from "~/utils/PostUtils";
+import { getAvatarURL, getDatedKey } from "~/utils/PostUtils";
 
 export type BlogPostCardProps = {
   /**
@@ -38,9 +38,8 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   // Number of media to display on the preview card
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
 
-  const displayDate = (date: string) => {
-    return fromNow(date);
-  };
+  const getDatedState = (post: Post): string =>
+    t(getDatedKey(post.state), { date: fromNow(post.modified.$date) });
 
   const handleOnClick = (post: Post) => {
     navigate(`./post/${post?._id}`);
@@ -104,7 +103,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
       <div className="d-flex gap-12">
         <div className="blog-post-user-image">
           <Avatar
-            alt={t("Avatar utilisateur")}
+            alt={t("blog.author.avatar")}
             size="md"
             src={getAvatarURL(post)}
             variant="circle"
@@ -123,7 +122,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                     color: "text",
                   }}
                 >
-                  {t("Brouillon")}
+                  {t("draft")}
                 </Badge>
               )}
             {post.state === PostState.SUBMITTED && (
@@ -142,7 +141,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
           <div className="text-gray-700 small gap-12 d-flex flex-column flex-md-row">
             <span>{post.author.username}</span>
             <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
-              {t("Envoyé le") + " " + displayDate(post.modified.$date)}
+              {getDatedState(post)}
             </span>
           </div>
         </div>
@@ -186,7 +185,8 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                         },
                       )}
                     >
-                      + {mediaURLs.length - (index + 1)} {t("images")}
+                      + {mediaURLs.length - (index + 1)}{" "}
+                      {t("post.preview.media")}
                     </div>
                   )}
               </div>
