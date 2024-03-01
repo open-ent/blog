@@ -24,27 +24,32 @@ package org.entcore.blog.security;
 
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
-import org.entcore.blog.controllers.BlogController;
-import org.entcore.blog.controllers.PostController;
-import org.entcore.blog.services.PostService;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.Utils;
 import fr.wseduc.webutils.http.Binding;
-import org.entcore.common.http.filter.ResourcesProvider;
-import org.entcore.common.service.VisibilityFilter;
-import org.entcore.common.user.UserInfos;
-import org.entcore.common.utils.StringUtils;
-
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.entcore.blog.controllers.BlogController;
+import org.entcore.blog.controllers.PostController;
+import org.entcore.blog.services.PostService;
+import org.entcore.common.http.filter.ResourcesProvider;
+import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class BlogResourcesProvider implements ResourcesProvider {
+
+	protected static final Logger log = LoggerFactory.getLogger(BlogResourcesProvider.class);
 
 	private MongoDb mongo = MongoDb.getInstance();
 
@@ -147,58 +152,103 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			handler.handle(false);
 			return;
 		}
-		//
-		QueryBuilder query = QueryBuilder.start("_id").is(postId);
 		request.pause();
-		mongo.findOne("posts", MongoQueryBuilder.build(query), null, new JsonArray().add("blog"),
-				new Handler<Message<JsonObject>>() {
-					@Override
-					public void handle(Message<JsonObject> event) {
-						request.resume();
-						if ("ok".equals(event.body().getString("status"))) {
-							JsonObject res = event.body().getJsonObject("result");
-							if (res == null) {
-								handler.handle(false);
-								return;
-							}
-							/**
-							 * Is author?
-							 */
-							if (res.getJsonObject("author") != null
-									&& user.getUserId().equals(res.getJsonObject("author").getString("userId"))) {
-								handler.handle(true);
-								return;
-							}
-							if (res.getJsonObject("blog") != null
-									&& res.getJsonObject("blog").getJsonArray("shared") != null) {
-								/**
-								 * is author?
-								 */
-								String blogAuthorId = res.getJsonObject("blog")
-										.getJsonObject("author", new JsonObject()).getString("userId");
-								if (blogAuthorId != null && blogAuthorId.equals(user.getUserId())) {
-									handler.handle(true);
-									return;
-								}
-								/**
-								 * has right action?
-								 */
-								for (Object o : res.getJsonObject("blog").getJsonArray("shared")) {
-									if (!(o instanceof JsonObject))
-										continue;
-									JsonObject json = (JsonObject) o;
-									if (json != null && json.getBoolean(action, false)
-											&& (user.getUserId().equals(json.getString("userId"))
-													|| user.getGroupsIds().contains(json.getString("groupId")))) {
-										handler.handle(true);
-										return;
-									}
-								}
-							}
-							handler.handle(false);
-						}
+		hasRightsOnAllPosts(user.getUserId(), new HashSet<>(user.getGroupsIds()), Collections.singleton(postId), action)
+				.onComplete(event -> {
+					request.resume();
+					if (event.succeeded()) {
+						handler.handle(event.result());
+					} else {
+						log.error("Error while checking access rights on posts.", event.cause().getMessage());
 					}
-				});
+				}).onSuccess(handler);
+	}
+
+	public Future<Boolean> hasRightsOnAllPosts(final String userId, final Set<String> userGroups, final Set<String> postIds, String action) {
+		Promise<Boolean> promise = Promise.promise();
+		final JsonArray resourceIdsArray = new JsonArray();
+		postIds.forEach(resourceIdsArray::add);
+		final JsonObject postKeys = new JsonObject()
+				.put("author", 1)
+				.put("blog", 1);
+		final JsonObject blogKeys = new JsonObject()
+				.put("author", 1)
+				.put("shared", 1);
+		final QueryBuilder postsQuery = QueryBuilder.start("_id").in(resourceIdsArray);
+		// retrieve posts
+		mongo.find("posts", MongoQueryBuilder.build(postsQuery), null, postKeys, postsQueryResponse -> {
+			Either<String, JsonArray> postsQueryResult = Utils.validResults(postsQueryResponse);
+			if (postsQueryResult.isRight()) {
+				JsonArray posts = postsQueryResult.right().getValue();
+				if (posts.isEmpty()) {
+					promise.complete(false);
+				} else {
+					JsonArray blogIdsToBeChecked = getBlogIdsTobeChecked(posts, userId);
+					if (blogIdsToBeChecked.isEmpty()) {
+						// User is author of all posts and no posts needs to be checked on blog level
+						promise.complete(true);
+					} else {
+						// Check rights on blog level
+						final QueryBuilder blogQuery = QueryBuilder.start("_id").in(blogIdsToBeChecked);
+						mongo.find("blogs", MongoQueryBuilder.build(blogQuery), null, blogKeys, blogQueryResponse -> {
+							Either<String, JsonArray> blogQueryResult = Utils.validResults(blogQueryResponse);
+							if (blogQueryResult.isRight()) {
+								JsonArray blogs = blogQueryResult.right().getValue();
+								if (blogs.isEmpty()) {
+									promise.complete(false);
+								} else {
+									promise.complete(checkRightsOnAllBlogs(blogs, userGroups, userId, action));
+								}
+							} else {
+								promise.fail(blogQueryResult.left().getValue());
+							}
+						});
+					}
+				}
+			} else {
+				promise.fail(postsQueryResult.left().getValue());
+			}
+		});
+		return promise.future();
+	}
+
+	/**
+	 * Checks if user is author of a list of posts.
+	 * If not, returns the list of parent blog ids for which user is not author of post.
+	 * @param posts list of posts to be checked
+	 * @param userId id of user
+	 * @return the list of blog ids whose posts are not authored by user
+	 */
+	private JsonArray getBlogIdsTobeChecked(JsonArray posts, String userId) {
+		JsonArray blogIdsToBeChecked = new JsonArray();
+		posts.stream()
+				.filter(post -> !((JsonObject) post).getJsonObject("author").getString("userId").equals(userId))
+				.map(post -> ((JsonObject) post).getJsonObject("blog").getString("$id"))
+				.distinct()
+				.forEach(blogIdsToBeChecked::add);
+		return blogIdsToBeChecked;
+	}
+
+	/**
+	 * Checks if user has access rights on all blogs
+	 * @param blogs the blogs to be checked
+	 * @param userGroups the groups of the user
+	 * @param userId id of user
+	 * @param action right on resource
+	 * @return whether user has author or share rights on all blogs
+	 */
+	private boolean checkRightsOnAllBlogs(JsonArray blogs, Set<String> userGroups, String userId, String action) {
+		return blogs.stream().allMatch(blog -> {
+			JsonObject blogObject = (JsonObject) blog;
+			final boolean isBlogAuthor = blogObject.getJsonObject("author").getString("userId").equals(userId);
+			final boolean hasShareRights = blogObject.getJsonArray("shared").stream().anyMatch(rights -> {
+				JsonObject jsonRights = (JsonObject) rights;
+				return jsonRights.getBoolean(action, false) &&
+						(jsonRights.getString("userId").equals(userId)
+								|| userGroups.contains(jsonRights.getString("groupId")));
+			});
+			return isBlogAuthor || hasShareRights;
+		});
 	}
 
 	public static PostService.StateType getStateType(HttpServerRequest request) {

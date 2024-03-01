@@ -42,11 +42,14 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.explorer.PostExplorerPlugin;
+import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.to.PostFilter;
 import org.entcore.blog.to.PostProjection;
+import org.entcore.common.audience.to.AudienceCheckRightRequestMessage;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
@@ -291,6 +294,11 @@ public class DefaultPostService implements PostService {
 				}
 		});
 		return promise.future();
+	}
+
+	@Override
+	public void list(String blogId, UserInfos user, Integer page, int limit, String search, Set<String> states, Handler<Either<String, JsonArray>> result) {
+		PostService.super.list(blogId, user, page, limit, search, states, result);
 	}
 
 	/**
@@ -975,5 +983,14 @@ public class DefaultPostService implements PostService {
 				}
 			}
 		}));
+	}
+
+	@Override
+	public Future<Boolean> apply(AudienceCheckRightRequestMessage audienceCheckRightRequestMessage) {
+		final BlogResourcesProvider blogResourcesProvider = new BlogResourcesProvider();
+		final String userId = audienceCheckRightRequestMessage.getUserId();
+		final Set<String> userGroups = audienceCheckRightRequestMessage.getUserGroups();
+
+		return blogResourcesProvider.hasRightsOnAllPosts(userId, userGroups, audienceCheckRightRequestMessage.getResourceIds(), PostController.LIST_ACTION);
 	}
 }

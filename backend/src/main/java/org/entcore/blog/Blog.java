@@ -27,6 +27,7 @@ import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.transformer.ContentTransformerFactoryProvider;
 import fr.wseduc.transformer.IContentTransformerClient;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.LocalMap;
 import static java.util.Optional.empty;
@@ -40,6 +41,7 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.explorer.IExplorerPluginClient;
 import org.entcore.common.explorer.impl.ExplorerRepositoryEvents;
@@ -58,6 +60,7 @@ public class Blog extends BaseServer {
     public static final String POSTS_COLLECTION = "posts";
     public static final String BLOGS_COLLECTION = "blogs";
     BlogExplorerPlugin blogPlugin;
+    private MessageConsumer<Object> audiencheRightChecker;
 
     @Override
     public void start() throws Exception {
@@ -101,6 +104,7 @@ public class Blog extends BaseServer {
             addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
         blogPlugin.start();
+        audiencheRightChecker = AudienceHelper.listenForRightsCheck("blog", "post", vertx, postService);
     }
 
     private Optional<JsonObject> getContentTransformerConfig(final Vertx vertx) {
@@ -120,6 +124,9 @@ public class Blog extends BaseServer {
         super.stop();
         if(blogPlugin != null){
             blogPlugin.stop();
+        }
+        if(audiencheRightChecker != null) {
+            audiencheRightChecker.unregister();
         }
     }
 }

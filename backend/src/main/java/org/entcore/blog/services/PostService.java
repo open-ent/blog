@@ -26,6 +26,7 @@ import fr.wseduc.webutils.Either;
 import io.vertx.core.Future;
 import org.entcore.blog.to.PostFilter;
 import org.entcore.blog.to.PostProjection;
+import org.entcore.common.audience.AudienceRightChecker;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
@@ -35,7 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-public interface PostService {
+public interface PostService extends AudienceRightChecker {
 
 	enum StateType {
 		DRAFT, SUBMITTED, PUBLISHED
