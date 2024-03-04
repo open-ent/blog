@@ -1,6 +1,6 @@
 import { AppHeader, Breadcrumb } from "@edifice-ui/react";
 
-import { BlogActionBar } from "../BlogActionBar/BlogActionBar";
+import { BlogActionBar } from "./BlogActionBar";
 import { Blog } from "~/models/blog";
 import { basename } from "~/routes";
 

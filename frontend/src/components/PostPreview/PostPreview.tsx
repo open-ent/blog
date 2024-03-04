@@ -13,14 +13,14 @@ import { Post, PostState } from "~/models/post";
 import { useSidebarHighlightedPost } from "~/store";
 import { getAvatarURL, getDatedKey } from "~/utils/PostUtils";
 
-export type BlogPostCardProps = {
+export type PostPreviewProps = {
   /**
    * Post to display
    */
   post: Post;
 };
 
-export const BlogPostCard = ({ post }: BlogPostCardProps) => {
+export const PostPreview = ({ post }: PostPreviewProps) => {
   const { fromNow } = useDate();
   const { t } = useTranslation("blog");
 

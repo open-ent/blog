@@ -10,7 +10,7 @@ import {
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
-import { useActionDefinitions } from "../../ActionBar/useActionDefinitions";
+import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
 import { PostsFilters } from "~/models/postFilter";

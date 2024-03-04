@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Button, EmptyScreen, usePaths } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
-import { BlogPostCard } from "~/components/BlogPostCard/BlogPostCard";
+import { PostPreview } from "~/components/PostPreview/PostPreview";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
@@ -74,7 +74,7 @@ const BlogPostList = () => {
           />
         </div>
       )}
-      {posts?.map((post) => <BlogPostCard key={post._id} post={post} />)}
+      {posts?.map((post) => <PostPreview key={post._id} post={post} />)}
       {hasNextPage && (
         <div className="d-flex justify-content-center">
           <Button

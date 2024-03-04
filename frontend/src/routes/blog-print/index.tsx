@@ -8,7 +8,7 @@ import { LoaderFunctionArgs } from "react-router-dom";
 
 import { blogContentActions } from "~/config/blogContentActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import { BlogHeader } from "~/features/Blog/BlogHeader/BlogHeader";
+import { BlogHeader } from "~/features/Blog/BlogHeader";
 import { PostTitle } from "~/features/Post/PostTitle";
 import {
   availableActionsQuery,
