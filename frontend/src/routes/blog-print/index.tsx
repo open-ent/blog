@@ -49,8 +49,6 @@ export function BlogPrint() {
     query: { fetchNextPage, hasNextPage, isSuccess, data },
   } = usePostsList(blog?._id, true);
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     if (!hasRight(ACTION.PRINT)) {
       window.close();

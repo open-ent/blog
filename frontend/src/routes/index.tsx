@@ -60,7 +60,7 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
     errorElement: <PageError />,
   },
   {
-    path: "/id/:blogId/print",
+    path: "/print/id/:blogId",
     async lazy() {
       const { BlogPrint, blogPrintLoader } = await import(
         "~/routes/blog-print"
@@ -68,6 +68,18 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       return {
         loader: blogPrintLoader(queryClient),
         Component: BlogPrint,
+      };
+    },
+  },
+  {
+    path: "/print/:blogId/post/:postId",
+    async lazy() {
+      const { PostPrint, postPrintLoader } = await import(
+        "~/routes/post-print"
+      );
+      return {
+        loader: postPrintLoader(queryClient),
+        Component: PostPrint,
       };
     },
   },
