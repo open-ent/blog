@@ -22,7 +22,7 @@ export type BlogPostCardProps = {
 
 export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   const { fromNow } = useDate();
-  const { t } = useTranslation();
+  const { t } = useTranslation("blog");
 
   const sidebarHighlightedPost = useSidebarHighlightedPost();
   const { contrib, manager, creator } = useActionDefinitions([]);
@@ -39,7 +39,9 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
 
   const getDatedState = (post: Post): string =>
-    t(getDatedKey(post.state), { date: fromNow(post.modified.$date) });
+    t(getDatedKey(post.state), {
+      date: fromNow(post.modified.$date),
+    });
 
   const handleOnClick = (post: Post) => {
     navigate(`./post/${post?._id}`);
@@ -134,7 +136,7 @@ export const BlogPostCard = ({ post }: BlogPostCardProps) => {
                   color: "text",
                 }}
               >
-                {t(creator || manager ? "À valider" : "Envoyés")}
+                {t(creator || manager ? "filters.submitted" : "filters.sent")}
               </Badge>
             )}
           </h5>
