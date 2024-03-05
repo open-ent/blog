@@ -49,6 +49,7 @@ import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.to.PostFilter;
 import org.entcore.blog.to.PostProjection;
+import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.audience.to.AudienceCheckRightRequestMessage;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
@@ -85,13 +86,15 @@ public class DefaultPostService implements PostService {
 	private final int searchWordMinSize;
 	private final PostExplorerPlugin plugin;
 	private final IContentTransformerClient contentTransformerClient;
+	private final AudienceHelper audienceHelper;
 
-	public DefaultPostService(MongoDb mongo, int searchWordMinSize, String listPostAction, final PostExplorerPlugin plugin, IContentTransformerClient contentTransformerClient) {
+	public DefaultPostService(MongoDb mongo, int searchWordMinSize, String listPostAction, final PostExplorerPlugin plugin, IContentTransformerClient contentTransformerClient, AudienceHelper audienceHelper) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.listPostAction = listPostAction;
 		this.searchWordMinSize = searchWordMinSize;
 		this.contentTransformerClient = contentTransformerClient;
+		this.audienceHelper = audienceHelper;
 	}
 
 	@Override
@@ -270,6 +273,8 @@ public class DefaultPostService implements PostService {
 				}
 				result.handle(Utils.validResult(event));
 			});
+			audienceHelper.notifyResourcesDeletion("blog", "post", Collections.singleton(postId))
+					.onFailure(th -> log.error("Failed to notify audience of post deletion", th));
 		});
 	}
 

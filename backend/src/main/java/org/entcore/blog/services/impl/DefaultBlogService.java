@@ -38,6 +38,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
+import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.explorer.IdAndVersion;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.service.VisibilityFilter;
@@ -46,6 +47,7 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -59,12 +61,15 @@ public class DefaultBlogService implements BlogService{
 	private final PostService postService;
 	private final BlogExplorerPlugin plugin;
 
-	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, BlogExplorerPlugin plugin) {
+	private final AudienceHelper audienceHelper;
+
+	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, BlogExplorerPlugin plugin, AudienceHelper audienceHelper) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.pagingSize = pagingSize;
 		this.postService = postService;
 		this.searchWordMinSize = searchWordMinSize;
+		this.audienceHelper = audienceHelper;
 	}
 
 	@Override
@@ -170,28 +175,36 @@ public class DefaultBlogService implements BlogService{
 	public void delete(UserInfos user, final String blogId, final Handler<Either<String, JsonObject>> result) {
 		final long now = currentTimeMillis();
 		QueryBuilder q = QueryBuilder.start("blog.$id").is(blogId);
-		mongo.delete("posts", MongoQueryBuilder.build(q), new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> res) {
-				if ("ok".equals(res.body().getString("status"))) {
-					QueryBuilder query = QueryBuilder.start("_id").is(blogId);
-					mongo.delete(BLOG_COLLECTION, MongoQueryBuilder.build(query), event-> {
-						final Either<String, JsonObject> either = Utils.validResult(event);
-						if(either.isLeft()){
-							log.error("Failed to delete blog: ", either.left().getValue());
-							result.handle(either);
-						}else{
-							plugin.notifyDeleteById(user, new IdAndVersion(blogId, now)).onComplete(e->{
-								if(e.failed()){
-									log.error("Failed to notify delete blog: ", e.cause());
-								}
+		mongo.find("posts", MongoQueryBuilder.build(q), null, new JsonObject().put("_id", 1), findPostsResults -> {
+			Either<String, JsonObject> validFindPostsResult = Utils.validResult(findPostsResults);
+			if (validFindPostsResult.isRight()) {
+				Set<String> ids = validFindPostsResult.right().getValue().getJsonArray("results").stream().map(r -> ((JsonObject) r).getString("_id")).collect(Collectors.toSet());
+				audienceHelper.notifyResourcesDeletion("blog", "posts", ids)
+						.onFailure(th -> log.error("Failed to notify audience of deletion of posts : " + ids, th));
+				mongo.delete("posts", MongoQueryBuilder.build(q), deletePostsResult -> {
+					Either<String, JsonObject> validatedResult = Utils.validResult(deletePostsResult);
+					if (validatedResult.isRight()) {
+						QueryBuilder query = QueryBuilder.start("_id").is(blogId);
+						mongo.delete(BLOG_COLLECTION, MongoQueryBuilder.build(query), event -> {
+							final Either<String, JsonObject> either = Utils.validResult(event);
+							if(either.isLeft()){
+								log.error("Failed to delete blog: ", either.left().getValue());
 								result.handle(either);
-							});
-						}
-					});
-				} else {
-					result.handle(Utils.validResult(res));
-				}
+							}else{
+								plugin.notifyDeleteById(user, new IdAndVersion(blogId, now)).onComplete(e->{
+									if(e.failed()){
+										log.error("Failed to notify delete blog: ", e.cause());
+									}
+									result.handle(either);
+								});
+							}
+						});
+					} else {
+						result.handle(validatedResult);
+					}
+				});
+			} else {
+				result.handle(validFindPostsResult);
 			}
 		});
 	}

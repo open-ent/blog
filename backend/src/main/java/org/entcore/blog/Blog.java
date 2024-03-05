@@ -60,7 +60,7 @@ public class Blog extends BaseServer {
     public static final String POSTS_COLLECTION = "posts";
     public static final String BLOGS_COLLECTION = "blogs";
     BlogExplorerPlugin blogPlugin;
-    private MessageConsumer<Object> audiencheRightChecker;
+    private MessageConsumer<Object> audienceRightChecker;
 
     @Override
     public void start() throws Exception {
@@ -93,9 +93,10 @@ public class Blog extends BaseServer {
         blogPlugin = BlogExplorerPlugin.create(securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
-        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient);
+        AudienceHelper audienceHelper = new AudienceHelper(vertx);
+        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, audienceHelper);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
-                config.getInteger("blog-search-word-min-size", 4), blogPlugin);
+                config.getInteger("blog-search-word-min-size", 4), blogPlugin, audienceHelper);
         addController(new BlogController(mongo, blogService, postService));
         addController(new PostController(blogService, postService));
         if(config().getBoolean("use-explorer-folder-api", true)){
@@ -104,7 +105,7 @@ public class Blog extends BaseServer {
             addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
         blogPlugin.start();
-        audiencheRightChecker = AudienceHelper.listenForRightsCheck("blog", "post", vertx, postService);
+        audienceRightChecker = audienceHelper.listenForRightsCheck("blog", "post", postService);
     }
 
     private Optional<JsonObject> getContentTransformerConfig(final Vertx vertx) {
@@ -125,8 +126,8 @@ public class Blog extends BaseServer {
         if(blogPlugin != null){
             blogPlugin.stop();
         }
-        if(audiencheRightChecker != null) {
-            audiencheRightChecker.unregister();
+        if(audienceRightChecker != null) {
+            audienceRightChecker.unregister();
         }
     }
 }

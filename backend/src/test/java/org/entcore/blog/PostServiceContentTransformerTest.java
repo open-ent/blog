@@ -27,6 +27,7 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.blog.to.PostFilter;
+import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -71,7 +72,7 @@ public class PostServiceContentTransformerTest {
     static final int POST_SEARCH_WORD = 4;
     static Map<String, Object> data = new HashMap<>();
     static final UserInfos user = test.directory().generateUser("user");
-
+    static AudienceHelper audienceHelper;
     static final int nbTimesGetSamePost = 10;
 
     @BeforeClass
@@ -88,10 +89,11 @@ public class PostServiceContentTransformerTest {
         final Map<String, SecuredAction> securedActions = test.share().getSecuredActions(context);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
+        audienceHelper = new AudienceHelper(test.vertx());
         contentTransformerClient = new DummyContentTransformerClient();
         data.put("BLOGID1", "blog-id-1");
-        postService = new DefaultPostService(mongoDb, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, contentTransformerClient);
-        blogService = new DefaultBlogService(mongoDb, postService, 20, 3, blogPlugin);
+        postService = new DefaultPostService(mongoDb, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, contentTransformerClient, audienceHelper);
+        blogService = new DefaultBlogService(mongoDb, postService, 20, 3, blogPlugin, audienceHelper);
     }
 
 

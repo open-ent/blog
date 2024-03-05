@@ -20,6 +20,7 @@ import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -56,6 +57,7 @@ public class FolderControllerExplorerTest {
     static final UserInfos user2 = test.directory().generateUser("user-foldercontroller2");
     static final UserInfos user3 = test.directory().generateUser("user-foldercontroller3");
     static final UserInfos user4 = test.directory().generateUser("user-foldercontroller4");
+    static AudienceHelper audienceHelper;
 
     @BeforeClass
     public static void setUp(TestContext context) throws Exception {
@@ -75,9 +77,10 @@ public class FolderControllerExplorerTest {
         final MongoClient mongoClient = test.database().createMongoClient(mongoDBContainer);
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
-        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop);
+        audienceHelper = new AudienceHelper(test.vertx());
+        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop, audienceHelper);
         controllerExplorer = new FoldersControllerExplorer(test.vertx(), blogPlugin);
-        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin);
+        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
     }
 
 
