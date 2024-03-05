@@ -1,10 +1,15 @@
 import { useMemo } from "react";
 
-import { ACTION, IAction } from "edifice-ts-client";
+import { ACTION, ActionType, IAction } from "edifice-ts-client";
 
 import { useActionDefinitions } from "./useActionDefinitions";
-import { Post } from "~/models/post";
-import { useDeletePost, usePublishPost, useSavePost } from "~/services/queries";
+import { Post, PostMetadata } from "~/models/post";
+import {
+  useDeletePost,
+  useGoUpPost,
+  usePublishPost,
+  useSavePost,
+} from "~/services/queries";
 import { IActionDefinition } from "~/utils/types";
 
 export interface PostActions {
@@ -16,12 +21,18 @@ export interface PostActions {
   canPublish: boolean;
   /** Truthy if the user should not alter the post. */
   readOnly: boolean;
+  /** Truthy if the user can do the action
+   * @param action - The action to check
+   */
+  isActionAvailable: (action: ActionType) => boolean;
   /** Action to save a post as draft; invalidates cached queries if needed. */
-  save: () => void;
+  save: () => Promise<PostMetadata>;
   /** Action to delete a post; invalidates cached queries if needed. */
-  trash: () => void;
+  trash: () => Promise<void>;
   /** Action to publish or submit a post; invalidates cached queries if needed. */
-  publish: () => void;
+  publish: () => Promise<Post>;
+  /** Action to move up a post; invalidates cached queries if needed. */
+  goUp: () => Promise<PostMetadata>;
 }
 
 export const usePostActions = (
@@ -40,17 +51,21 @@ export const usePostActions = (
   const saveMutation = useSavePost(blogId, post);
   const deleteMutation = useDeletePost(blogId, post._id);
   const publishMutation = usePublishPost(blogId);
+  const goUpMutation = useGoUpPost(blogId, post._id);
 
   return {
     actions,
     mustSubmit,
+    isActionAvailable: (action: ActionType) =>
+      !!actions && actions.findIndex((a) => a.id === action) >= 0,
     readOnly:
       !!actions && actions.findIndex((action) => action.id === ACTION.OPEN) < 0,
     canPublish:
       !!actions &&
       actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0,
-    save: () => saveMutation.mutate(),
-    trash: () => deleteMutation.mutate(),
-    publish: () => publishMutation.mutate({ post, mustSubmit }),
+    save: () => saveMutation.mutateAsync(),
+    trash: () => deleteMutation.mutateAsync(),
+    publish: () => publishMutation.mutateAsync({ post, mustSubmit }),
+    goUp: () => goUpMutation.mutateAsync(),
   };
 };

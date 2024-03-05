@@ -16,7 +16,7 @@ import {
 } from "../api/blog";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { Post, PostState } from "~/models/post";
-import { usePostPageSize } from "~/store";
+import { useBlogState } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
 /** Query blog data */
@@ -161,7 +161,7 @@ export const useBlogCounter = (blogId?: string) => {
 export const usePostsList = (blogId?: string, getAll?: boolean) => {
   const params = useParams<{ blogId: string }>();
   const { postsFilters } = usePostsFilter();
-  const pageSize = usePostPageSize();
+  const { postPageSize } = useBlogState();
 
   if (!blogId) {
     if (!params.blogId) {
@@ -173,7 +173,7 @@ export const usePostsList = (blogId?: string, getAll?: boolean) => {
   const query = useInfiniteQuery(
     postsListQuery(
       blogId!,
-      pageSize,
+      postPageSize,
       !getAll ? postsFilters.state : undefined,
       !getAll ? postsFilters.search : undefined,
       !getAll,

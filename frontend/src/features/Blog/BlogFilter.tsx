@@ -123,7 +123,7 @@ export const BlogFilter = () => {
       {(manager || creator || contrib) && (
         <Toolbar
           variant="no-shadow"
-          className="ps-4 py-2 ms-md-16 border border-primary-200 rounded-3 blog-filter-toolbar"
+          className="ps-4 py-2 ms-md-16 border border-primary-200 rounded-3 blog-filter-toolbar flex-wrap flex-md-nowrap row-gap-4"
           items={filterToolbar}
         ></Toolbar>
       )}

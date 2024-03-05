@@ -110,7 +110,7 @@ export const useActionDefinitions = (
       }
       return true;
     },
-    [rights],
+    [availableActions, rights],
   );
 
   /** Filter function the actions the current user can use on a post. */

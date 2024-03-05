@@ -8,20 +8,21 @@ import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions"
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
 import { useBlogCounter, usePostsList } from "~/services/queries";
-import { useSidebarHighlightedPost } from "~/store";
+import { useBlogState } from "~/store";
 
 const BlogPostList = () => {
   const { t } = useTranslation("blog");
   const [imagePath] = usePaths();
 
+  const { creator, manager } = useActionDefinitions([]);
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
   } = usePostsList();
-  const sidebarHighlightedPost = useSidebarHighlightedPost();
   const { postsFilters } = usePostsFilter();
-  const { creator, manager } = useActionDefinitions([]);
   const { counters } = useBlogCounter();
+
+  const { sidebarHighlightedPost } = useBlogState();
 
   useEffect(() => {
     if (sidebarHighlightedPost) {
@@ -74,7 +75,9 @@ const BlogPostList = () => {
           />
         </div>
       )}
-      {posts?.map((post) => <PostPreview key={post._id} post={post} />)}
+      {posts?.map((post, index) => (
+        <PostPreview key={post._id} post={post} index={index} />
+      ))}
       {hasNextPage && (
         <div className="d-flex justify-content-center">
           <Button

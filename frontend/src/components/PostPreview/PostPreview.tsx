@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
 import { MessageInfo, See } from "@edifice-ui/icons";
@@ -8,9 +8,11 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
+import { PostPreviewActionBar } from "./PostPreviewActionBar";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { Post, PostState } from "~/models/post";
-import { useSidebarHighlightedPost } from "~/store";
+import { useBlog } from "~/services/queries";
+import { useBlogState, useStoreUpdaters } from "~/store";
 import { getAvatarURL, getDatedKey } from "~/utils/PostUtils";
 
 export type PostPreviewProps = {
@@ -18,15 +20,22 @@ export type PostPreviewProps = {
    * Post to display
    */
   post: Post;
+  /**
+   * Index of the post in the list
+   */
+  index: number;
 };
 
-export const PostPreview = ({ post }: PostPreviewProps) => {
+export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const { fromNow } = useDate();
   const { t } = useTranslation("blog");
-
-  const sidebarHighlightedPost = useSidebarHighlightedPost();
-  const { contrib, manager, creator } = useActionDefinitions([]);
   const navigate = useNavigate();
+
+  const { blog } = useBlog();
+  const { contrib, manager, creator } = useActionDefinitions([]);
+  const { setActionBarPostId } = useStoreUpdaters();
+  const { sidebarHighlightedPost } = useBlogState();
+  const { actionBarPostId } = useBlogState();
 
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -38,14 +47,23 @@ export const PostPreview = ({ post }: PostPreviewProps) => {
   // Number of media to display on the preview card
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
 
-  const getDatedState = (post: Post): string =>
+  const getDatedState = (): string =>
     t(getDatedKey(post.state), {
       date: fromNow(post.modified.$date),
     });
 
-  const handleOnClick = (post: Post) => {
+  const handleCardClick = () => {
     navigate(`./post/${post?._id}`);
   };
+
+  const handleCardSelect = useCallback(() => {
+    if (actionBarPostId === post._id) {
+      setActionBarPostId();
+    } else {
+      setActionBarPostId(post._id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionBarPostId]);
 
   useEffect(() => {
     if (sidebarHighlightedPost?._id === post._id) {
@@ -95,119 +113,135 @@ export const PostPreview = ({ post }: PostPreviewProps) => {
   });
 
   return (
-    <Card
-      className={classes}
-      onClick={() => {
-        handleOnClick(post);
-      }}
-      ref={cardRef}
-    >
-      <div className="d-flex gap-12">
-        <div className="blog-post-user-image">
-          <Avatar
-            alt={t("blog.author.avatar")}
-            size="md"
-            src={getAvatarURL(post)}
-            variant="circle"
-          />
-        </div>
-        <div className="d-flex flex-column gap-2">
-          <h5 className="d-flex align-items-center">
-            {post.title}
-            {post.state === PostState.DRAFT &&
-              (creator || manager || contrib) && (
+    <>
+      <Card
+        className={classes}
+        isSelected={actionBarPostId === post._id}
+        onClick={() => {
+          handleCardClick();
+        }}
+        onSelect={() => {
+          handleCardSelect();
+        }}
+        isSelectable={true}
+        ref={cardRef}
+      >
+        <div className="d-flex gap-12">
+          <div className="blog-post-user-image">
+            <Avatar
+              alt={t("blog.author.avatar")}
+              size="md"
+              src={getAvatarURL(post)}
+              variant="circle"
+            />
+          </div>
+          <div className="d-flex flex-column gap-2">
+            <h5 className="d-flex align-items-center">
+              {post.title}
+              {post.state === PostState.DRAFT &&
+                (creator || manager || contrib) && (
+                  <Badge
+                    className="ms-8"
+                    variant={{
+                      type: "notification",
+                      level: "info",
+                      color: "text",
+                    }}
+                  >
+                    {t("draft")}
+                  </Badge>
+                )}
+              {post.state === PostState.SUBMITTED && (
                 <Badge
-                  className="ms-8"
+                  className="blog-post-badge ms-8"
                   variant={{
                     type: "notification",
-                    level: "info",
+                    level: "warning",
                     color: "text",
                   }}
                 >
-                  {t("draft")}
+                  {t(creator || manager ? "filters.submitted" : "filters.sent")}
                 </Badge>
               )}
-            {post.state === PostState.SUBMITTED && (
-              <Badge
-                className="blog-post-badge ms-8"
-                variant={{
-                  type: "notification",
-                  level: "warning",
-                  color: "text",
-                }}
-              >
-                {t(creator || manager ? "filters.submitted" : "filters.sent")}
-              </Badge>
-            )}
-          </h5>
-          <div className="text-gray-700 small gap-12 d-flex flex-column flex-md-row">
-            <span>{post.author.username}</span>
-            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
-              {getDatedState(post)}
-            </span>
-          </div>
-        </div>
-      </div>
-      <Card.Body space="0">
-        <div className="d-flex flex-fill flex-column gap-16 pt-16">
-          <div className="d-none">
-            <Editor
-              ref={editorRef}
-              content={summaryContent}
-              mode="read"
-              variant="ghost"
-            />
-          </div>
-          <div className="flex-fill blog-post-preview">
-            {summaryContentPlain}
-          </div>
-          <div className="d-flex align-items-center justify-content-center gap-24 mx-32">
-            {mediaURLs.slice(0, MAX_NUMBER_MEDIA_DISPLAY).map((url, index) => (
-              <div
-                className={clsx("blog-post-image col-12 col-md-4 ", {
-                  "d-none d-md-block": index >= 1,
-                })}
-                key={url}
-              >
-                <Image
-                  alt=""
-                  objectFit="cover"
-                  ratio="16"
-                  className="rounded"
-                  src={url}
-                />
-                {(index === 0 || index === 2) &&
-                  mediaURLs.length - (index + 1) > 0 && (
-                    <div
-                      className={clsx(
-                        "position-absolute top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center rounded text-light bg-dark bg-opacity-50",
-                        {
-                          "d-flex d-md-none": index === 0,
-                          "d-none d-md-flex": index === 2,
-                        },
-                      )}
-                    >
-                      + {mediaURLs.length - (index + 1)}{" "}
-                      {t("post.preview.media")}
-                    </div>
-                  )}
-              </div>
-            ))}
-          </div>
-          <div className="d-flex justify-content-between">
-            <div className="d-flex gap-12 small text-gray-700">
-              <div className="d-flex align-items-center gap-8">
-                <span>{post.views}</span>
-                <See />
-              </div>
-              <div className="d-flex align-items-center gap-8 border border-gray-600 border-top-0 border-end-0 border-bottom-0 ps-12">
-                <span>{post.nbComments}</span>
-                <MessageInfo />
-              </div>
+            </h5>
+            <div className="text-gray-700 small gap-12 d-flex flex-column flex-md-row">
+              <span>{post.author.username}</span>
+              <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
+                {getDatedState()}
+              </span>
             </div>
           </div>
         </div>
-      </Card.Body>
-    </Card>
+        <Card.Body space="0">
+          <div className="d-flex flex-fill flex-column gap-16 pt-16">
+            <div className="d-none">
+              <Editor
+                ref={editorRef}
+                content={summaryContent}
+                mode="read"
+                variant="ghost"
+              />
+            </div>
+            <div className="flex-fill blog-post-preview">
+              {summaryContentPlain}
+            </div>
+            <div className="d-flex align-items-center justify-content-center gap-24 mx-32">
+              {mediaURLs
+                .slice(0, MAX_NUMBER_MEDIA_DISPLAY)
+                .map((url, index) => (
+                  <div
+                    className={clsx("blog-post-image col-12 col-md-4 ", {
+                      "d-none d-md-block": index >= 1,
+                    })}
+                    key={url}
+                  >
+                    <Image
+                      alt=""
+                      objectFit="cover"
+                      ratio="16"
+                      className="rounded"
+                      src={url}
+                    />
+                    {(index === 0 || index === 2) &&
+                      mediaURLs.length - (index + 1) > 0 && (
+                        <div
+                          className={clsx(
+                            "position-absolute top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center rounded text-light bg-dark bg-opacity-50",
+                            {
+                              "d-flex d-md-none": index === 0,
+                              "d-none d-md-flex": index === 2,
+                            },
+                          )}
+                        >
+                          + {mediaURLs.length - (index + 1)}{" "}
+                          {t("post.preview.media")}
+                        </div>
+                      )}
+                  </div>
+                ))}
+            </div>
+            <div className="d-flex justify-content-between">
+              <div className="d-flex gap-12 small text-gray-700">
+                <div className="d-flex align-items-center gap-8">
+                  <span>{post.views}</span>
+                  <See />
+                </div>
+                <div className="d-flex align-items-center gap-8 border border-gray-600 border-top-0 border-end-0 border-bottom-0 ps-12">
+                  <span>{post.nbComments}</span>
+                  <MessageInfo />
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+      {blog && post && (
+        <PostPreviewActionBar
+          post={post}
+          blogId={blog._id}
+          index={index}
+        ></PostPreviewActionBar>
+      )}
+    </>
   );
 };

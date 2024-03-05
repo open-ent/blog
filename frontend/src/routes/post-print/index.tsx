@@ -6,11 +6,8 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import { ACTION } from "edifice-ts-client";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
-import { blogContentActions } from "~/config/blogContentActions";
 import { postContentActions } from "~/config/postContentActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import { CommentsHeader } from "~/features/Comments/CommentsHeader";
-import { CommentsList } from "~/features/Comments/CommentsList";
 import { PostTitle } from "~/features/Post/PostTitle";
 import { PostMetadata } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
@@ -40,11 +37,10 @@ export const postPrintLoader =
   };
 
 export function PostPrint() {
-  const { blogId, postId } = useParams();
-  const { hasRight } = useActionDefinitions(blogContentActions);
+  const { blogId } = useParams();
+  const { hasRight } = useActionDefinitions(postContentActions);
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const { data: post } = useQuery(postQuery(blogId!, postMetadata));
-  const { data: comments } = useQuery(commentListQuery(blogId!, postId!));
 
   useEffect(() => {
     if (!hasRight(ACTION.PRINT)) {
@@ -66,10 +62,6 @@ export function PostPrint() {
         <PostTitle post={post} mode="print" />
         <div className="mx-32">
           <Editor content={post.content} mode="read" variant="ghost"></Editor>
-        </div>
-        <div className="mx-md-16 mx-lg-64">
-          <CommentsHeader comments={comments ?? []} />
-          <CommentsList comments={comments ?? []} />
         </div>
       </div>
     </>

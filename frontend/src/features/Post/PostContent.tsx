@@ -4,7 +4,7 @@ import { Editor, EditorRef } from "@edifice-ui/editor";
 import { Save, Send } from "@edifice-ui/icons";
 import { Button, FormControl, Input, Label } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { PostTitle } from "./PostTitle";
 import { usePostActions } from "../ActionBar/usePostActions";
@@ -19,7 +19,10 @@ export interface PostContentProps {
 export const PostContent = ({ blogId, post }: PostContentProps) => {
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
-  const { mustSubmit, save, trash, publish } = postActions;
+  const { mustSubmit, save, trash, publish, readOnly } = postActions;
+
+  // Get the query parameters in URL to know if the post is in edit mode.
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const editorRef = useRef<EditorRef>(null);
   const titleRef = useRef(null);
@@ -27,7 +30,9 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
   // Variables for edit mode
   const [title, setTitle] = useState(post?.title ?? "");
   const [content, setContent] = useState(post?.content ?? "");
-  const [mode, setMode] = useState<"read" | "edit">("read");
+  const [mode, setMode] = useState<"read" | "edit">(
+    searchParams.get("edit") && !readOnly ? "edit" : "read",
+  );
   const [variant, setVariant] = useState<"ghost" | "outline">("ghost");
 
   const { t } = useTranslation("blog");
@@ -36,7 +41,11 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
 
   // Changing mode displays another variant of the editor.
   useEffect(() => {
+    if (searchParams.get("edit") && mode !== "edit") {
+      setSearchParams({}, { replace: true });
+    }
     setVariant(mode === "read" ? "ghost" : "outline");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
   // Handlers for actions triggered from the post title component.
@@ -51,7 +60,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
     onEdit: () => {
       setMode("edit");
     },
-    onPrint: () => alert("print !"), // TODO
+    onPrint: () => window.open(`/print/${blogId}/post/${post._id}`, "_blank"),
     onPublish: () => {
       publish();
     },

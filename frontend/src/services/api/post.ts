@@ -49,6 +49,14 @@ export function savePost(blogId: string, post: Post) {
   );
 }
 
+export function goUpPost(blogId: string, postId: string) {
+  return checkHttpError(
+    odeServices.http().putJson<PostMetadata>(`/blog/post/${blogId}/${postId}`, {
+      sorted: true,
+    }),
+  );
+}
+
 export function publishPost(blogId: string, post: Post, mustSubmit: boolean) {
   const { _id: postId } = post;
   return checkHttpError(
