@@ -55,8 +55,7 @@ export const BlogFilter = () => {
         }),
         children: (
           <span>
-            {counters?.countPublished +
-              t("blog.filters.published", { count: counters?.countPublished })}
+            {t("blog.filters.published", { count: counters?.countPublished })}
           </span>
         ),
         onClick: () => {
@@ -75,12 +74,11 @@ export const BlogFilter = () => {
         children: (
           <>
             <span>
-              {counters?.countSubmitted +
-                t(
-                  creator || manager
-                    ? "blog.filters.submitted"
-                    : "blog.filters.sent",
-                )}{" "}
+              {t(
+                creator || manager
+                  ? "blog.filters.submitted"
+                  : "blog.filters.sent",
+              )}{" "}
             </span>
             {counters?.countSubmitted ? (
               <Badge
@@ -110,8 +108,7 @@ export const BlogFilter = () => {
         }),
         children: (
           <span>
-            {counters?.countDraft +
-              t("blog.filters.drafts", { count: counters?.countDraft })}
+            {t("blog.filters.drafts", { count: counters?.countDraft })}
           </span>
         ),
         onClick: () => {
