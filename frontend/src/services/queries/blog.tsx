@@ -19,44 +19,38 @@ import { Post, PostState } from "~/models/post";
 import { useBlogState } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
+export const blogQueryKeys = {
+  all: (blogId: string) => ["blog", blogId],
+  counter: (blogId: string) => [...blogQueryKeys.all(blogId), "counter"],
+  postsList: (blogId: string, state?: PostState, search?: string) => {
+    const queryKey = [...blogQueryKeys.all(blogId), "postsList"];
+    const queryKeyFilter: any = {};
+    if (state || search) {
+      if (state) {
+        queryKeyFilter.state = state;
+      }
+      if (search) {
+        queryKeyFilter.search = search;
+      }
+      queryKey.push(queryKeyFilter);
+    }
+    return queryKey;
+  },
+};
+
 /** Query blog data */
 export const blogQuery = (blogId: string) => {
   return {
-    queryKey: ["blog", blogId],
+    queryKey: blogQueryKeys.all(blogId),
     queryFn: () => loadBlog(blogId),
   };
 };
 
 export const blogCounterQuery = (blogId: string) => {
   return {
-    queryKey: ["blog", "counter", blogId],
+    queryKey: blogQueryKeys.counter(blogId),
     queryFn: () => loadBlogCounter(blogId),
   };
-};
-
-export const postsListQueryKey = (
-  blogId: string,
-  state?: PostState,
-  search?: string,
-) => {
-  const queryKey = ["postList"];
-  if (blogId) {
-    queryKey.push(blogId);
-  }
-
-  const queryKeyFilter: any = {};
-
-  if (state) {
-    queryKeyFilter.state = state;
-  }
-  if (search) {
-    queryKeyFilter.search = search;
-  }
-  if (state || search) {
-    queryKey.push(queryKeyFilter);
-  }
-
-  return queryKey;
 };
 
 export const postsListQuery = (
@@ -66,20 +60,8 @@ export const postsListQuery = (
   search?: string,
   nbComments: boolean = true,
 ) => {
-  const queryKey = ["postList", blogId];
-  const queryKeyFilter: any = {};
-  if (state || search) {
-    if (state) {
-      queryKeyFilter.state = state;
-    }
-    if (search) {
-      queryKeyFilter.search = search;
-    }
-    queryKey.push(queryKeyFilter);
-  }
-
   return {
-    queryKey: queryKey,
+    queryKey: blogQueryKeys.postsList(blogId, state, search),
     queryFn: ({ pageParam = 0 }) =>
       loadPostsList(blogId, pageParam, state, search, nbComments),
     initialPageParam: 0,
@@ -190,11 +172,9 @@ export const useDeleteBlog = (blogId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => deleteBlog(blogId),
-    onSuccess: () =>
-      Promise.all([
-        // Deleting  some queries.
-        queryClient.removeQueries(postsListQuery(blogId)),
-        queryClient.removeQueries(blogCounterQuery(blogId)),
-      ]),
+    onSuccess: () => [
+      // Invalidate all queries for this blog.
+      queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) }),
+    ],
   });
 };

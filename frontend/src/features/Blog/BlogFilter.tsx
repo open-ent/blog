@@ -55,7 +55,8 @@ export const BlogFilter = () => {
         }),
         children: (
           <span>
-            {t("filters.published", { count: counters?.countPublished })}{" "}
+            {counters?.countPublished +
+              t("blog.filters.published", { count: counters?.countPublished })}
           </span>
         ),
         onClick: () => {
@@ -74,7 +75,12 @@ export const BlogFilter = () => {
         children: (
           <>
             <span>
-              {t(creator || manager ? "filters.submitted" : "filters.sent")}{" "}
+              {counters?.countSubmitted +
+                t(
+                  creator || manager
+                    ? "blog.filters.submitted"
+                    : "blog.filters.sent",
+                )}{" "}
             </span>
             {counters?.countSubmitted ? (
               <Badge
@@ -103,7 +109,10 @@ export const BlogFilter = () => {
           "bg-primary-200 fw-bold": localPostsFilters.state === PostState.DRAFT,
         }),
         children: (
-          <span>{t("filters.drafts", { count: counters?.countDraft })} </span>
+          <span>
+            {counters?.countDraft +
+              t("blog.filters.drafts", { count: counters?.countDraft })}
+          </span>
         ),
         onClick: () => {
           handleFilter(PostState.DRAFT);

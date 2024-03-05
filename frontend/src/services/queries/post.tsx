@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { blogCounterQuery, postsListQuery } from "./blog";
+import { blogCounterQuery, blogQueryKeys } from "./blog";
 import {
   createPost,
   deletePost,
@@ -35,7 +35,9 @@ export const useCreatePost = (blogId: string) => {
     onSuccess: () => {
       return Promise.all([
         // Publishing a post invalidates some queries.
-        queryClient.invalidateQueries(postsListQuery(blogId)),
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.postsList(blogId),
+        }),
         queryClient.invalidateQueries(blogCounterQuery(blogId)),
       ]);
     },
@@ -55,8 +57,12 @@ export const useSavePost = (blogId: string, post: Post) => {
 
       return Promise.all([
         // Publishing a post invalidates some queries.
-        queryClient.invalidateQueries(postsListQuery(blogId)),
-        queryClient.invalidateQueries(blogCounterQuery(blogId)),
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.postsList(blogId),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.counter(blogId),
+        }),
       ]);
     },
   });
@@ -68,7 +74,9 @@ export const useGoUpPost = (blogId: string, postId: string) => {
     mutationFn: () => goUpPost(blogId, postId),
     onSuccess: () => {
       // Publishing a post invalidates some queries.
-      return queryClient.invalidateQueries(postsListQuery(blogId));
+      return queryClient.invalidateQueries({
+        queryKey: blogQueryKeys.postsList(blogId),
+      });
     },
   });
 };
@@ -80,7 +88,9 @@ export const useDeletePost = (blogId: string, postId: string) => {
     onSuccess: () =>
       Promise.all([
         // Deleting a post invalidates some queries.
-        queryClient.invalidateQueries(postsListQuery(blogId)),
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.postsList(blogId),
+        }),
         queryClient.invalidateQueries(blogCounterQuery(blogId)),
         Promise.resolve(
           queryClient.removeQueries(
@@ -103,7 +113,9 @@ export const usePublishPost = (blogId: string) => {
 
       return Promise.all([
         // Publishing a post invalidates some queries.
-        queryClient.invalidateQueries(postsListQuery(blogId)),
+        queryClient.invalidateQueries({
+          queryKey: blogQueryKeys.postsList(blogId),
+        }),
         queryClient.invalidateQueries(blogCounterQuery(blogId)),
       ]);
     },
