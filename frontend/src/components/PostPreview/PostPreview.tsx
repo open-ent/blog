@@ -131,7 +131,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             <Avatar
               alt={t("blog.author.avatar")}
               size="md"
-              src={getAvatarURL(post)}
+              src={getAvatarURL(post.author.userId)}
               variant="circle"
             />
           </div>

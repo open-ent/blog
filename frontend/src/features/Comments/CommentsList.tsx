@@ -1,7 +1,13 @@
+import { useId, useState } from "react";
+
+import { Content } from "@edifice-ui/editor";
 import { EmptyScreen, usePaths } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
+import { useParams } from "react-router-dom";
 
+import { useComments } from "../../hooks/useComments";
 import { CommentCard } from "~/components/CommentCard/CommentCard";
+import ConfirmModal from "~/components/ConfirmModal/ConfirmModal";
 import { Comment } from "~/models/comment";
 
 export interface CommentsListProps {
@@ -10,13 +16,59 @@ export interface CommentsListProps {
 
 export const CommentsList = ({ comments }: CommentsListProps) => {
   const [imagePath] = usePaths();
+  const [commentToDelete, setCommentToDelete] = useState<Comment | null>(null);
+  const deleteModalId = useId();
+
   const { t } = useTranslation("blog");
+  const { blogId, postId } = useParams();
+  const { canEdit, canRemove, update, remove } = useComments(blogId!, postId!);
+
+  if (!blogId || !postId) return <></>;
+
+  const handlePublishClick = (comment: Comment, newContent: Content) => {
+    comment.comment = newContent as string;
+    update(comment);
+  };
+
+  const handleRemoveClick = (comment: Comment) => {
+    setCommentToDelete(comment);
+  };
+
+  const handleRemoveConfirmSuccess = () => {
+    commentToDelete && remove(commentToDelete.id);
+    setCommentToDelete(null);
+  };
 
   return comments.length ? (
     <div className="mb-48">
       {comments.map((comment) => (
-        <CommentCard key={comment.id} comment={comment} className="mt-16" />
+        <CommentCard
+          key={comment.id}
+          className="mt-16"
+          author={comment.author}
+          content={comment.comment}
+          mode="read"
+          created={comment.created}
+          onPublish={
+            canEdit(comment)
+              ? (newContent) => handlePublishClick(comment, newContent)
+              : undefined
+          }
+          onRemove={
+            canRemove(comment) ? () => handleRemoveClick(comment) : undefined
+          }
+        />
       ))}
+      {commentToDelete !== null && (
+        <ConfirmModal
+          id={deleteModalId}
+          isOpen={commentToDelete !== null}
+          header={<></>}
+          body={<p className="body">{t("confirm.remove.comment")}</p>}
+          onSuccess={handleRemoveConfirmSuccess}
+          onCancel={() => setCommentToDelete(null)}
+        />
+      )}
     </div>
   ) : (
     <div className="m-auto">

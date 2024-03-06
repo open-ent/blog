@@ -152,7 +152,7 @@ export const PostTitle = ({
           <Avatar
             alt={t("post.author.avatar")}
             size="sm"
-            src={getAvatarURL(post)}
+            src={getAvatarURL(post.author.userId)}
             variant="circle"
           />
           <div className="text-gray-700 small d-flex flex-column flex-md-row">

@@ -1,54 +1,173 @@
-import { Avatar, Badge, Button, useDate } from "@edifice-ui/react";
+import { useMemo, useState } from "react";
+
+import { Content, EditorContent, useCommentEditor } from "@edifice-ui/editor";
+import { Send } from "@edifice-ui/icons";
+import { Avatar, Badge, Button, CoreDate, useDate } from "@edifice-ui/react";
 import clsx from "clsx";
+import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 
-import { Comment } from "~/models/comment";
 import { getAvatarURL } from "~/utils/PostUtils";
 
+const MAX_COMMENT_LENGTH = 800;
+
 export interface CommentProps {
-  comment: Comment;
   className?: string;
+  mode: "edit" | "read" | "print";
+
+  author: {
+    userId: ID;
+    username: string;
+    profiles?: IUserDescription["profiles"];
+  };
+
+  created?: CoreDate;
+
+  content?: Content;
+
+  onRemove?: () => void;
+  onPublish?: (content: Content) => void;
 }
 
-export const CommentCard = ({ comment, className }: CommentProps) => {
-  const { t } = useTranslation("blog");
+export const CommentCard = ({
+  author,
+  created,
+  content,
+  mode,
+  className,
+  onPublish,
+  onRemove,
+}: CommentProps) => {
+  const [editable, setEditable] = useState(mode === "edit");
+
+  const { t } = useTranslation("common");
   const { fromNow } = useDate();
+  const { editor, commentLength, getComment, resetComment } = useCommentEditor(
+    editable,
+    content ?? "",
+    MAX_COMMENT_LENGTH,
+  );
+  const badge = useMemo(() => {
+    const profile = author.profiles?.[0] ?? "Guest";
+    if (["Teacher", "Student", "Relative", "Personnel"].indexOf(profile) < 0)
+      return <></>;
+
+    return (
+      <Badge
+        variant={{
+          type: "profile",
+          //@ts-ignore -- Checked above
+          profile: profile.toLowerCase(),
+        }}
+      >
+        {t(profile)}
+      </Badge>
+    );
+  }, [author.profiles, t]);
+
+  if (!editor) return <></>;
+
+  // Modifying an existing comment ? Truthy if yes, falsy if creating a new one.
+  const modifying = content !== undefined;
+
+  const handleEditClick = () => setEditable(true);
+
+  const handleRemoveClick = () => onRemove?.();
+
+  const handlePublishClick = () => {
+    onPublish?.(getComment());
+    resetComment();
+    setEditable(mode === "edit");
+  };
+
+  const handleCancelClick = () => {
+    resetComment();
+    setEditable(mode === "edit");
+  };
 
   return (
     <div className={clsx("border rounded-3 p-12 d-flex", className)}>
       <Avatar
-        alt={t("post.author.avatar")}
+        alt={t("comment.author.avatar")}
         size="sm"
-        src={getAvatarURL(comment)}
+        src={getAvatarURL(author.userId)}
         variant="circle"
       />
-      <div className="ms-4 d-flex flex-column">
+      <div className="d-flex flex-column flex-grow-1">
         <div className="ms-8">
-          <div className="mb-8 d-flex text-gray-700 small gap-8">
-            <span className="ms-2">{comment.author.username}</span>
-            <Badge
-              variant={{
-                type: "profile",
-                profile: "teacher" /* | "student" | "relative" | "personnel"*/,
-              }}
-            >
-              {t("teacher")}
-            </Badge>
-            <span className="d-none d-md-block mx-8">|</span>
-            <span>
-              {t("post.dated.published", { date: fromNow(comment.created) })}
-            </span>
+          {editable ? (
+            <div className="d-flex flex-column flex-fill gap-8">
+              <div>{t("comment.placeholder")}</div>
+              <div className="border rounded-3 px-16 pt-12 pb-8 d-flex gap-2 flex-column bg-white">
+                <EditorContent editor={editor}></EditorContent>
+                <div className="d-flex gap-12 justify-content-end align-items-center">
+                  <span className="small text-gray-700">
+                    {commentLength} / {MAX_COMMENT_LENGTH}
+                  </span>
+                  {modifying && (
+                    <Button
+                      variant="ghost"
+                      color="tertiary"
+                      size="sm"
+                      onClick={handleCancelClick}
+                    >
+                      {t("cancel")}
+                    </Button>
+                  )}
+                  <Button
+                    leftIcon={<Send />}
+                    variant="ghost"
+                    size="sm"
+                    onClick={handlePublishClick}
+                  >
+                    {t("comment.post")}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="ms-2">
+              <div className="mb-8 d-flex text-gray-700 small gap-8">
+                <span>{author.username}</span>
+                {badge}
+                {created && (
+                  <>
+                    <span className="d-none d-md-block mx-8">|</span>
+                    <span>
+                      {t("comment.publish.date", { date: fromNow(created) })}
+                    </span>
+                  </>
+                )}
+              </div>
+              <EditorContent editor={editor}></EditorContent>
+            </div>
+          )}
+        </div>
+
+        {mode !== "print" && !editable && (
+          <div>
+            {onPublish && (
+              <Button
+                variant="ghost"
+                color="tertiary"
+                size="sm"
+                onClick={handleEditClick}
+              >
+                {t("edit")}
+              </Button>
+            )}
+            {onRemove && (
+              <Button
+                variant="ghost"
+                color="tertiary"
+                size="sm"
+                onClick={handleRemoveClick}
+              >
+                {t("remove")}
+              </Button>
+            )}
           </div>
-          <div>{comment.comment}</div>
-        </div>
-        <div>
-          <Button variant="ghost" color="tertiary" size="sm">
-            {t("blog.edit.post")}
-          </Button>
-          <Button variant="ghost" color="tertiary" size="sm">
-            {t("blog.delete.post")}
-          </Button>
-        </div>
+        )}
       </div>
     </div>
   );
