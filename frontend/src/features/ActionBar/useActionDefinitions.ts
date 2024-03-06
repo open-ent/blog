@@ -9,10 +9,13 @@ import { Post } from "~/models/post";
 import { availableActionsQuery, useBlog } from "~/services/queries";
 import { IActionDefinition } from "~/utils/types";
 
+// Real publish (or submit) URL. Depends on user shared rights.
+type PublishWith = { defaultPublishAction?: "publish" | "submit" };
 type SharedRoles = { read: boolean; contrib: boolean; manager: boolean };
 type SharedRight = {
   "org-entcore-blog-controllers-PostController|list": boolean;
   "org-entcore-blog-controllers-PostController|submit": boolean;
+  "org-entcore-blog-controllers-PostController|publish": boolean;
   "org-entcore-blog-controllers-BlogController|shareResource": boolean;
 };
 
@@ -44,10 +47,10 @@ export const useActionDefinitions = (
     }
     const { shared, author } = blog;
     const { userId, groupsIds } = user;
-    // Look for granted rights in the "shared" array
+    // Look for granted rights in the "shared" array.
     const sharedRights = (shared as any).reduce(
       (
-        previous: SharedRoles,
+        previous: SharedRoles & PublishWith,
         current: {
           userId: string;
           groupId: string;
@@ -60,11 +63,20 @@ export const useActionDefinitions = (
           previous.read ||=
             current["org-entcore-blog-controllers-PostController|list"];
           previous.contrib ||=
-            current["org-entcore-blog-controllers-PostController|submit"];
+            current["org-entcore-blog-controllers-PostController|submit"] ||
+            current["org-entcore-blog-controllers-PostController|publish"];
           previous.manager ||=
             current[
               "org-entcore-blog-controllers-BlogController|shareResource"
             ];
+
+          // Also look for the real publish/submit URL to use.
+          if (current["org-entcore-blog-controllers-PostController|publish"]) {
+            previous.defaultPublishAction = "publish";
+          }
+          if (current["org-entcore-blog-controllers-PostController|submit"]) {
+            previous.defaultPublishAction = "submit";
+          }
         }
         return previous;
       },
@@ -73,7 +85,7 @@ export const useActionDefinitions = (
         contrib: false,
         manager: false,
       },
-    ) as SharedRoles;
+    ) as SharedRoles & PublishWith;
     return {
       ...sharedRights,
       creator: author.userId === userId,

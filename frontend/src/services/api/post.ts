@@ -57,15 +57,16 @@ export function goUpPost(blogId: string, postId: string) {
   );
 }
 
-export function publishPost(blogId: string, post: Post, mustSubmit: boolean) {
+export function publishPost(
+  blogId: string,
+  post: Post,
+  publishWith: "publish" | "submit",
+) {
   const { _id: postId } = post;
   return checkHttpError(
     odeServices
       .http()
-      .putJson<Post>(
-        `/blog/post/${mustSubmit ? "submit" : "publish"}/${blogId}/${postId}`,
-        {},
-      ),
+      .putJson<Post>(`/blog/post/${publishWith}/${blogId}/${postId}`, {}),
   );
 }
 

@@ -90,7 +90,9 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
     if (!post || !title || title.trim().length == 0 || !contentHtml) return;
     post.title = title;
     post.content = contentHtml;
-    publish();
+    await save();
+    await publish();
+    setMode("read");
   };
 
   return (

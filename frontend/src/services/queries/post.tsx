@@ -104,11 +104,17 @@ export const useDeletePost = (blogId: string, postId: string) => {
 export const usePublishPost = (blogId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ post, mustSubmit }: { post: Post; mustSubmit: boolean }) =>
-      publishPost(blogId, post, mustSubmit),
-    onSuccess: (_data, { post, mustSubmit }) => {
+    mutationFn: ({
+      post,
+      publishWith = "publish",
+    }: {
+      post: Post;
+      publishWith?: "publish" | "submit";
+    }) => publishPost(blogId, post, publishWith),
+    onSuccess: (_data, { post, publishWith }) => {
       // Publishing/submitting a post change its state. Update the query data accordingly.
-      post.state = mustSubmit ? PostState.SUBMITTED : PostState.PUBLISHED;
+      post.state =
+        publishWith === "submit" ? PostState.SUBMITTED : PostState.PUBLISHED;
       queryClient.setQueryData(postQuery(blogId, post).queryKey, post);
 
       return Promise.all([

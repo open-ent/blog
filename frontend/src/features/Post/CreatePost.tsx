@@ -20,7 +20,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
 
   const navigate = useNavigate();
 
-  const { mustSubmit } = useActionDefinitions([]);
+  const { mustSubmit, defaultPublishAction } = useActionDefinitions([]);
   const createMutation = useCreatePost(blogId);
   const publishMutation = usePublishPost(blogId);
 
@@ -43,7 +43,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const handlePublishClick = async () => {
     const post = await create();
     if (post) {
-      await publishMutation.mutate({ post, mustSubmit });
+      await publishMutation.mutate({ post, publishWith: defaultPublishAction });
       navigate(`/id/${blogId}/post/${post?._id}`);
     }
   };

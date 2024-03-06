@@ -15,10 +15,10 @@ import { IActionDefinition } from "~/utils/types";
 export interface PostActions {
   /** Available actions, not considering the post's state. */
   actions?: IAction[];
-  /** Truthy if the user cannot publish a post without submitting to a manager beforehand, falsy otherwise. */
-  mustSubmit: boolean;
   /** Truthy if the user can publish (or submit) a post. */
   canPublish: boolean;
+  /** Truthy if the user cannot publish a post without submitting to a manager beforehand, falsy otherwise. */
+  mustSubmit: boolean;
   /** Truthy if the user should not alter the post. */
   readOnly: boolean;
   /** Truthy if the user can do the action
@@ -40,7 +40,7 @@ export const usePostActions = (
   blogId: string,
   post: Post,
 ): PostActions => {
-  const { availableActionsForPost, mustSubmit } =
+  const { availableActionsForPost, mustSubmit, defaultPublishAction } =
     useActionDefinitions(actionDefinitions);
 
   const actions = useMemo(
@@ -65,7 +65,8 @@ export const usePostActions = (
       actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0,
     save: () => saveMutation.mutateAsync(),
     trash: () => deleteMutation.mutateAsync(),
-    publish: () => publishMutation.mutateAsync({ post, mustSubmit }),
+    publish: () =>
+      publishMutation.mutateAsync({ post, publishWith: defaultPublishAction }),
     goUp: () => goUpMutation.mutateAsync(),
   };
 };
