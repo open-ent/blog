@@ -4,7 +4,7 @@ import { LoadingScreen } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { LoaderFunctionArgs } from "react-router-dom";
 
-import { blogContentActions } from "~/config/blogContentActions";
+import { blogActions } from "~/config/blogActions";
 import { BlogFilter } from "~/features/Blog/BlogFilter";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
 import BlogPostList from "~/features/Blog/BlogPostList";
@@ -26,7 +26,7 @@ export const blogLoader =
   async ({ params, request }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
     const queryBlogCounter = blogCounterQuery(params.blogId as string);
-    const actions = availableActionsQuery(blogContentActions);
+    const actions = availableActionsQuery(blogActions);
 
     const url = new URL(request.url);
     const state =

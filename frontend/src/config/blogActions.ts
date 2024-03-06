@@ -6,7 +6,7 @@ import { IActionDefinition } from "~/utils/types";
 /**
  * Actions doable on a new Post
  */
-export const blogContentActions: Array<IActionDefinition> = [
+export const blogActions: Array<IActionDefinition> = [
   {
     id: ACTION.OPEN,
     workflow: workflows.access,

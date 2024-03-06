@@ -6,7 +6,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { ACTION } from "edifice-ts-client";
 import { LoaderFunctionArgs } from "react-router-dom";
 
-import { blogContentActions } from "~/config/blogContentActions";
+import { blogActions } from "~/config/blogActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
 import { PostTitle } from "~/features/Post/PostTitle";
@@ -22,7 +22,7 @@ export const blogPrintLoader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
-    const actions = availableActionsQuery(blogContentActions);
+    const actions = availableActionsQuery(blogActions);
     const queryPostsList = postsListQuery(
       params.blogId as string,
       0,
@@ -42,7 +42,7 @@ export const blogPrintLoader =
 
 export function BlogPrint() {
   const { blog } = useBlog();
-  const { hasRight } = useActionDefinitions(blogContentActions);
+  const { hasRight } = useActionDefinitions(blogActions);
 
   const {
     posts,

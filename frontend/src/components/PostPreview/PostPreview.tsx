@@ -49,7 +49,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
 
   const getDatedState = (): string =>
     t(getDatedKey(post.state), {
-      date: fromNow(post.modified.$date),
+      date: fromNow(post.modified),
     });
 
   const handleCardClick = () => {

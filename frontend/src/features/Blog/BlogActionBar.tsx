@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 
 import { Add, Options } from "@edifice-ui/icons";
 import { Button, IconButton, useToggle } from "@edifice-ui/react";
@@ -11,6 +11,7 @@ import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
 import { blogQuery, useDeleteBlog } from "~/services/queries";
+import { useBlogState } from "~/store";
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -45,11 +46,20 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  const { actions: availableActions, canContrib } = useBlogActions(blog);
+  const { actionBarPostId } = useBlogState();
+
   const [isBarOpen, toggleBar] = useToggle();
   const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();
   const [isShareModalOpen, toogleShareModalOpen] = useToggle();
   const [isPublishModalOpen, tooglePublishModalOpen] = useToggle();
   const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
+
+  useEffect(() => {
+    if (actionBarPostId) {
+      toggleBar(false);
+    }
+  }, [actionBarPostId, toggleBar]);
 
   const invalidateQueries = () => {
     queryClient.invalidateQueries(blogQuery(blog._id));
@@ -113,8 +123,6 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
     window.open(`/print/id/${blog._id}`, "_blank");
   };
 
-  const { actions: availableActions } = useBlogActions(blog);
-
   function isActionAvailable(action: ActionType) {
     return availableActions?.some((act) => act.id === action);
   }
@@ -122,7 +130,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   return (
     <>
       <div className="d-flex align-items-center gap-12">
-        {isActionAvailable(ACTION.CREATE) && (
+        {canContrib && (
           <Button leftIcon={<Add />} onClick={handleAddClick}>
             {t("blog.create.post")}
           </Button>
