@@ -85,7 +85,7 @@ export function Blog() {
       <div className="d-flex flex-fill">
         <BlogSidebar />
         <div className="flex-fill py-16 ps-md-16 d-flex flex-column">
-          {!!counters?.countAll && <BlogFilter />}
+          {!!counters?.countAll && <BlogFilter blog={blog} />}
           <BlogPostList />
         </div>
       </div>

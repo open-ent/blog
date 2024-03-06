@@ -1,6 +1,6 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy } from "react";
 
-import { Add, Options } from "@edifice-ui/icons";
+import { Options, Plus } from "@edifice-ui/icons";
 import { Button, IconButton, useToggle } from "@edifice-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ACTION, ActionType } from "edifice-ts-client";
@@ -54,12 +54,6 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const [isShareModalOpen, toogleShareModalOpen] = useToggle();
   const [isPublishModalOpen, tooglePublishModalOpen] = useToggle();
   const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
-
-  useEffect(() => {
-    if (actionBarPostId) {
-      toggleBar(false);
-    }
-  }, [actionBarPostId, toggleBar]);
 
   const invalidateQueries = () => {
     queryClient.invalidateQueries(blogQuery(blog._id));
@@ -129,9 +123,13 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   return (
     <>
-      <div className="d-flex align-items-center gap-12">
+      <div className="d-flex flex-fill align-items-center align-self-end justify-content-end gap-12">
         {canContrib && (
-          <Button leftIcon={<Add />} onClick={handleAddClick}>
+          <Button
+            leftIcon={<Plus />}
+            onClick={handleAddClick}
+            className="text-nowrap"
+          >
             {t("blog.create.post")}
           </Button>
         )}
@@ -143,7 +141,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           onClick={toggleBar}
         />
 
-        <ActionBarContainer visible={isBarOpen}>
+        <ActionBarContainer visible={isBarOpen && !actionBarPostId}>
           {isActionAvailable(ACTION.EDIT) ? (
             <Button
               type="button"

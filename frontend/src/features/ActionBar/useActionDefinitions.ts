@@ -92,6 +92,11 @@ export const useActionDefinitions = (
     };
   }, [blog, user]);
 
+  const canContrib = useMemo(
+    () => rights.contrib || rights.creator || rights.manager,
+    [rights],
+  );
+
   /**
    * Check the `right` field of an IAction.
    * @returns `true` if no right is required, or if the current user has a sufficient role.
@@ -193,5 +198,6 @@ export const useActionDefinitions = (
     mustSubmit,
     availableActionsForPost,
     availableActionsForBlog,
+    canContrib,
   };
 };

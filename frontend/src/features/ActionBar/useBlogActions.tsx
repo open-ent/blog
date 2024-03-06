@@ -5,17 +5,12 @@ import { blogActions } from "~/config/blogActions";
 import { Blog } from "~/models/blog";
 
 export const useBlogActions = (blog: Blog) => {
-  const { availableActionsForBlog, contrib, creator, manager } =
+  const { availableActionsForBlog, canContrib } =
     useActionDefinitions(blogActions);
 
   const actions = useMemo(
     () => availableActionsForBlog(blog),
     [blog, availableActionsForBlog],
-  );
-
-  const canContrib = useMemo(
-    () => contrib || creator || manager,
-    [contrib, creator, manager],
   );
 
   return {

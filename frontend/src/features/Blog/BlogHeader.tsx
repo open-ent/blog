@@ -12,19 +12,21 @@ export interface BlogProps {
 export const BlogHeader = ({ blog, print }: BlogProps) => {
   return (
     <AppHeader>
-      <div className="d-flex justify-content-between flex-fill ">
-        <Breadcrumb
-          app={{
-            address: basename,
-            display: false,
-            displayName: "Blog",
-            icon: "",
-            isExternal: false,
-            name: "",
-            scope: [],
-          }}
-          name={blog?.title}
-        />
+      <div className="d-flex flex-wrap flex-md-nowrap justify-content-md-between flex-fill gap-12 overflow-hidden">
+        <div className="text-truncate">
+          <Breadcrumb
+            app={{
+              address: basename,
+              display: false,
+              displayName: "Blog",
+              icon: "",
+              isExternal: false,
+              name: "",
+              scope: [],
+            }}
+            name={blog.title}
+          />
+        </div>
         {!print && <BlogActionBar blog={blog} />}
       </div>
     </AppHeader>

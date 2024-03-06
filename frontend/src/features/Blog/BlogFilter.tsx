@@ -12,11 +12,16 @@ import { useTranslation } from "react-i18next";
 
 import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
+import { Blog } from "~/models/blog";
 import { PostState } from "~/models/post";
 import { PostsFilters } from "~/models/postFilter";
 import { useBlogCounter } from "~/services/queries";
 
-export const BlogFilter = () => {
+export interface BlogFilterProps {
+  blog: Blog;
+}
+
+export const BlogFilter = ({ blog }: BlogFilterProps) => {
   const { t } = useTranslation("blog");
   const { postsFilters, setPostsFilters } = usePostsFilter();
 
@@ -66,6 +71,7 @@ export const BlogFilter = () => {
     {
       type: "button",
       name: "submitted",
+      visibility: blog["publish-type"] === "RESTRAINT" ? "show" : "hide",
       props: {
         className: clsx("fw-normal", {
           "bg-primary-200 fw-bold":
@@ -73,13 +79,7 @@ export const BlogFilter = () => {
         }),
         children: (
           <>
-            <span>
-              {t(
-                creator || manager
-                  ? "blog.filters.submitted"
-                  : "blog.filters.sent",
-              )}{" "}
-            </span>
+            <span>{t("blog.filters.submitted")} </span>
             {counters?.countSubmitted ? (
               <Badge
                 variant={{
@@ -129,7 +129,7 @@ export const BlogFilter = () => {
       {(manager || creator || contrib) && (
         <Toolbar
           variant="no-shadow"
-          className="ps-4 py-2 ms-md-16 border border-primary-200 rounded-3 blog-filter-toolbar flex-wrap flex-md-nowrap row-gap-4"
+          className="ps-4 py-2 ms-md-16 border border-primary-200 rounded-3 blog-filter-toolbar flex-nowrap row-gap-4 overflow-auto "
           items={filterToolbar}
         ></Toolbar>
       )}

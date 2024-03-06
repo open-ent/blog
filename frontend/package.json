@@ -44,9 +44,9 @@
     ]
   },
   "dependencies": {
-    "@edifice-ui/editor": "develop-b2school",
-    "@edifice-ui/icons": "develop-b2school",
-    "@edifice-ui/react": "develop-b2school",
+    "@edifice-ui/editor": "link:../../edifice-ui/packages/editor",
+    "@edifice-ui/icons": "link:../../edifice-ui/packages/icons",
+    "@edifice-ui/react": "link:../../edifice-ui/packages/react",
     "@react-spring/web": "9.7.3",
     "@tanstack/react-query": "5.18.0",
     "dayjs": "1.11.10",

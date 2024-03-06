@@ -136,8 +136,8 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             />
           </div>
           <div className="d-flex flex-column gap-2">
-            <h5 className="d-flex align-items-center">
-              {post.title}
+            <div className="d-flex align-items-center">
+              <h5>{post.title}</h5>
               {post.state === PostState.DRAFT &&
                 (creator || manager || contrib) && (
                   <Badge
@@ -163,12 +163,11 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                   {t(creator || manager ? "filters.submitted" : "filters.sent")}
                 </Badge>
               )}
-            </h5>
-            <div className="text-gray-700 small gap-12 d-flex flex-column flex-md-row">
+            </div>
+            <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row">
               <span>{post.author.username}</span>
-              <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12">
-                {getDatedState()}
-              </span>
+              <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+              <span>{getDatedState()}</span>
             </div>
           </div>
         </div>
