@@ -102,6 +102,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
         postActions={postActions}
         isSpeeching={editorRef.current?.isSpeeching()}
         mode={mode}
+        blogId={blogId}
         {...postActionsHandlers}
       />
       {mode === "edit" && (

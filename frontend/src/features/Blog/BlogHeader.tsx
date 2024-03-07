@@ -12,8 +12,8 @@ export interface BlogProps {
 export const BlogHeader = ({ blog, print }: BlogProps) => {
   return (
     <AppHeader>
-      <div className="d-flex flex-wrap flex-md-nowrap justify-content-md-between flex-fill gap-12 overflow-hidden">
-        <div className="text-truncate">
+      <div className="d-flex flex-column flex-md-row flex-nowrap justify-content-md-between flex-fill gap-12 overflow-hidden">
+        <div className="overflow-hidden">
           <Breadcrumb
             app={{
               address: basename,

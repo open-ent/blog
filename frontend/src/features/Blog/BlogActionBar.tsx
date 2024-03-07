@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 
 import { Options, Plus } from "@edifice-ui/icons";
 import { Button, IconButton, useToggle } from "@edifice-ui/react";
@@ -11,7 +11,7 @@ import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
 import { blogQuery, useDeleteBlog } from "~/services/queries";
-import { useBlogState } from "~/store";
+import { useBlogState, useStoreUpdaters } from "~/store";
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -47,19 +47,31 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const queryClient = useQueryClient();
 
   const { actions: availableActions, canContrib } = useBlogActions(blog);
+  const { setActionBarPostId } = useStoreUpdaters();
   const { actionBarPostId } = useBlogState();
 
-  const [isBarOpen, toggleBar] = useToggle();
+  const [isBarOpen, setBarOpen] = useState(false);
   const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();
   const [isShareModalOpen, toogleShareModalOpen] = useToggle();
   const [isPublishModalOpen, tooglePublishModalOpen] = useToggle();
   const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
+
+  useEffect(() => {
+    if (actionBarPostId) {
+      setBarOpen(false);
+    }
+  }, [actionBarPostId]);
 
   const invalidateQueries = () => {
     queryClient.invalidateQueries(blogQuery(blog._id));
   };
 
   const deleteMutation = useDeleteBlog(blog._id);
+
+  const handleOpenMenuClick = () => {
+    setActionBarPostId();
+    setBarOpen((prev) => !prev);
+  };
 
   const handleAddClick = () => {
     navigate(`./post/edit`);
@@ -138,10 +150,10 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           color="primary"
           variant="outline"
           icon={<Options />}
-          onClick={toggleBar}
+          onClick={handleOpenMenuClick}
         />
 
-        <ActionBarContainer visible={isBarOpen && !actionBarPostId}>
+        <ActionBarContainer visible={isBarOpen}>
           {isActionAvailable(ACTION.EDIT) ? (
             <Button
               type="button"

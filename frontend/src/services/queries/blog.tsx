@@ -172,9 +172,8 @@ export const useDeleteBlog = (blogId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => deleteBlog(blogId),
-    onSuccess: () => [
+    onSuccess: () =>
       // Invalidate all queries for this blog.
       queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) }),
-    ],
   });
 };

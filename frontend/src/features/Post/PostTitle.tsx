@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 
 import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
 import { PostActions } from "../ActionBar/usePostActions";
+import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
 import { Post } from "~/models/post";
 import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
 
@@ -27,6 +28,7 @@ const ConfirmModal = lazy(
 );
 
 export interface PostTitleProps {
+  blogId: string;
   post: Post;
   postActions?: PostActions;
   mode: "edit" | "read" | "print";
@@ -40,6 +42,7 @@ export interface PostTitleProps {
 }
 
 export const PostTitle = ({
+  blogId,
   post,
   postActions,
   mode,
@@ -58,11 +61,12 @@ export const PostTitle = ({
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [isBarOpen, toggleBar] = useToggle();
+  const [isOldFormatOpen, toggleOldFormat] = useToggle();
 
   if (mode === "edit") return;
 
   const getDatedState = (post: Post): string =>
-    t(getDatedKey(post.state), { date: fromNow(post.modified.$date) });
+    t(getDatedKey(post.state), { date: fromNow(post.modified) });
 
   const classes = clsx("d-flex flex-column", {
     "mx-16": mode === "print",
@@ -139,6 +143,18 @@ export const PostTitle = ({
                   >
                     {t("blog.delete.post")}
                   </Button>
+                  {post.contentVersion === 0 ? (
+                    <Button
+                      type="button"
+                      color="primary"
+                      variant="filled"
+                      onClick={() => toggleOldFormat(true)}
+                    >
+                      {t("post.oldFormat")}
+                    </Button>
+                  ) : (
+                    <></>
+                  )}
                 </ActionBarContainer>
               </>
             )}
@@ -147,7 +163,7 @@ export const PostTitle = ({
       )}
 
       <div className={classes}>
-        <h2>{post.title}</h2>
+        <h2 className="text-gray-800">{post.title}</h2>
         <div className="d-flex align-items-center gap-12 mb-16 mb-md-24 mt-8">
           <Avatar
             alt={t("post.author.avatar")}
@@ -156,15 +172,15 @@ export const PostTitle = ({
             variant="circle"
           />
           <div className="text-gray-700 small d-flex flex-column flex-md-row">
+            <span>{post.author.username}</span>
             <a
               href={getUserbookURL(post.author.userId)}
               className="comment-card-author"
             >
               {post.author.username}
             </a>
-            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12 ms-12">
-              {getDatedState(post)}
-            </span>
+            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+            <span>{getDatedState(post)}</span>
           </div>
         </div>
       </div>
@@ -179,6 +195,14 @@ export const PostTitle = ({
             onSuccess={onDelete}
             onCancel={() => setConfirmDeleteModal(false)}
           />
+        )}
+        {isOldFormatOpen && (
+          <OldFormatModal
+            blogId={blogId}
+            postId={post._id}
+            isOpen={isOldFormatOpen}
+            onCancel={() => toggleOldFormat(false)}
+          ></OldFormatModal>
         )}
       </Suspense>
     </>
