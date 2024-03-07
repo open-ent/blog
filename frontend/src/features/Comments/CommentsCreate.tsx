@@ -19,7 +19,7 @@ export const CommentsCreate = ({ comments }: CommentsCreateProps) => {
 
   if (!user?.userId || !blogId || !postId) return <></>;
 
-  const cssClasses = clsx("py-16", comments.length > 0 && "bg-gray-300");
+  const cssClasses = clsx({ "bg-gray-200": comments.length > 0 });
 
   const userAsAuthor = {
     userId: user?.userId,

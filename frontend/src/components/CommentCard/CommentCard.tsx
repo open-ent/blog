@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 
-import { getAvatarURL } from "~/utils/PostUtils";
+import { getAvatarURL, getUserbookURL } from "~/utils/PostUtils";
 
 const MAX_COMMENT_LENGTH = 800;
 
@@ -86,7 +86,7 @@ export const CommentCard = ({
   };
 
   return (
-    <div className={clsx("border rounded-3 p-12 d-flex", className)}>
+    <div className={clsx("border rounded-3 p-12 pb-8 d-flex", className)}>
       <Avatar
         alt={t("comment.author.avatar")}
         size="sm"
@@ -126,26 +126,31 @@ export const CommentCard = ({
               </div>
             </div>
           ) : (
-            <div className="ms-2">
+            <div className="ms-4">
               <div className="mb-8 d-flex text-gray-700 small gap-8">
-                <span>{author.username}</span>
+                <a
+                  href={getUserbookURL(author.userId)}
+                  className="comment-card-author"
+                >
+                  {author.username}
+                </a>
                 {badge}
                 {created && (
                   <>
-                    <span className="d-none d-md-block mx-8">|</span>
+                    <span className="d-none d-md-block mx-4 d-none d-md-block mx-4 border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
                     <span>
                       {t("comment.publish.date", { date: fromNow(created) })}
                     </span>
                   </>
                 )}
               </div>
-              <EditorContent editor={editor}></EditorContent>
+              <EditorContent className="mb-4" editor={editor}></EditorContent>
             </div>
           )}
         </div>
 
         {mode !== "print" && !editable && (
-          <div>
+          <div className="ms-4">
             {onPublish && (
               <Button
                 variant="ghost"

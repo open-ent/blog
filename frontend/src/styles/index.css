@@ -9,6 +9,15 @@ main {
   top: 0;
 }
 
+.comment-card-author {
+  color: var(--edifice-gray-800);
+}
+
+.comment-card-author:hover {
+  color: rgba(var(--edifice-link-color-rgb), var(--edifice-link-opacity, 1));
+  text-decoration: underline;
+}
+
 .summary-list-item {
   position: relative;
 }
