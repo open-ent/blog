@@ -244,7 +244,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			final boolean hasShareRights = blogObject.getJsonArray("shared").stream().anyMatch(rights -> {
 				JsonObject jsonRights = (JsonObject) rights;
 				return jsonRights.getBoolean(action, false) &&
-						(jsonRights.getString("userId").equals(userId)
+						(userId.equals(jsonRights.getString("userId"))
 								|| userGroups.contains(jsonRights.getString("groupId")));
 			});
 			return isBlogAuthor || hasShareRights;
