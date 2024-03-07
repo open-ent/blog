@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { postsListQuery } from ".";
 import {
   createComment,
   deleteComment,
@@ -22,7 +23,10 @@ export const useCreateComment = (blogId: string, postId: string) => {
     mutationFn: ({ content }: { content: string }) =>
       createComment(blogId, postId, content),
     onSuccess: () =>
-      queryClient.invalidateQueries(commentListQuery(blogId, postId)),
+      Promise.all([
+        queryClient.invalidateQueries(commentListQuery(blogId, postId)),
+        queryClient.invalidateQueries(postsListQuery(blogId)),
+      ]),
   });
 };
 

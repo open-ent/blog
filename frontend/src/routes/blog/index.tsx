@@ -9,6 +9,7 @@ import { BlogFilter } from "~/features/Blog/BlogFilter";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
 import BlogPostList from "~/features/Blog/BlogPostList";
 import BlogSidebar from "~/features/Blog/BlogSidebar";
+import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { PostState } from "~/models/post";
 import {
   availableActionsQuery,
@@ -50,6 +51,7 @@ export const blogLoader =
   };
 
 export function Blog() {
+  useBlogErrorToast();
   const { blog } = useBlog();
   const { counters } = useBlogCounter();
   const { setPostPageSize } = useStoreUpdaters();

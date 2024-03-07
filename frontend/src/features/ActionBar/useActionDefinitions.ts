@@ -71,10 +71,13 @@ export const useActionDefinitions = (
             ];
 
           // Also look for the real publish/submit URL to use.
+          // If both are acceptable, prefer publish over submit.
           if (current["org-entcore-blog-controllers-PostController|publish"]) {
             previous.defaultPublishAction = "publish";
-          }
-          if (current["org-entcore-blog-controllers-PostController|submit"]) {
+          } else if (
+            previous.defaultPublishAction !== "publish" &&
+            current["org-entcore-blog-controllers-PostController|submit"]
+          ) {
             previous.defaultPublishAction = "submit";
           }
         }

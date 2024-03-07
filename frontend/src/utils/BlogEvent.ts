@@ -10,17 +10,8 @@ export interface IBlogError {
   text: string;
 }
 
-// /** Model of a notified blog error. */
-// interface IBlogErrorMessage extends ISubjectMessage {
-//     name: "error",
-//     data: {
-//         code: string;
-//         text: string;
-//     }
-// }
-
 /** Specialize a notification layer dedicated to this application. */
-const BlogLayer = "blog" as LayerName;
+export const BlogLayer = "blog" as LayerName;
 
 /** Function to notify a blog error. */
 export function notifyError(error: IBlogError) {

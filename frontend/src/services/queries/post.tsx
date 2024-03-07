@@ -113,9 +113,14 @@ export const usePublishPost = (blogId: string) => {
     }) => publishPost(blogId, post, publishWith),
     onSuccess: (_data, { post, publishWith }) => {
       // Publishing/submitting a post change its state. Update the query data accordingly.
-      post.state =
-        publishWith === "submit" ? PostState.SUBMITTED : PostState.PUBLISHED;
-      queryClient.setQueryData(postQuery(blogId, post).queryKey, post);
+      // Use the state which is sent back, or guess it from the publish/submit mess.
+      queryClient.setQueryData(postQuery(blogId, post).queryKey, {
+        ...post,
+        state:
+          _data?.state ?? publishWith === "submit"
+            ? PostState.SUBMITTED
+            : PostState.PUBLISHED,
+      });
 
       return Promise.all([
         // Publishing a post invalidates some queries.

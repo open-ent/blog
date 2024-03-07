@@ -7,6 +7,7 @@ import { CommentsHeader } from "~/features/Comments/CommentsHeader";
 import { CommentsList } from "~/features/Comments/CommentsList";
 import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
+import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { PostMetadata } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
 import {
@@ -35,6 +36,7 @@ export const loader =
   };
 
 export function Component() {
+  useBlogErrorToast();
   const { blogId, postId } = useParams();
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const query = useQuery(postQuery(blogId!, postMetadata));

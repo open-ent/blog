@@ -8,6 +8,7 @@ import { createPostActions } from "~/config/createPostActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { CreatePost } from "~/features/Post/CreatePost";
 import { PostHeader } from "~/features/Post/PostHeader";
+import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { availableActionsQuery } from "~/services/queries";
 
 export const loader = (queryClient: QueryClient) => async () => {
@@ -18,6 +19,7 @@ export const loader = (queryClient: QueryClient) => async () => {
 };
 
 export function Component() {
+  useBlogErrorToast();
   const { blogId } = useParams();
   const navigate = useNavigate();
   // Check for the right to create a new post
