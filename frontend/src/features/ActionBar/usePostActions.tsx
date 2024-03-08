@@ -40,13 +40,32 @@ export const usePostActions = (
   blogId: string,
   post: Post,
 ): PostActions => {
-  const { availableActionsForPost, mustSubmit, defaultPublishAction } =
+  const { availableActionsForPost, mustSubmit, getDefaultPublishKeyword } =
     useActionDefinitions(actionDefinitions);
 
-  const actions = useMemo(
-    () => availableActionsForPost(post),
-    [post, availableActionsForPost],
-  );
+  // Memoize a set of expensive computations
+  const memoized = useMemo(() => {
+    const actions = availableActionsForPost(post);
+
+    return {
+      actions,
+
+      publishWith: getDefaultPublishKeyword(post.author.userId) as
+        | "publish"
+        | "submit",
+
+      isActionAvailable: (action: ActionType) =>
+        !!actions && actions.findIndex((a) => a.id === action) >= 0,
+
+      readOnly:
+        !!actions &&
+        actions.findIndex((action) => action.id === ACTION.OPEN) < 0,
+
+      canPublish:
+        !!actions &&
+        actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0,
+    };
+  }, [availableActionsForPost, post, getDefaultPublishKeyword]);
 
   const saveMutation = useSavePost(blogId, post);
   const deleteMutation = useDeletePost(blogId, post._id);
@@ -54,19 +73,12 @@ export const usePostActions = (
   const goUpMutation = useGoUpPost(blogId, post._id);
 
   return {
-    actions,
+    ...memoized,
     mustSubmit,
-    isActionAvailable: (action: ActionType) =>
-      !!actions && actions.findIndex((a) => a.id === action) >= 0,
-    readOnly:
-      !!actions && actions.findIndex((action) => action.id === ACTION.OPEN) < 0,
-    canPublish:
-      !!actions &&
-      actions.findIndex((action) => action.id === ACTION.PUBLISH) >= 0,
     save: () => saveMutation.mutateAsync(),
     trash: () => deleteMutation.mutateAsync(),
     publish: () =>
-      publishMutation.mutateAsync({ post, publishWith: defaultPublishAction }),
+      publishMutation.mutateAsync({ post, publishWith: memoized.publishWith }),
     goUp: () => goUpMutation.mutateAsync(),
   };
 };

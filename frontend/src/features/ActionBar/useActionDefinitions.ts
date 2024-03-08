@@ -9,8 +9,10 @@ import { Post } from "~/models/post";
 import { availableActionsQuery, useBlog } from "~/services/queries";
 import { IActionDefinition } from "~/utils/types";
 
-// Real publish (or submit) URL. Depends on user shared rights.
-type PublishWith = { defaultPublishAction?: "publish" | "submit" };
+type SpecialPostRights = {
+  hasPublishPostRight: boolean;
+  hasSubmitPostRight: boolean;
+};
 type SharedRoles = { read: boolean; contrib: boolean; manager: boolean };
 type SharedRight = {
   "org-entcore-blog-controllers-PostController|list": boolean;
@@ -37,20 +39,26 @@ export const useActionDefinitions = (
   const { user } = useUser();
   const { blog } = useBlog();
   const rights = useMemo(() => {
+    const defaultRights = {
+      creator: false,
+      read: false,
+      contrib: false,
+      manager: false,
+      hasPublishPostRight: false,
+      hasSubmitPostRight: false,
+    };
+
     if (!blog || !user) {
-      return {
-        creator: false,
-        read: false,
-        contrib: false,
-        manager: false,
-      };
+      return defaultRights;
     }
+
     const { shared, author } = blog;
     const { userId, groupsIds } = user;
+
     // Look for granted rights in the "shared" array.
     const sharedRights = (shared as any).reduce(
       (
-        previous: SharedRoles & PublishWith,
+        previous: SharedRoles & SpecialPostRights,
         current: {
           userId: string;
           groupId: string;
@@ -73,22 +81,17 @@ export const useActionDefinitions = (
           // Also look for the real publish/submit URL to use.
           // If both are acceptable, prefer publish over submit.
           if (current["org-entcore-blog-controllers-PostController|publish"]) {
-            previous.defaultPublishAction = "publish";
-          } else if (
-            previous.defaultPublishAction !== "publish" &&
-            current["org-entcore-blog-controllers-PostController|submit"]
-          ) {
-            previous.defaultPublishAction = "submit";
+            previous.hasPublishPostRight = true;
+          }
+          if (current["org-entcore-blog-controllers-PostController|submit"]) {
+            previous.hasSubmitPostRight = true;
           }
         }
         return previous;
       },
-      {
-        read: false,
-        contrib: false,
-        manager: false,
-      },
-    ) as SharedRoles & PublishWith;
+      defaultRights,
+    ) as SharedRoles & SpecialPostRights;
+
     return {
       ...sharedRights,
       creator: author.userId === userId,
@@ -163,7 +166,27 @@ export const useActionDefinitions = (
     [availableActions, filterActionsForPost],
   );
 
-  /** Check if a publish restriction applies on a new post. */
+  /** Get the publish or submit keyword to use, which depends on :
+    - available rights,
+    - retro-compatible logic. 
+  */
+  const getDefaultPublishKeyword = useCallback(
+    (postAuthorId: string) => {
+      const isConstraint = blog?.["publish-type"] === "RESTRAINT";
+
+      return !isConstraint && postAuthorId === user?.userId
+        ? "submit"
+        : rights.hasPublishPostRight
+          ? "publish"
+          : "submit";
+    },
+    [blog, user, rights],
+  );
+
+  /**
+   * Check if a publish restriction applies on a new post.
+   * This is intended for UI only (buttons label), not custom backend logic.
+   */
   const mustSubmit =
     blog?.["publish-type"] === "RESTRAINT" &&
     rights.contrib &&
@@ -199,6 +222,7 @@ export const useActionDefinitions = (
     ...rights,
     hasRight,
     mustSubmit,
+    getDefaultPublishKeyword,
     availableActionsForPost,
     availableActionsForBlog,
     canContrib,
