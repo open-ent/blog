@@ -14,7 +14,6 @@ import {
   useDate,
   useToggle,
 } from "@edifice-ui/react";
-import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 
 import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
@@ -68,25 +67,21 @@ export const PostTitle = ({
   const getDatedState = (post: Post): string =>
     t(getDatedKey(post.state), { date: fromNow(post.modified) });
 
-  const classes = clsx("d-flex flex-column", {
-    "mx-16": mode === "print",
-    "mx-md-16": mode !== "print",
-  });
-
   return (
     <>
       {mode !== "print" && (
-        <div className="d-flex justify-content-between align-items-center">
+        <div className="d-flex justify-content-between align-items-center my-16">
           <Button
             type="button"
             color="tertiary"
             variant="ghost"
             leftIcon={<ArrowLeft />}
             onClick={onBackward}
+            size="sm"
           >
             {common_t("back")}
           </Button>
-          <div className="d-flex m-16 gap-12">
+          <div className="d-flex ms-16 gap-12">
             {readOnly ? (
               <>
                 <IconButton
@@ -162,7 +157,7 @@ export const PostTitle = ({
         </div>
       )}
 
-      <div className={classes}>
+      <div className="d-flex flex-column mt-8 mx-md-8">
         <h2 className="text-gray-800">{post.title}</h2>
         <div className="d-flex align-items-center gap-12 mb-16 mb-md-24 mt-8">
           <Avatar

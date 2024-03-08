@@ -40,7 +40,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
   };
 
   return comments.length ? (
-    <div className="mb-48">
+    <>
       {comments.map((comment) => (
         <CommentCard
           key={comment.id}
@@ -69,7 +69,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
           onCancel={() => setCommentToDelete(null)}
         />
       )}
-    </div>
+    </>
   ) : (
     <div className="m-auto">
       <EmptyScreen

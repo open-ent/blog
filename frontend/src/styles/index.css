@@ -94,3 +94,8 @@ main {
     max-height: none;
   }
 }
+
+.post-container {
+  max-width: 900px;
+  width: 100%;
+}

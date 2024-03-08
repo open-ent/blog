@@ -105,54 +105,54 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
         blogId={blogId}
         {...postActionsHandlers}
       />
-      {mode === "edit" && (
-        <div className="mt-24 mx-md-16">
-          <FormControl id="postTitle" isRequired>
-            <Label>{t("blog.post.title-helper")}</Label>
-            <Input
-              ref={titleRef}
-              type="text"
-              size="md"
-              placeholder={t("post.title.placeholder")}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            ></Input>
-          </FormControl>
-          <FormControl id="postContent" className="mt-16">
-            <Label>{t("blog.post.content-helper")}</Label>
-          </FormControl>
-        </div>
-      )}
-      <div className="mx-md-16">
+      <div className="mx-md-8">
+        {mode === "edit" && (
+          <div className="mt-24">
+            <FormControl id="postTitle" isRequired>
+              <Label>{t("blog.post.title-helper")}</Label>
+              <Input
+                ref={titleRef}
+                type="text"
+                size="md"
+                placeholder={t("post.title.placeholder")}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              ></Input>
+            </FormControl>
+            <FormControl id="postContent" className="mt-16">
+              <Label>{t("blog.post.content-helper")}</Label>
+            </FormControl>
+          </div>
+        )}
         <Editor
           ref={editorRef}
           content={content}
           mode={mode}
           variant={variant}
         ></Editor>
+        {mode === "edit" && (
+          <div className="d-flex gap-8 justify-content-end my-8 sticky-bottom py-8 bg-white">
+            <Button type="button" variant="ghost" onClick={handleCancelClick}>
+              {t("cancel")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              leftIcon={<Save />}
+              onClick={handleSaveClick}
+            >
+              {t("blog.save")}
+            </Button>
+            <Button
+              type="button"
+              leftIcon={<Send />}
+              onClick={handlePublishClick}
+            >
+              {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+            </Button>
+          </div>
+        )}
       </div>
-      {mode === "edit" && (
-        <div className="d-flex gap-8 justify-content-end my-16 mx-md-16">
-          <Button type="button" variant="ghost" onClick={handleCancelClick}>
-            {t("cancel")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            leftIcon={<Save />}
-            onClick={handleSaveClick}
-          >
-            {t("blog.save")}
-          </Button>
-          <Button
-            type="button"
-            leftIcon={<Send />}
-            onClick={handlePublishClick}
-          >
-            {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
-          </Button>
-        </div>
-      )}
     </>
   );
 };

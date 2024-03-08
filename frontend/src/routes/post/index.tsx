@@ -49,8 +49,8 @@ export function Component() {
   return (
     <>
       <PostHeader />
-      <PostContent blogId={blogId} post={query.data} />
-      <div className="mx-md-16">
+      <div className="post-container mx-auto mb-48">
+        <PostContent blogId={blogId} post={query.data} />
         <CommentsHeader comments={comments ?? []} />
         <CommentsCreate comments={comments ?? []} />
         <CommentsList comments={comments ?? []} />

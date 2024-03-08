@@ -94,7 +94,7 @@ export const CommentCard = ({
         variant="circle"
       />
       <div className="d-flex flex-column flex-grow-1">
-        <div className="ms-8">
+        <div className="ms-8 text-break">
           {editable ? (
             <div className="d-flex flex-column flex-fill gap-8">
               <div>{t("comment.placeholder")}</div>
