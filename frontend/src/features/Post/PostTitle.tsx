@@ -150,7 +150,7 @@ export const PostTitle = ({
                       variant="filled"
                       onClick={() => toggleOldFormat(true)}
                     >
-                      {t("post.oldFormat")}
+                      {t("post.oldFormat.open")}
                     </Button>
                   ) : (
                     <></>

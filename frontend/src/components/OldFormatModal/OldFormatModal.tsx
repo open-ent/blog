@@ -3,6 +3,8 @@ import { useState } from "react";
 import { LoadingScreen, Modal } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
+import { basename } from "~/routes";
+
 interface OldFormatModalProps {
   blogId: string;
   postId: string;
@@ -38,7 +40,7 @@ export default function OldFormatModal({
         )}
         <iframe
           className="flex-fill"
-          src={`/oldformat/${blogId}/${postId}`}
+          src={`${location.origin}${basename.replace(/\/$/g, "")}/oldformat/${blogId}/${postId}`}
           title={t("post.oldFormat.title", { ns: "blog" })}
           onLoad={() => setIsLoaded(true)}
         ></iframe>
