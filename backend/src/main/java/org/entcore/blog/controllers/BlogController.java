@@ -132,10 +132,10 @@ public class BlogController extends BaseController {
 	}
 
 	/**
-	 * Display react front print /print/id/:id
+	 * Display react front print /print/:id
 	 * @param request
 	 */
-	@Get("/print/id/:id")
+	@Get("/print/:id")
 	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void viewPrintById(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);

@@ -106,7 +106,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
         {...postActionsHandlers}
       />
       {mode === "edit" && (
-        <div className="mt-24 mx-md-16 mx-lg-64">
+        <div className="mt-24 mx-md-16">
           <FormControl id="postTitle" isRequired>
             <Label>{t("blog.post.title-helper")}</Label>
             <Input
@@ -123,7 +123,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
           </FormControl>
         </div>
       )}
-      <div className="mx-md-16 mx-lg-64">
+      <div className="mx-md-16">
         <Editor
           ref={editorRef}
           content={content}
@@ -132,7 +132,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
         ></Editor>
       </div>
       {mode === "edit" && (
-        <div className="d-flex gap-8 justify-content-end my-16 mx-md-16 mx-lg-64">
+        <div className="d-flex gap-8 justify-content-end my-16 mx-md-16">
           <Button type="button" variant="ghost" onClick={handleCancelClick}>
             {t("cancel")}
           </Button>

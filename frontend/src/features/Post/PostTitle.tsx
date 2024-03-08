@@ -70,13 +70,13 @@ export const PostTitle = ({
 
   const classes = clsx("d-flex flex-column", {
     "mx-16": mode === "print",
-    "mx-md-16 mx-lg-64": mode !== "print",
+    "mx-md-16": mode !== "print",
   });
 
   return (
     <>
       {mode !== "print" && (
-        <div className="d-flex justify-content-between align-items-center mx-lg-48">
+        <div className="d-flex justify-content-between align-items-center">
           <Button
             type="button"
             color="tertiary"
@@ -172,14 +172,13 @@ export const PostTitle = ({
             variant="circle"
           />
           <div className="text-gray-700 small d-flex flex-column flex-md-row">
-            <span>{post.author.username}</span>
             <a
               href={getUserbookURL(post.author.userId)}
               className="comment-card-author"
             >
               {post.author.username}
             </a>
-            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12 ms-12"></span>
             <span>{getDatedState(post)}</span>
           </div>
         </div>

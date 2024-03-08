@@ -50,7 +50,7 @@ export function Component() {
     <>
       <PostHeader />
       <PostContent blogId={blogId} post={query.data} />
-      <div className="mx-md-16 mx-lg-64">
+      <div className="mx-md-16">
         <CommentsHeader comments={comments ?? []} />
         <CommentsCreate comments={comments ?? []} />
         <CommentsList comments={comments ?? []} />
