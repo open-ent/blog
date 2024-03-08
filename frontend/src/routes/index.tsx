@@ -60,7 +60,7 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
     errorElement: <PageError />,
   },
   {
-    path: "/print/id/:blogId",
+    path: "/print/:blogId",
     async lazy() {
       const { BlogPrint, blogPrintLoader } = await import(
         "~/routes/blog-print"
@@ -97,6 +97,7 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
 ];
 
 export const basename = import.meta.env.PROD ? "/blog" : "/";
+export const baseUrl = `${location.origin}${basename.replace(/\/$/g, "")}`;
 
 export const router = (queryClient: QueryClient) =>
   createBrowserRouter(routes(queryClient), {

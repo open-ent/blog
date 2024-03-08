@@ -18,12 +18,15 @@ import { useTranslation } from "react-i18next";
 
 import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
 import { PostActions } from "../ActionBar/usePostActions";
-import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
 import { Post } from "~/models/post";
 import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
 
 const ConfirmModal = lazy(
   async () => await import("~/components/ConfirmModal/ConfirmModal"),
+);
+
+const OldFormatModal = lazy(
+  async () => await import("~/components/OldFormatModal/OldFormatModal"),
 );
 
 export interface PostTitleProps {

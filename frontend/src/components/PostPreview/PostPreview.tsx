@@ -237,7 +237,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
       {blog && post && (
         <PostPreviewActionBar
           post={post}
-          blogId={blog._id}
+          blog={blog}
           index={index}
         ></PostPreviewActionBar>
       )}

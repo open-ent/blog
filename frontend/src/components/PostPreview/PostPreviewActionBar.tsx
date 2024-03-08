@@ -8,7 +8,9 @@ import { useNavigate } from "react-router-dom";
 import { postContentActions } from "~/config/postContentActions";
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { usePostActions } from "~/features/ActionBar/usePostActions";
+import { Blog } from "~/models/blog";
 import { Post, PostState } from "~/models/post";
+import { baseUrl } from "~/routes";
 import { useBlogState, useStoreUpdaters } from "~/store";
 
 const DeleteModal = lazy(
@@ -17,9 +19,9 @@ const DeleteModal = lazy(
 
 export interface PostPreviewActionBarProps {
   /**
-   * Blog id of the post.
+   * Blog of the post.
    */
-  blogId: string;
+  blog: Blog;
   /**
    * Post to be previewed.
    */
@@ -31,12 +33,12 @@ export interface PostPreviewActionBarProps {
 }
 
 export const PostPreviewActionBar = ({
-  blogId,
+  blog: blog,
   post,
   index,
 }: PostPreviewActionBarProps) => {
   // Get available actions and requirements for the post.
-  const postActions = usePostActions(postContentActions, blogId, post);
+  const postActions = usePostActions(postContentActions, blog._id, post);
   const { mustSubmit, isActionAvailable, goUp, publish, trash } = postActions;
 
   const { t } = useTranslation("blog");
@@ -48,11 +50,18 @@ export const PostPreviewActionBar = ({
   const { actionBarPostId } = useBlogState();
 
   const handleEditClick = () => {
-    navigate(`/id/${blogId}/post/${post._id}?edit=true`);
+    navigate(`/id/${blog._id}/post/${post._id}?edit=true`);
   };
 
   const handlePrintClick = () => {
-    window.open(`/print/${blogId}/post/${post._id}`, "_blank");
+    if (blog.visibility === "PUBLIC") {
+      window.open(
+        `${baseUrl}/pub/print/${blog._id}/post/${post._id}`,
+        "_blank",
+      );
+    } else {
+      window.open(`${baseUrl}/print/${blog._id}/post/${post._id}`, "_blank");
+    }
   };
 
   const handlePublishClick = async () => {

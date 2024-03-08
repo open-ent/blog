@@ -126,7 +126,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   };
 
   const handlePrintClick = () => {
-    window.open(`/print/id/${blog._id}`, "_blank");
+    window.open(`/print/${blog._id}`, "_blank");
   };
 
   function isActionAvailable(action: ActionType) {
