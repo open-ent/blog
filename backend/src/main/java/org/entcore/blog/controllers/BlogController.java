@@ -132,12 +132,32 @@ public class BlogController extends BaseController {
 	}
 
 	/**
-	 * Display react front print /print/:id
+	 * Display react front print blog /print/:id
 	 * @param request
 	 */
 	@Get("/print/:id")
-	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
+	@SecuredAction(value = "blog.view")
 	public void viewPrintById(HttpServerRequest request) {
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	/**
+	 * Display react front print post /print/:id/post/:postId
+	 * @param request
+	 */
+	@Get("/print/:id/post/:postid")
+	@SecuredAction(value = "blog.view")
+	public void viewPrintPostById(HttpServerRequest request) {
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	/**
+	 * Display react front print /print/:id/post/:postId
+	 * @param request
+	 */
+	@Get("/oldformat/:id/:postid")
+	@SecuredAction(value = "blog.view")
+	public void viewOldPostById(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);
 	}
 
