@@ -2,8 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
-import { MessageInfo, See } from "@edifice-ui/icons";
-import { Avatar, Badge, Card, Image, useDate } from "@edifice-ui/react";
+import { ArrowRight, MessageInfo, See } from "@edifice-ui/icons";
+import { Avatar, Badge, Button, Card, Image, useDate } from "@edifice-ui/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -229,6 +229,15 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                   <span>{post.nbComments}</span>
                   <MessageInfo />
                 </div>
+              </div>
+              <div>
+                <Button
+                  variant="ghost"
+                  rightIcon={<ArrowRight />}
+                  color="secondary"
+                >
+                  {t("blog.post.preview.readMore")}
+                </Button>
               </div>
             </div>
           </div>

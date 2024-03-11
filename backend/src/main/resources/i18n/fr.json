@@ -33,6 +33,7 @@
   "blog.starthere": "Vous pouvez commencer à écrire en cliquant sur ce lien.",
   "blog.title.placeholder": "Entrez le titre de votre blog",
   "blog.unsetImage.caps": "SUPPRIMER L'IMAGE",
+  "blog.post.preview.readMore": "Lire la suite",
   "cancel": "Annuler",
   "comment.placeholder": "Votre commentaire",
   "comments.hide": "Masquer les commentaires ([[post.comments.length()]])",
