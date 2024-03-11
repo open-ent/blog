@@ -10,6 +10,7 @@ import { PostTitle } from "./PostTitle";
 import { usePostActions } from "../ActionBar/usePostActions";
 import { postContentActions } from "~/config/postContentActions";
 import { Post } from "~/models/post";
+import { baseUrl } from "~/routes";
 
 export interface PostContentProps {
   post: Post;
@@ -60,7 +61,8 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
     onEdit: () => {
       setMode("edit");
     },
-    onPrint: () => window.open(`/print/${blogId}/post/${post._id}`, "_blank"),
+    onPrint: () =>
+      window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank"),
     onPublish: () => {
       publish();
     },

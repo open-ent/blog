@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
 import { useBlogActions } from "~/features/ActionBar/useBlogActions";
 import { Blog } from "~/models/blog";
+import { baseUrl } from "~/routes";
 import { blogQuery, useDeleteBlog } from "~/services/queries";
 import { useBlogState, useStoreUpdaters } from "~/store";
 
@@ -126,7 +127,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   };
 
   const handlePrintClick = () => {
-    window.open(`/print/${blog._id}`, "_blank");
+    window.open(`${baseUrl}/print/${blog._id}`, "_blank");
   };
 
   function isActionAvailable(action: ActionType) {

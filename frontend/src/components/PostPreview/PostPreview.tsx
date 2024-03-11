@@ -160,7 +160,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                     color: "text",
                   }}
                 >
-                  {t(creator || manager ? "filters.submitted" : "filters.sent")}
+                  {t("blog.filters.submitted")}
                 </Badge>
               )}
             </div>
