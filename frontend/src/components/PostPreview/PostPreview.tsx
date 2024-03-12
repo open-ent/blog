@@ -3,7 +3,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
 import { ArrowRight, MessageInfo, See } from "@edifice-ui/icons";
-import { Avatar, Badge, Button, Card, Image, useDate } from "@edifice-ui/react";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Image,
+  getThumbnail,
+  useDate,
+} from "@edifice-ui/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -88,7 +96,10 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             .filter((tag) => tag.includes("img"))
             .map((tag) => {
               const srcMatch = getSrc.exec(tag);
-              return srcMatch?.length ? srcMatch[1] : "";
+              if (srcMatch?.length) {
+                return getThumbnail(srcMatch[1], 0, 300);
+              }
+              return "";
             }) || [],
         );
       }
