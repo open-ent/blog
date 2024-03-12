@@ -52,7 +52,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   };
 
   return (
-    <div className="mt-32">
+    <div className="post-container mt-32">
       <FormControl id="postTitle" isRequired className="mx-md-16">
         <Label>{t("blog.post.title-helper")}</Label>
         <Input

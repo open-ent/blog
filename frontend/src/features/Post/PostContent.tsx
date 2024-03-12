@@ -103,7 +103,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   };
 
   return (
-    <div className="post-container mx-auto mb-48">
+    <div className="post-container mb-48">
       <PostTitle
         post={post}
         postActions={postActions}
@@ -162,7 +162,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
       </div>
 
       {mode === "read" && (
-        <div className="mx-md-8">
+        <div className="mx-md-8 mt-24">
           <CommentsHeader comments={comments ?? []} />
           <CommentsCreate comments={comments ?? []} />
           <CommentsList comments={comments ?? []} />

@@ -176,7 +176,7 @@ export const useActionDefinitions = (
 
       return !isConstraint && postAuthorId === user?.userId
         ? "submit"
-        : rights.hasPublishPostRight
+        : rights.manager || rights.creator || rights.hasPublishPostRight
           ? "publish"
           : "submit";
     },
