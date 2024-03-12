@@ -2,9 +2,6 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { postContentActions } from "~/config/postContentActions";
-import { CommentsCreate } from "~/features/Comments/CommentsCreate";
-import { CommentsHeader } from "~/features/Comments/CommentsHeader";
-import { CommentsList } from "~/features/Comments/CommentsList";
 import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
 import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
@@ -49,12 +46,7 @@ export function Component() {
   return (
     <>
       <PostHeader />
-      <div className="post-container mx-auto mb-48">
-        <PostContent blogId={blogId} post={query.data} />
-        <CommentsHeader comments={comments ?? []} />
-        <CommentsCreate comments={comments ?? []} />
-        <CommentsList comments={comments ?? []} />
-      </div>
+      <PostContent blogId={blogId} post={query.data} comments={comments} />
     </>
   );
 }

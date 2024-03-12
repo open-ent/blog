@@ -8,16 +8,21 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { PostTitle } from "./PostTitle";
 import { usePostActions } from "../ActionBar/usePostActions";
+import { CommentsCreate } from "../Comments/CommentsCreate";
+import { CommentsHeader } from "../Comments/CommentsHeader";
+import { CommentsList } from "../Comments/CommentsList";
 import { postContentActions } from "~/config/postContentActions";
+import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
 import { baseUrl } from "~/routes";
 
 export interface PostContentProps {
   post: Post;
   blogId: string;
+  comments?: Comment[];
 }
 
-export const PostContent = ({ blogId, post }: PostContentProps) => {
+export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
   const { mustSubmit, save, trash, publish, readOnly } = postActions;
@@ -98,7 +103,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
   };
 
   return (
-    <>
+    <div className="post-container mx-auto mb-48">
       <PostTitle
         post={post}
         postActions={postActions}
@@ -155,6 +160,14 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
           </div>
         )}
       </div>
-    </>
+
+      {mode === "read" && (
+        <div className="mx-md-8">
+          <CommentsHeader comments={comments ?? []} />
+          <CommentsCreate comments={comments ?? []} />
+          <CommentsList comments={comments ?? []} />
+        </div>
+      )}
+    </div>
   );
 };
