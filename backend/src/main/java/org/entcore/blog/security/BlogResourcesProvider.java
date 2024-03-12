@@ -180,7 +180,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			Either<String, JsonArray> postsQueryResult = Utils.validResults(postsQueryResponse);
 			if (postsQueryResult.isRight()) {
 				JsonArray posts = postsQueryResult.right().getValue();
-				if (posts.isEmpty()) {
+				if (posts.isEmpty() || posts.size() != resourceIdsArray.size()) {
 					promise.complete(false);
 				} else {
 					JsonArray blogIdsToBeChecked = getBlogIdsTobeChecked(posts, userId);
