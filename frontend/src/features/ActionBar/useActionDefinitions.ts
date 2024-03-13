@@ -63,6 +63,7 @@ export const useActionDefinitions = (
 
     const { shared, author } = blog;
     const { userId, groupsIds } = user;
+    const isAuthor = author.userId === userId;
 
     // Look for granted rights in the "shared" array.
     const sharedRights = (shared as any).reduce(
@@ -108,7 +109,10 @@ export const useActionDefinitions = (
 
     return {
       ...sharedRights,
-      creator: author.userId === userId,
+      // The creator has all rights.
+      canComment: sharedRights.canComment || isAuthor,
+      canContrib: sharedRights.canContrib || isAuthor,
+      creator: isAuthor,
     };
   }, [blog, user]);
 
