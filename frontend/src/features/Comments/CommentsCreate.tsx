@@ -15,11 +15,11 @@ export interface CommentsCreateProps {
 export const CommentsCreate = ({ comments }: CommentsCreateProps) => {
   const { user } = useUser();
   const { blogId, postId } = useParams();
-  const { create } = useComments(blogId!, postId!);
+  const { canCreate, create } = useComments(blogId!, postId!);
 
-  if (!user?.userId || !blogId || !postId) return <></>;
+  if (!user?.userId || !blogId || !postId || !canCreate) return <></>;
 
-  const cssClasses = clsx({ "bg-gray-200": comments.length > 0 });
+  const cssClasses = clsx("mt-16", { "bg-gray-200": comments.length > 0 });
 
   const userAsAuthor = {
     userId: user?.userId,

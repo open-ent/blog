@@ -13,12 +13,19 @@ type SpecialPostRights = {
   hasPublishPostRight: boolean;
   hasSubmitPostRight: boolean;
 };
-type SharedRoles = { read: boolean; contrib: boolean; manager: boolean };
+type SharedRoles = {
+  read: boolean;
+  contrib: boolean;
+  manager: boolean;
+  canComment: boolean;
+  canContrib: boolean;
+};
 type SharedRight = {
   "org-entcore-blog-controllers-PostController|list": boolean;
   "org-entcore-blog-controllers-PostController|submit": boolean;
   "org-entcore-blog-controllers-PostController|publish": boolean;
   "org-entcore-blog-controllers-BlogController|shareResource": boolean;
+  "org-entcore-blog-controllers-PostController|comment": boolean;
 };
 
 /**
@@ -44,6 +51,8 @@ export const useActionDefinitions = (
       read: false,
       contrib: false,
       manager: false,
+      canContrib: false,
+      canComment: false,
       hasPublishPostRight: false,
       hasSubmitPostRight: false,
     };
@@ -77,6 +86,11 @@ export const useActionDefinitions = (
             current[
               "org-entcore-blog-controllers-BlogController|shareResource"
             ];
+          previous.canComment ||=
+            current["org-entcore-blog-controllers-PostController|comment"];
+
+          previous.canContrib ||=
+            author.userId === userId || previous.contrib || previous.manager;
 
           // Also look for the real publish/submit URL to use.
           // If both are acceptable, prefer publish over submit.
@@ -97,11 +111,6 @@ export const useActionDefinitions = (
       creator: author.userId === userId,
     };
   }, [blog, user]);
-
-  const canContrib = useMemo(
-    () => rights.contrib || rights.creator || rights.manager,
-    [rights],
-  );
 
   /**
    * Check the `right` field of an IAction.
@@ -225,6 +234,5 @@ export const useActionDefinitions = (
     getDefaultPublishKeyword,
     availableActionsForPost,
     availableActionsForBlog,
-    canContrib,
   };
 };

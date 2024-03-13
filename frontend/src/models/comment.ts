@@ -12,6 +12,9 @@ export type Comment = {
   created: {
     $date: number;
   };
+  modified?: {
+    $date: number;
+  };
   author: {
     userId: ID;
     username: string;

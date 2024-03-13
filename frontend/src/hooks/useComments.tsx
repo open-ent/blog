@@ -1,5 +1,4 @@
 import { useUser } from "@edifice-ui/react";
-import { ACTION } from "edifice-ts-client";
 
 import { useActionDefinitions } from "../features/ActionBar/useActionDefinitions";
 import { postCommentActions } from "~/config/postCommentActions";
@@ -11,6 +10,8 @@ import {
 } from "~/services/queries";
 
 export interface CommentActions {
+  /** Truthy if the user can create a new comment. */
+  canCreate: boolean;
   /** Truthy if the user can edit (and update) the comment. */
   canEdit: (comment: Comment) => boolean;
   /** Truthy if the user can remove the comment. */
@@ -25,18 +26,21 @@ export interface CommentActions {
 
 export const useComments = (blogId: string, postId: string): CommentActions => {
   const { user } = useUser();
-  const { hasRight, manager } = useActionDefinitions(postCommentActions);
+  const { creator, manager, canComment } =
+    useActionDefinitions(postCommentActions);
 
   const canEdit = (comment: Comment) =>
-    comment.author.userId === user?.userId && hasRight(ACTION.COMMENT);
+    comment.author.userId === user?.userId && canComment;
 
-  const canRemove = (comment: Comment) => manager || canEdit(comment);
+  const canRemove = (comment: Comment) =>
+    creator || manager || canEdit(comment);
 
   const createMutation = useCreateComment(blogId, postId);
   const deleteMutation = useDeleteComment(blogId, postId);
   const updateMutation = useUpdateComment(blogId, postId);
 
   return {
+    canCreate: canComment,
     canEdit,
     canRemove,
     create: (content: string) => createMutation.mutate({ content }),

@@ -21,9 +21,12 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
 
   const { t } = useTranslation("blog");
   const { blogId, postId } = useParams();
-  const { canEdit, canRemove, update, remove } = useComments(blogId!, postId!);
+  const { canCreate, canEdit, canRemove, update, remove } = useComments(
+    blogId!,
+    postId!,
+  );
 
-  if (!blogId || !postId) return <></>;
+  if (!blogId || !postId || (!canCreate && comments.length <= 0)) return <></>;
 
   const handlePublishClick = (comment: Comment, newContent: Content) => {
     comment.comment = newContent as string;
@@ -48,7 +51,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
           author={comment.author}
           content={comment.comment}
           mode="read"
-          created={comment.created}
+          created={comment.modified ?? comment.created}
           onPublish={
             canEdit(comment)
               ? (newContent) => handlePublishClick(comment, newContent)
@@ -71,7 +74,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
       )}
     </>
   ) : (
-    <div className="m-auto">
+    <div className="m-auto mt-24">
       <EmptyScreen
         imageSrc={`${imagePath}/emptyscreen/illu-pad.svg`}
         text={t("blog.comment.emptyscreen.text")}

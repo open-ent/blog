@@ -10,6 +10,6 @@ export const postCommentActions: Array<IActionDefinition> = [
   {
     // publish/delete a comment
     id: ACTION.COMMENT,
-    workflow: workflows.comment,
+    workflow: workflows.access,
   },
 ];
