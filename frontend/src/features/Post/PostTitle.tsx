@@ -150,14 +150,14 @@ export const PostTitle = ({
             src={getAvatarURL(post.author.userId)}
             variant="circle"
           />
-          <div className="text-gray-700 small d-flex flex-column flex-md-row">
+          <div className="text-gray-700 small d-flex flex-column flex-md-row gap-12 align-items-md-center ">
             <a
               href={getUserbookURL(post.author.userId)}
               className="comment-card-author"
             >
               {post.author.username}
             </a>
-            <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600 ps-12 ms-12"></span>
+            <span className="separator border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
             <span>{getDatedState(post)}</span>
           </div>
         </div>

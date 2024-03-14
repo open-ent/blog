@@ -148,7 +148,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
           </div>
           <div className="d-flex flex-column gap-2">
             <div className="d-flex align-items-center">
-              <h5>{post.title}</h5>
+              <h4>{post.title}</h4>
               {post.state === PostState.DRAFT &&
                 (creator || manager || contrib) && (
                   <Badge
@@ -175,9 +175,9 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 </Badge>
               )}
             </div>
-            <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row">
+            <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row align-items-md-center">
               <span>{post.author.username}</span>
-              <span className="border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+              <span className="separator border border-top-0 border-end-0 border-bottom-0 border-gray-600 d-none d-md-inline-block"></span>
               <span>{getDatedState()}</span>
             </div>
           </div>
@@ -231,12 +231,13 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 ))}
             </div>
             <div className="d-flex justify-content-between">
-              <div className="d-flex gap-12 small text-gray-700">
+              <div className="d-flex gap-12 small text-gray-700 align-items-center ">
                 <div className="d-flex align-items-center gap-8">
                   <span>{post.views}</span>
                   <See />
                 </div>
-                <div className="d-flex align-items-center gap-8 border border-gray-600 border-top-0 border-end-0 border-bottom-0 ps-12">
+                <span className="separator border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+                <div className="d-flex align-items-center gap-8">
                   <span>{post.nbComments}</span>
                   <MessageInfo />
                 </div>
