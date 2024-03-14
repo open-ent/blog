@@ -10,6 +10,7 @@ import { blogActions } from "~/config/blogActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
 import { PostTitle } from "~/features/Post/PostTitle";
+import { PostState } from "~/models/post";
 import {
   availableActionsQuery,
   blogQuery,
@@ -26,9 +27,9 @@ export const blogPrintLoader =
     const queryPostsList = postsListQuery(
       params.blogId as string,
       0,
+      PostState.PUBLISHED,
       undefined,
-      undefined,
-      true,
+      false,
     );
 
     await Promise.all([
@@ -47,7 +48,7 @@ export function BlogPrint() {
   const {
     posts,
     query: { fetchNextPage, hasNextPage, isSuccess, data },
-  } = usePostsList(blog?._id, true);
+  } = usePostsList(blog?._id, PostState.PUBLISHED, false);
 
   useEffect(() => {
     if (!hasRight(ACTION.PRINT)) {
@@ -70,6 +71,7 @@ export function BlogPrint() {
 
   return (
     <>
+      {!isSuccess && hasNextPage && <LoadingScreen />}
       <div className="px-16">
         <BlogHeader blog={blog} print={true} />
       </div>

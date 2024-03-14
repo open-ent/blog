@@ -55,7 +55,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       name: "published",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "text-bg-secondary-200 fw-bold":
+          "bg-secondary-200 fw-bold":
             localPostsFilters.state === PostState.PUBLISHED,
         }),
         children: (
@@ -74,7 +74,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       visibility: blog["publish-type"] === "RESTRAINT" ? "show" : "hide",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "text-bg-secondary-200 fw-bold":
+          "bg-secondary-200 fw-bold":
             localPostsFilters.state === PostState.SUBMITTED,
         }),
         children: (
@@ -105,7 +105,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       name: "draft",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "text-bg-secondary-200 fw-bold":
+          "bg-secondary-200 fw-bold":
             localPostsFilters.state === PostState.DRAFT,
         }),
         children: (

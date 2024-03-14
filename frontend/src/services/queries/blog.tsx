@@ -140,7 +140,11 @@ export const useBlogCounter = (blogId?: string) => {
  * @param blogId the blog id string
  * @returns list of posts
  */
-export const usePostsList = (blogId?: string, getAll?: boolean) => {
+export const usePostsList = (
+  blogId?: string,
+  state?: PostState,
+  withNbComments: boolean = true,
+) => {
   const params = useParams<{ blogId: string }>();
   const { postsFilters } = usePostsFilter();
   const { postPageSize } = useBlogState();
@@ -156,9 +160,9 @@ export const usePostsList = (blogId?: string, getAll?: boolean) => {
     postsListQuery(
       blogId!,
       postPageSize,
-      !getAll ? postsFilters.state : undefined,
-      !getAll ? postsFilters.search : undefined,
-      !getAll,
+      state || postsFilters.state,
+      postsFilters.search,
+      withNbComments,
     ),
   );
 
