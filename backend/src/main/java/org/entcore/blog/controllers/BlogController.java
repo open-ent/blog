@@ -204,7 +204,7 @@ public class BlogController extends BaseController {
 					if(visibility==null || "".equals(visibility)){
 						blog.update(user, blogId, data, defaultResponseHandler(request));
 					}else{
-						changeResourcesVisibility(blogId, data, user, visibility).setHandler(res->{
+						changeResourcesVisibility(blogId, data, user, visibility, request).setHandler(res->{
 							blog.update(user, blogId, data, defaultResponseHandler(request));
 						});
 					}
@@ -690,7 +690,7 @@ public class BlogController extends BaseController {
 				getUserInfos(eb, request,  user -> {
 					if (user != null) {
 						String visibility = data.getString("visibility");
-						changeResourcesVisibility(blogId,data, user, visibility).setHandler(res->{
+						changeResourcesVisibility(blogId,data, user, visibility, request).setHandler(res->{
 							blog.update(user, blogId, data, defaultResponseHandler(request));
 						});
 					} else {
@@ -725,7 +725,8 @@ public class BlogController extends BaseController {
 		return future;
 	}
 
-	private Future<JsonArray> changeResourcesVisibility(String blogId, JsonObject data, UserInfos user, String visibility) {
+	private Future<JsonArray> changeResourcesVisibility(String blogId, JsonObject data, UserInfos user, String visibility,
+																											final HttpServerRequest request) {
 		final VisibilityFilter eVisibility = VisibilityFilter.valueOf(visibility);
 		final VisibilityFilter inverse = eVisibility.equals(VisibilityFilter.PUBLIC)?VisibilityFilter.OWNER:VisibilityFilter.PUBLIC;
 		//get old version of blog
@@ -777,7 +778,7 @@ public class BlogController extends BaseController {
 				}else{
 					futureList.fail(event.left().getValue());
 				}
-			});
+			}, request);
 			return futureList;
 		})//transform content
 		.compose(posts -> {

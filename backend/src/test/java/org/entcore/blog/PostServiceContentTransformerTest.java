@@ -14,6 +14,7 @@ import fr.wseduc.webutils.Utils;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
@@ -107,7 +108,7 @@ public class PostServiceContentTransformerTest {
             final String postId = createdPost.getString("_id");
             data.put("POSTID1", postId);
             context.assertNotNull(postId);
-            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT))
+            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT), null)
             .onSuccess(postGet -> {
                 context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
@@ -121,7 +122,7 @@ public class PostServiceContentTransformerTest {
                 async.complete();
             })
             .onFailure(context::fail);
-        })));
+        })), null);
     }
 
 
@@ -135,7 +136,7 @@ public class PostServiceContentTransformerTest {
         final JsonObject post2 = createPost("post2");
         postService.update(postId, post2, user, test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(updatedPost -> {
             context.assertNotNull(postId);
-            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT))
+            postService.get(new PostFilter(blogId, postId, false, PostService.StateType.DRAFT), null)
             .onSuccess(postGet -> {
                 context.assertEquals("<p>clean html</p>"+post2.getString("content"), postGet.getString("content"));
                 context.assertEquals(1, postGet.getInteger("contentVersion"));
@@ -148,7 +149,7 @@ public class PostServiceContentTransformerTest {
                 async.complete();
             })
             .onFailure(context::fail);
-        })));
+        })), null);
     }
 
     /**
@@ -256,7 +257,7 @@ public class PostServiceContentTransformerTest {
             } else {
                 promise.complete(e.right().getValue());
             }
-        });
+        }, null);
         return promise.future();
     }
 
@@ -291,7 +292,7 @@ public class PostServiceContentTransformerTest {
         if(nbTimesToGet <= 0) {
             promise.fail("nbTimesToGet should be a positive number");
         } else {
-            postService.get(filter).onComplete(e -> {
+            postService.get(filter, null).onComplete(e -> {
                 if(e.failed()) {
                     promise.fail(e.cause());
                 } else {
@@ -319,7 +320,7 @@ public class PostServiceContentTransformerTest {
             } else {
                 promise.complete(e.right().getValue());
             }
-        });
+        }, null);
         return promise.future();
     }
 
@@ -342,7 +343,8 @@ public class PostServiceContentTransformerTest {
         private int nbCalls = 0;
 
         @Override
-        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
+        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest,
+                                                            final HttpServerRequest request) {
             nbCalls++;
             return Future.succeededFuture(new ContentTransformerResponse(1, null, new JsonObject().put("content", contentTransformerRequest.getHtmlContent()).getMap(), "plainTextContent", "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }

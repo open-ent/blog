@@ -8,6 +8,7 @@ import fr.wseduc.transformer.to.ContentTransformerRequest;
 import fr.wseduc.transformer.to.ContentTransformerResponse;
 import fr.wseduc.webutils.security.SecuredAction;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.unit.Async;
@@ -224,17 +225,17 @@ public class BlogExplorerPluginTest {
                             context.assertNotNull(postModel.getValue("modified"));
                             context.assertNotNull(postModel.getValue("author"));
                             context.assertNotNull(postModel.getNumber("views"));
-                            postService.get(new PostFilter(id, postId, false, PostService.StateType.DRAFT))
+                            postService.get(new PostFilter(id, postId, false, PostService.StateType.DRAFT), null)
                             .onSuccess(postGet -> {
                                 context.assertEquals("<p>clean html</p>"+post1.getString("content"), postGet.getString("content"));
                                 async.complete();
                             })
                             .onFailure(context::fail);
-                        })));
+                        })), null);
                     }));
                 }));
             }));
-        })));
+        })), null);
     }
 
     @Test
@@ -264,11 +265,11 @@ public class BlogExplorerPluginTest {
                             context.assertNotNull(postModel.getValue("author"));
                             context.assertNotNull(postModel.getNumber("views"));
                             async.complete();
-                        })));
+                        })), null);
                     }));
                 }));
             }));
-        })));
+        })), null);
     }
 
     @Test
@@ -300,7 +301,7 @@ public class BlogExplorerPluginTest {
                                 context.assertNotNull(postModel.getValue("author"));
                                 context.assertNotNull(postModel.getNumber("views"));
                                 async.complete();
-                            })));
+                            })), null);
                         }));
                     }));
                 }));
@@ -393,7 +394,7 @@ public class BlogExplorerPluginTest {
                         postService.list(blogId,user, 0,10, null, new HashSet<>(), test.asserts().asyncAssertSuccessEither(context.asyncAssertSuccess(listPost -> {
                             context.assertEquals(0, listPost.size());
                             async.complete();
-                        })));
+                        })), null);
                     }));
                 }));
             }));
@@ -424,7 +425,8 @@ public class BlogExplorerPluginTest {
     static class DummyContentTransformerClient implements IContentTransformerClient {
 
         @Override
-        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
+        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest,
+                                                            final HttpServerRequest request) {
             return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), null, contentTransformerRequest.getHtmlContent(), "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }
     }

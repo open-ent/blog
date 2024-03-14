@@ -101,7 +101,7 @@ public class PostController extends BaseController {
 					public void handle(final UserInfos user) {
 						if (user != null) {
 							final Handler<Either<String, JsonObject>> handler = eventHelper.onCreateResource(request, RESOURCE_NAME, defaultResponseHandler(request));
-							post.create(blogId, data, user, handler);
+							post.create(blogId, data, user, handler, request);
 						} else {
 							unauthorized(request);
 						}
@@ -126,7 +126,7 @@ public class PostController extends BaseController {
 				if (user != null) {
 					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
 						public void handle(final JsonObject data) {
-							post.update(postId, data, user, defaultResponseHandler(request));
+							post.update(postId, data, user, defaultResponseHandler(request), request);
 						}
 					});
 				} else {
@@ -180,7 +180,7 @@ public class PostController extends BaseController {
 			return;
 		}
 		final PostFilter filter = new PostFilter(blogId, postId, originalFormat, BlogResourcesProvider.getStateType(request));
-		post.get(filter).onComplete(defaultAsyncResultResponseHandler(request));
+		post.get(filter, request).onComplete(defaultAsyncResultResponseHandler(request));
 	}
 
 	/**
@@ -251,7 +251,7 @@ public class PostController extends BaseController {
 						if (!StringUtils.isEmpty(statesParam)) {
 							states.addAll(StringUtils.split(statesParam, ","));
 						}
-						post.list(blogId, user, page, pagingSize, search, states, projection, arrayResponseHandler(request));
+						post.list(blogId, user, page, pagingSize, search, states, projection, arrayResponseHandler(request), request);
 					} else {
 						post.list(blogId, BlogResourcesProvider.getStateType(request), user, page, pagingSize, search,
 								arrayResponseHandler(request));

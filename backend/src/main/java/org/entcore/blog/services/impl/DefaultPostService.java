@@ -38,6 +38,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -99,7 +100,8 @@ public class DefaultPostService implements PostService {
 
 	@Override
 	public void create(String blogId, JsonObject post, UserInfos author,
-					   final Handler<Either<String, JsonObject>> result) {
+										 final Handler<Either<String, JsonObject>> result,
+										 final HttpServerRequest request) {
 		final long version = System.currentTimeMillis();
 		JsonObject now = MongoDb.nowISO();
 		JsonObject blogRef = new JsonObject()
@@ -127,7 +129,8 @@ public class DefaultPostService implements PostService {
 							new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML, ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
 							b.getInteger("contentVersion", 0),
 							b.getString("content", ""),
-							null));
+							null),
+						request);
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
@@ -170,7 +173,8 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void update(String postId, final JsonObject post, final UserInfos user, final Handler<Either<String, JsonObject>> result) {
+	public void update(String postId, final JsonObject post, final UserInfos user,
+										 final Handler<Either<String, JsonObject>> result, final HttpServerRequest request) {
 		final long version = System.currentTimeMillis();
 		final JsonObject jQuery = MongoQueryBuilder.build(QueryBuilder.start("_id").is(postId));
 		mongo.findOne(POST_COLLECTION, jQuery,  MongoDbResult.validActionResultHandler(event -> {
@@ -193,7 +197,8 @@ public class DefaultPostService implements PostService {
 									new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT, ContentTransformerFormat.HTML)),
 									validatedPost.getInteger("contentVersion", 0),
 									validatedPost.getString("content"),
-									null));
+									null),
+						request);
 				} else {
 					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
@@ -279,7 +284,7 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public Future<JsonObject> get(final PostFilter filter) {
+	public Future<JsonObject> get(final PostFilter filter, final HttpServerRequest request) {
 		final Promise<JsonObject> promise = Promise.promise();
 		final QueryBuilder query = QueryBuilder.start("_id").is(filter.getPostId())
 				.put("blog.$id").is(filter.getBlogId())
@@ -292,7 +297,7 @@ public class DefaultPostService implements PostService {
 						MongoUpdateBuilder incView = new MongoUpdateBuilder();
 						incView.inc("views", 1);
 						mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
-						handleOldContent(res.right().getValue(), filter.isOriginalFormat())
+						handleOldContent(res.right().getValue(), filter.isOriginalFormat(), request)
 								.onComplete(promise);
 				} else {
 					promise.fail(res.left().getValue());
@@ -302,8 +307,9 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void list(String blogId, UserInfos user, Integer page, int limit, String search, Set<String> states, Handler<Either<String, JsonArray>> result) {
-		PostService.super.list(blogId, user, page, limit, search, states, result);
+	public void list(String blogId, UserInfos user, Integer page, int limit, String search, Set<String> states,
+									 Handler<Either<String, JsonArray>> result, final HttpServerRequest httpCallerRequest) {
+		PostService.super.list(blogId, user, page, limit, search, states, result, httpCallerRequest);
 	}
 
 	/**
@@ -312,7 +318,8 @@ public class DefaultPostService implements PostService {
 	 * @param post Post whose content could be transformed
 	 * @return The modified post (actually the same as {@code post})
 	 */
-	private Future<JsonObject> handleOldContent(final JsonObject post, final boolean originalFormatRequested) {
+	private Future<JsonObject> handleOldContent(final JsonObject post, final boolean originalFormatRequested,
+																							final HttpServerRequest request) {
 		final Promise<JsonObject> promise = Promise.promise();
 		if (post.containsKey("jsonContent")) {
 			log.debug("Post has already been transformed, nothing to do.");
@@ -322,7 +329,7 @@ public class DefaultPostService implements PostService {
 			desiredFormats.add(ContentTransformerFormat.HTML);
 			desiredFormats.add(ContentTransformerFormat.JSON);
 			final ContentTransformerRequest transformerRequest = new ContentTransformerRequest(desiredFormats, 0, post.getString("content"), null);
-			contentTransformerClient.transform(transformerRequest)
+			contentTransformerClient.transform(transformerRequest, request)
 			.onComplete(response -> {
 				if (response.failed()) {
 					log.error("Content transformation failed", response.cause());
@@ -508,7 +515,8 @@ public class DefaultPostService implements PostService {
 	public void list(String blogId, final UserInfos user, final Integer page, final int limit,
 															 final String search, final Set<String> states,
 															 final PostProjection postProjection,
-															 final Handler<Either<String, JsonArray>> result) {
+															 final Handler<Either<String, JsonArray>> result,
+									 final HttpServerRequest request) {
 		final QueryBuilder accessQuery;
 		if (states == null || states.isEmpty()) {
 			accessQuery = QueryBuilder.start("blog.$id").is(blogId);
@@ -560,7 +568,7 @@ public class DefaultPostService implements PostService {
 					// the content
 					if (postProjection.isWithContent()) {
 						final List<Future> transformedContents = posts.stream()
-								.map(post -> handleOldContent((JsonObject) post, false))
+								.map(post -> handleOldContent((JsonObject) post, false, request))
 								.collect(Collectors.toList());
 						CompositeFuture.join(transformedContents).onComplete(e -> result.handle(fetchResults));
 					} else {
