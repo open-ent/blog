@@ -25,12 +25,7 @@ const ConfirmModal = lazy(
   async () => await import("~/components/ConfirmModal/ConfirmModal"),
 );
 
-const OldFormatModal = lazy(
-  async () => await import("~/components/OldFormatModal/OldFormatModal"),
-);
-
 export interface PostTitleProps {
-  blogId: string;
   post: Post;
   postActions?: PostActions;
   mode: "edit" | "read" | "print";
@@ -44,7 +39,6 @@ export interface PostTitleProps {
 }
 
 export const PostTitle = ({
-  blogId,
   post,
   postActions,
   mode,
@@ -63,7 +57,6 @@ export const PostTitle = ({
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [isBarOpen, toggleBar] = useToggle();
-  const [isOldFormatOpen, toggleOldFormat] = useToggle();
 
   if (mode === "edit") return;
 
@@ -141,18 +134,6 @@ export const PostTitle = ({
                   >
                     {t("blog.delete.post")}
                   </Button>
-                  {post.contentVersion === 0 ? (
-                    <Button
-                      type="button"
-                      color="primary"
-                      variant="filled"
-                      onClick={() => toggleOldFormat(true)}
-                    >
-                      {t("post.oldFormat.open")}
-                    </Button>
-                  ) : (
-                    <></>
-                  )}
                 </ActionBarContainer>
               </>
             )}
@@ -192,14 +173,6 @@ export const PostTitle = ({
             onSuccess={onDelete}
             onCancel={() => setConfirmDeleteModal(false)}
           />
-        )}
-        {isOldFormatOpen && (
-          <OldFormatModal
-            blogId={blogId}
-            postId={post._id}
-            isOpen={isOldFormatOpen}
-            onCancel={() => toggleOldFormat(false)}
-          ></OldFormatModal>
         )}
       </Suspense>
     </>

@@ -58,8 +58,8 @@ export function PostPrint() {
 
   return (
     <>
-      <div className="rounded border pt-16">
-        <PostTitle post={post} mode="print" blogId={blogId} />
+      <div className="rounded border pt-16 bg-white">
+        <PostTitle post={post} mode="print" />
         <div className="mx-32">
           <Editor content={post.content} mode="read" variant="ghost"></Editor>
         </div>

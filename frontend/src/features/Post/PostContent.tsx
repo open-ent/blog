@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
 import { Save, Send } from "@edifice-ui/icons";
-import { Button, FormControl, Input, Label } from "@edifice-ui/react";
+import { Alert, Button, FormControl, Input, Label } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import { usePostActions } from "../ActionBar/usePostActions";
 import { CommentsCreate } from "../Comments/CommentsCreate";
 import { CommentsHeader } from "../Comments/CommentsHeader";
 import { CommentsList } from "../Comments/CommentsList";
+import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
 import { postContentActions } from "~/config/postContentActions";
 import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
@@ -40,6 +41,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     searchParams.get("edit") && !readOnly ? "edit" : "read",
   );
   const [variant, setVariant] = useState<"ghost" | "outline">("ghost");
+  const [isOldFormatOpen, setIsOldFormat] = useState(false);
 
   const { t } = useTranslation("blog");
 
@@ -109,9 +111,29 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         postActions={postActions}
         isSpeeching={editorRef.current?.isSpeeching()}
         mode={mode}
-        blogId={blogId}
         {...postActionsHandlers}
       />
+      {post.contentVersion === 0 && mode === "read" ? (
+        <Alert
+          type="warning"
+          className="my-24"
+          button={
+            <Button
+              color="tertiary"
+              type="button"
+              variant="ghost"
+              className="text-gray-700"
+              onClick={() => setIsOldFormat(true)}
+            >
+              {t("post.oldFormat.open")}
+            </Button>
+          }
+        >
+          {t("post.oldFormat.text")}
+        </Alert>
+      ) : (
+        <></>
+      )}
       <div className="mx-md-8">
         {mode === "edit" && (
           <div className="mt-24">
@@ -168,6 +190,16 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           <CommentsList comments={comments ?? []} />
         </div>
       )}
+      <Suspense>
+        {isOldFormatOpen && mode === "read" && (
+          <OldFormatModal
+            blogId={blogId}
+            postId={post._id}
+            isOpen={isOldFormatOpen}
+            onCancel={() => setIsOldFormat(false)}
+          ></OldFormatModal>
+        )}
+      </Suspense>
     </div>
   );
 };
