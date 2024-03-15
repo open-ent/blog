@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
-import { ArrowRight, MessageInfo, See } from "@edifice-ui/icons";
+import { ArrowRight, MessageInfo } from "@edifice-ui/icons";
 import {
   Avatar,
   Badge,
@@ -232,11 +232,6 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             </div>
             <div className="d-flex justify-content-between">
               <div className="d-flex gap-12 small text-gray-700 align-items-center ">
-                <div className="d-flex align-items-center gap-8">
-                  <span>{post.views}</span>
-                  <See />
-                </div>
-                <span className="separator border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
                 <div className="d-flex align-items-center gap-8">
                   <span>{post.nbComments}</span>
                   <MessageInfo />

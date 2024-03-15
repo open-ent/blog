@@ -199,5 +199,10 @@
   "explorer.emptyScreen.txt2d.create": "Vous partez en voyage linguistique et souhaitez partager toutes vos aventures ? Devenez apprenti reporter ! Seul ou à plusieurs, publiez et partagez facilement textes, photos et vidéos. => Créer un blog",
   "explorer.emptyScreen.txt2d.consultation": "Il n’y a pas encore de blog. Patience ! Des sujets passionnants s’apprêtent à déferler sur cette page.",
   "explorer.emptyScreen.search.text": "Désolé, il n’y a rien sous ce nom-là... Aucun blog ne correspond à votre recherche. Modifiez les critères et tentez à nouveau !",
-  "explorer.emptyScreen.search.alt": "Illustration de la recherche de ressources"
+  "explorer.emptyScreen.search.alt": "Illustration de la recherche de ressources",
+  "explorer.modal.onboarding.blog.title": "L’appli Blog fait peau neuve !",
+  "explorer.modal.onboarding.blog.screen1.alt": "Illustration d'un blog",
+  "explorer.modal.onboarding.blog.screen1.text": "Votre application Blog est désormais plus simple et intuitive. Les photos et autres contenus multimédias sont mis à l’honneur, la navigation a été améliorée et les interactions facilitées.",
+  "explorer.modal.onboarding.blog.screen2.alt": "Illustration du nouvelle éditeur de billet de blog",
+  "explorer.modal.onboarding.blog.screen2.text": "Un éditeur de contenu plus pratique et épuré ! Créez et modifiez vos billets de blog, de façon plus simple, plus mobile et plus accessible."
 }
