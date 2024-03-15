@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 
+import { ButtonGroup } from "../ButtonGroup/ButtonGroup";
 import { getAvatarURL, getUserbookURL } from "~/utils/PostUtils";
 
 const MAX_COMMENT_LENGTH = 800;
@@ -85,8 +86,12 @@ export const CommentCard = ({
     setEditable(mode === "edit");
   };
 
+  const cssClasses = clsx("border rounded-3 p-12 pb-8 d-flex", className, {
+    "bg-gray-200": mode === "edit",
+  });
+
   return (
-    <div className={clsx("border rounded-3 p-12 pb-8 d-flex", className)}>
+    <div className={cssClasses}>
       <Avatar
         alt={t("comment.author.avatar")}
         size="sm"
@@ -100,7 +105,7 @@ export const CommentCard = ({
               <div>{t("comment.placeholder")}</div>
               <div className="border rounded-3 px-16 pt-12 pb-8 d-flex gap-2 flex-column bg-white">
                 <EditorContent editor={editor}></EditorContent>
-                <div className="d-flex gap-12 justify-content-end align-items-center">
+                <ButtonGroup className="gap-12" variant="reverse">
                   <span className="small text-gray-700">
                     {commentLength} / {MAX_COMMENT_LENGTH}
                   </span>
@@ -122,12 +127,12 @@ export const CommentCard = ({
                   >
                     {t("comment.post")}
                   </Button>
-                </div>
+                </ButtonGroup>
               </div>
             </div>
           ) : (
             <div className="ms-4">
-              <div className="mb-8 d-flex text-gray-700 small gap-8">
+              <div className="mb-8 d-flex flex-column flex-md-row text-gray-700 small column-gap-12 align-items-md-center">
                 <a
                   href={getUserbookURL(author.userId)}
                   className="comment-card-author"
@@ -137,7 +142,7 @@ export const CommentCard = ({
                 {badge}
                 {created && (
                   <>
-                    <span className="d-none d-md-block mx-4 d-none d-md-block mx-4 border border-top-0 border-end-0 border-bottom-0 border-gray-600"></span>
+                    <span className="separator d-none d-md-block"></span>
                     <span>
                       {t("comment.publish.date", { date: fromNow(created) })}
                     </span>

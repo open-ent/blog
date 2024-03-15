@@ -104,4 +104,6 @@ main {
 
 .separator {
   height: 16px;
+  border: 0;
+  border-left: 1px solid var(--edifice-gray-700);
 }

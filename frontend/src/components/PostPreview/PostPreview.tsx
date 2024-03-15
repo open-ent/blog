@@ -177,7 +177,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             </div>
             <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row align-items-md-center">
               <span>{post.author.username}</span>
-              <span className="separator border border-top-0 border-end-0 border-bottom-0 border-gray-600 d-none d-md-inline-block"></span>
+              <span className="separator d-none d-md-inline-block"></span>
               <span>{getDatedState()}</span>
             </div>
           </div>

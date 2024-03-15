@@ -1,25 +1,17 @@
 import { Content } from "@edifice-ui/editor";
 import { useUser } from "@edifice-ui/react";
-import clsx from "clsx";
 import { UserProfile } from "edifice-ts-client";
 import { useParams } from "react-router-dom";
 
 import { CommentCard } from "~/components/CommentCard/CommentCard";
 import { useComments } from "~/hooks/useComments";
-import { Comment } from "~/models/comment";
 
-export interface CommentsCreateProps {
-  comments: Comment[];
-}
-
-export const CommentsCreate = ({ comments }: CommentsCreateProps) => {
+export const CommentsCreate = () => {
   const { user } = useUser();
   const { blogId, postId } = useParams();
   const { canCreate, create } = useComments(blogId!, postId!);
 
   if (!user?.userId || !blogId || !postId || !canCreate) return <></>;
-
-  const cssClasses = clsx("mt-16", { "bg-gray-200": comments.length > 0 });
 
   const userAsAuthor = {
     userId: user?.userId,
@@ -33,7 +25,7 @@ export const CommentsCreate = ({ comments }: CommentsCreateProps) => {
 
   return (
     <CommentCard
-      className={cssClasses}
+      className="mt-16"
       author={userAsAuthor}
       mode="edit"
       onPublish={handlePublish}
