@@ -90,6 +90,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const handleEditSuccess = () => {
     invalidateQueries();
     handleEditClose();
+    setBarOpen(false);
   };
 
   const handleDeleteClick = () => {
@@ -98,6 +99,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handleDeleteClose = () => {
     toogleDeleteModalOpen();
+    setBarOpen(false);
   };
 
   const handleDeleteSuccess = () => {
@@ -112,6 +114,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handlePublishClose = () => {
     tooglePublishModalOpen();
+    setBarOpen(false);
   };
 
   const handleShareClick = () => {
@@ -120,15 +123,18 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handleShareClose = () => {
     toogleShareModalOpen();
+    setBarOpen(false);
   };
 
   const handleShareSuccess = () => {
     invalidateQueries();
     handleShareClose();
+    setBarOpen(false);
   };
 
   const handlePrintClick = () => {
     window.open(`${baseUrl}/print/${blog._id}`, "_blank");
+    setBarOpen(false);
   };
 
   function isActionAvailable(action: ActionType) {
