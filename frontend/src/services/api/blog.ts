@@ -51,6 +51,17 @@ export function loadPostsList(
 }
 
 /**
+ * Load a public blog
+ * @param slug blog slug
+ * @returns
+ */
+export function loadBlogPublic(slug: string) {
+  return checkHttpError<Blog>(
+    odeServices.http().get<Blog>(`/blog/pub/${slug}?type=json`),
+  );
+}
+
+/**
  * sessionHasWorkflowRights API
  * @param actionRights
  * @returns check if user has rights

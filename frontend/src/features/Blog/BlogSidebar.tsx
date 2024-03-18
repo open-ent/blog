@@ -3,14 +3,22 @@ import { AppIcon, IconButton, Image, useOdeClient } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
 import { SummaryList } from "~/components/SummaryList/SummaryList";
+import { PostState } from "~/models/post";
 import { useBlog, usePostsList } from "~/services/queries";
 import { useStoreUpdaters } from "~/store";
 
-const BlogSidebar = () => {
+export interface BlogSidebarProps {
+  state?: PostState;
+}
+
+const BlogSidebar = ({ state }: BlogSidebarProps) => {
   const { t } = useTranslation("blog");
 
   const { blog } = useBlog();
-  const { posts } = usePostsList();
+  const {
+    posts,
+    query: { hasNextPage, isFetching, fetchNextPage },
+  } = usePostsList(blog?._id, state);
   const { currentApp } = useOdeClient();
   const { setSidebarHighlightedPost } = useStoreUpdaters();
 
@@ -20,10 +28,6 @@ const BlogSidebar = () => {
       setSidebarHighlightedPost();
     }, 4000);
   };
-
-  const {
-    query: { hasNextPage, isFetching, fetchNextPage },
-  } = usePostsList();
 
   return (
     <div className="d-none d-lg-block col-3 py-16 pe-16 border-end">

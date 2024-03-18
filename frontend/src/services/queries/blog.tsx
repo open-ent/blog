@@ -11,6 +11,7 @@ import {
   deleteBlog,
   loadBlog,
   loadBlogCounter,
+  loadBlogPublic,
   loadPostsList,
   sessionHasWorkflowRights,
 } from "../api/blog";
@@ -36,6 +37,7 @@ export const blogQueryKeys = {
     }
     return queryKey;
   },
+  public: (slug: string) => ["public blog", slug],
 };
 
 /** Query blog data */
@@ -43,6 +45,14 @@ export const blogQuery = (blogId: string) => {
   return {
     queryKey: blogQueryKeys.all(blogId),
     queryFn: () => loadBlog(blogId),
+  };
+};
+
+/** Query public blog data */
+export const blogPublicQuery = (slug: string) => {
+  return {
+    queryKey: blogQueryKeys.public(slug),
+    queryFn: () => loadBlogPublic(slug),
   };
 };
 
@@ -95,18 +105,24 @@ export const availableActionsQuery = (actions: IActionDefinition[]) => {
 
 /**
  * useBlog query
- * @param blogId the blog id string
+ * @param blogId optional blog id string
+ * @param slug optional blog slug string
  * @returns blog data
  */
-export const useBlog = (blogId?: string) => {
-  const params = useParams<{ blogId: string }>();
+export const useBlog = (blogId?: string, slug?: string) => {
+  const params = useParams<{ blogId: string; slug: string }>();
+  if (!blogId) blogId = params.blogId;
+  if (!slug) slug = params.slug;
+
+  let queryOptions = blogQuery(blogId!); // Default options
   if (!blogId) {
-    if (!params.blogId) {
-      console.error("blogId is not defined");
+    if (!slug) {
+      console.error("no blogId nor slug is defined");
+    } else {
+      queryOptions = blogPublicQuery(slug!);
     }
-    blogId = params.blogId;
   }
-  const query = useQuery(blogQuery(blogId!));
+  const query = useQuery(queryOptions);
 
   return {
     blog: query.data,

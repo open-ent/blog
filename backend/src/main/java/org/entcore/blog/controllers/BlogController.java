@@ -627,7 +627,6 @@ public class BlogController extends BaseController {
 		blog.isPublicBlog(slug, BlogService.IdType.Slug, ev->{
 			if(ev){
 				UserUtils.getUserInfos(eb, request, user ->{
-					JsonObject context = new JsonObject().put("notLoggedIn", user == null);
 					blog.getPublic(slug, BlogService.IdType.Slug, json -> {
 						if(json.isLeft()){
 							badRequest(request);
@@ -637,7 +636,8 @@ public class BlogController extends BaseController {
 						if("json".equals(request.params().get("type"))){
 							renderJson(request,blog);
 						}else{
-							renderView(request,context.put("blog",blog).put("blogStr",blog.toString()), "blog-public.html", null);
+							// Display react front page
+							renderView(request, new JsonObject(), "index.html", null);
 						}
 					});
 				});
