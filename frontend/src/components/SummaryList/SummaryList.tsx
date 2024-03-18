@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useDate } from "@edifice-ui/react";
+import { CoreDate, useDate } from "@edifice-ui/react";
 import clsx from "clsx";
 
 // TODO Move to edifice-ui (don't forget css) css
@@ -19,13 +19,13 @@ export type SummaryListProps = {
 export type SummaryListObject = {
   id: string;
   title: string;
-  date: string;
+  date: CoreDate;
 };
 
 export const SummaryList = ({ list, onClick }: SummaryListProps) => {
   const { formatDate } = useDate();
 
-  const displayDate = (date: string) => {
+  const displayDate = (date: CoreDate) => {
     return formatDate(date, "D MMMM YYYY");
   };
 

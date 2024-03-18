@@ -14,7 +14,6 @@ import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { Blog } from "~/models/blog";
 import { PostState } from "~/models/post";
-import { PostsFilters } from "~/models/postFilter";
 import { useBlogCounter } from "~/services/queries";
 
 export interface BlogFilterProps {
@@ -25,29 +24,29 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
   const { t } = useTranslation("blog");
   const { postsFilters, setPostsFilters } = usePostsFilter();
 
-  const [localPostsFilters, setLocalPostsFilter] =
-    useState<PostsFilters>(postsFilters);
-  const debouncePostsFilters = useDebounce(localPostsFilters, 600);
+  const [search, setSearch] = useState<string>(postsFilters.search || "");
+  const [state, setState] = useState<PostState>(postsFilters.state);
+  const debounceSearch = useDebounce(search, 300);
 
   const { counters } = useBlogCounter();
   const { contrib, manager, creator } = useActionDefinitions([]);
 
   const handlerSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newText = event.target.value;
-    setLocalPostsFilter({ ...localPostsFilters, search: newText.toString() });
+    setSearch(newText.toString());
   };
 
   const handleFilter = (filterState: PostState) => {
-    setLocalPostsFilter({
-      ...localPostsFilters,
-      state: filterState,
-    });
+    setState(filterState);
   };
 
   useEffect(() => {
-    setPostsFilters(debouncePostsFilters);
+    setPostsFilters({
+      search: debounceSearch,
+      state: state,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncePostsFilters]);
+  }, [debounceSearch, state]);
 
   const filterToolbar: ToolbarItem[] = [
     {
@@ -55,8 +54,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       name: "published",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold":
-            localPostsFilters.state === PostState.PUBLISHED,
+          "bg-secondary-200 fw-bold": state === PostState.PUBLISHED,
         }),
         children: (
           <span>
@@ -74,8 +72,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       visibility: blog["publish-type"] === "RESTRAINT" ? "show" : "hide",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold":
-            localPostsFilters.state === PostState.SUBMITTED,
+          "bg-secondary-200 fw-bold": state === PostState.SUBMITTED,
         }),
         children: (
           <>
@@ -105,8 +102,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       name: "draft",
       props: {
         className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold":
-            localPostsFilters.state === PostState.DRAFT,
+          "bg-secondary-200 fw-bold": state === PostState.DRAFT,
         }),
         children: (
           <span>

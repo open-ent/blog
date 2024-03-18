@@ -162,7 +162,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         ></Editor>
         {mode === "edit" && (
           <ButtonGroup
-            className="gap-8 my-8 sticky-bottom py-8 bg-white"
+            className="gap-8 my-8 sticky-bottom py-8 bg-white z-0"
             variant="reverse"
           >
             <Button type="button" variant="ghost" onClick={handleCancelClick}>

@@ -192,7 +192,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 variant="ghost"
               />
             </div>
-            <div className="flex-fill blog-post-preview">
+            <div className="flex-fill text-truncate text-truncate-2">
               {summaryContentPlain}
             </div>
             <div className="d-flex align-items-center justify-content-center gap-24 mx-32">

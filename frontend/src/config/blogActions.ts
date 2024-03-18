@@ -34,7 +34,7 @@ export const blogActions: Array<IActionDefinition> = [
   {
     id: ACTION.CREATE_PUBLIC,
     workflow: workflows.createPublic,
-    right: "manager",
+    right: "creator",
     target: "tree",
   },
   {

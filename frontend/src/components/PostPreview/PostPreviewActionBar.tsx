@@ -13,7 +13,7 @@ import { Post, PostState } from "~/models/post";
 import { baseUrl } from "~/routes";
 import { useBlogState, useStoreUpdaters } from "~/store";
 
-const DeleteModal = lazy(
+const ConfirmModal = lazy(
   async () => await import("~/components/ConfirmModal/ConfirmModal"),
 );
 
@@ -45,6 +45,7 @@ export const PostPreviewActionBar = ({
   const navigate = useNavigate();
 
   const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
+  const [isGoUpModalOpen, toogleGoUpModalOpen] = useToggle();
 
   const { setActionBarPostId } = useStoreUpdaters();
   const { actionBarPostId } = useBlogState();
@@ -78,6 +79,15 @@ export const PostPreviewActionBar = ({
     toogleDeleteModalOpen(false);
   };
 
+  const handleGoUpSuccess = () => {
+    goUp();
+    toogleGoUpModalOpen(false);
+  };
+
+  const handleGoUpClose = () => {
+    toogleGoUpModalOpen(false);
+  };
+
   return (
     <>
       <ActionBarContainer visible={actionBarPostId === post._id}>
@@ -99,7 +109,11 @@ export const PostPreviewActionBar = ({
         {post.state === PostState.PUBLISHED &&
         isActionAvailable(ACTION.MOVE) &&
         index > 0 ? (
-          <Button type="button" variant="filled" onClick={goUp}>
+          <Button
+            type="button"
+            variant="filled"
+            onClick={() => toogleGoUpModalOpen()}
+          >
             {t("goUp")}
           </Button>
         ) : (
@@ -125,13 +139,23 @@ export const PostPreviewActionBar = ({
 
       <Suspense>
         {isDeleteModalOpen && (
-          <DeleteModal
+          <ConfirmModal
             id="confirmDeleteModal"
             isOpen={isDeleteModalOpen}
             header={<>{t("blog.delete.post")}</>}
             body={<p className="body">{t("confirm.remove.post")}</p>}
             onSuccess={handleDeleteSuccess}
             onCancel={handleDeleteClose}
+          />
+        )}
+        {isGoUpModalOpen && (
+          <ConfirmModal
+            id="confirmGoUpModal"
+            isOpen={isGoUpModalOpen}
+            header={<>{t("goUp")}</>}
+            body={<p className="body">{t("confirm.up.post")}</p>}
+            onSuccess={handleGoUpSuccess}
+            onCancel={handleGoUpClose}
           />
         )}
       </Suspense>
