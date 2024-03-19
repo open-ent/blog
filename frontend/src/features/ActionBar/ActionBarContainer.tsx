@@ -3,7 +3,7 @@ import { useTransition, animated } from "@react-spring/web";
 
 export interface ActionBarContainerProps {
   visible: boolean;
-  children: JSX.Element[];
+  children: Array<JSX.Element | false>;
 }
 
 export const ActionBarContainer = ({

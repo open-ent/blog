@@ -46,7 +46,11 @@ export function Component() {
   return (
     <>
       <PostHeader />
-      <PostContent blogId={blogId} post={query.data} comments={comments} />
+      <PostContent
+        blogId={blogId}
+        post={query.data}
+        comments={comments ?? []}
+      />
     </>
   );
 }

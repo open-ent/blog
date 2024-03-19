@@ -33,35 +33,34 @@ export interface PostPreviewActionBarProps {
 }
 
 export const PostPreviewActionBar = ({
-  blog: blog,
+  blog: { _id: blogId, slug, visibility },
   post,
   index,
 }: PostPreviewActionBarProps) => {
   // Get available actions and requirements for the post.
-  const postActions = usePostActions(postContentActions, blog._id, post);
+  const postActions = usePostActions(postContentActions, blogId, post);
   const { mustSubmit, isActionAvailable, goUp, publish, trash } = postActions;
 
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
 
-  const [isDeleteModalOpen, toogleDeleteModalOpen] = useToggle();
-  const [isGoUpModalOpen, toogleGoUpModalOpen] = useToggle();
+  const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
+  const [isGoUpModalOpen, toggleGoUpModalOpen] = useToggle();
 
   const { setActionBarPostId } = useStoreUpdaters();
   const { actionBarPostId } = useBlogState();
 
+  const isPublic = visibility === "PUBLIC";
+
   const handleEditClick = () => {
-    navigate(`/id/${blog._id}/post/${post._id}?edit=true`);
+    navigate(`/id/${blogId}/post/${post._id}?edit=true`);
   };
 
   const handlePrintClick = () => {
-    if (blog.visibility === "PUBLIC") {
-      window.open(
-        `${baseUrl}/pub/print/${blog._id}/post/${post._id}`,
-        "_blank",
-      );
+    if (isPublic) {
+      window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, "_blank");
     } else {
-      window.open(`${baseUrl}/print/${blog._id}/post/${post._id}`, "_blank");
+      window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
     }
   };
 
@@ -72,53 +71,47 @@ export const PostPreviewActionBar = ({
 
   const handleDeleteSuccess = () => {
     trash();
-    toogleDeleteModalOpen(false);
+    toggleDeleteModalOpen(false);
   };
 
   const handleDeleteClose = () => {
-    toogleDeleteModalOpen(false);
+    toggleDeleteModalOpen(false);
   };
 
   const handleGoUpSuccess = () => {
     goUp();
-    toogleGoUpModalOpen(false);
+    toggleGoUpModalOpen(false);
   };
 
   const handleGoUpClose = () => {
-    toogleGoUpModalOpen(false);
+    toggleGoUpModalOpen(false);
   };
 
   return (
     <>
       <ActionBarContainer visible={actionBarPostId === post._id}>
-        {isActionAvailable(ACTION.OPEN) ? (
+        {isActionAvailable(ACTION.OPEN) && (
           <Button type="button" variant="filled" onClick={handleEditClick}>
             {t("blog.edit.post")}
           </Button>
-        ) : (
-          <></>
         )}
         {post.state !== PostState.PUBLISHED &&
-        isActionAvailable(ACTION.PUBLISH) ? (
-          <Button type="button" variant="filled" onClick={handlePublishClick}>
-            {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
-          </Button>
-        ) : (
-          <></>
-        )}
+          isActionAvailable(ACTION.PUBLISH) && (
+            <Button type="button" variant="filled" onClick={handlePublishClick}>
+              {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+            </Button>
+          )}
         {post.state === PostState.PUBLISHED &&
-        isActionAvailable(ACTION.MOVE) &&
-        index > 0 ? (
-          <Button
-            type="button"
-            variant="filled"
-            onClick={() => toogleGoUpModalOpen()}
-          >
-            {t("goUp")}
-          </Button>
-        ) : (
-          <></>
-        )}
+          isActionAvailable(ACTION.MOVE) &&
+          index > 0 && (
+            <Button
+              type="button"
+              variant="filled"
+              onClick={() => toggleGoUpModalOpen()}
+            >
+              {t("goUp")}
+            </Button>
+          )}
         <Button
           type="button"
           color="primary"
@@ -127,14 +120,16 @@ export const PostPreviewActionBar = ({
         >
           {t("blog.print")}
         </Button>
-        <Button
-          type="button"
-          color="primary"
-          variant="filled"
-          onClick={() => toogleDeleteModalOpen(true)}
-        >
-          {t("blog.delete.post")}
-        </Button>
+        {!isPublic && (
+          <Button
+            type="button"
+            color="primary"
+            variant="filled"
+            onClick={() => toggleDeleteModalOpen(true)}
+          >
+            {t("blog.delete.post")}
+          </Button>
+        )}
       </ActionBarContainer>
 
       <Suspense>

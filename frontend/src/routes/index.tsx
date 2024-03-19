@@ -3,6 +3,7 @@ import { RouteObject, createBrowserRouter } from "react-router-dom";
 
 import { ExplorerBlog } from "./explorer-blog";
 import PageError from "./page-error";
+import PublicPageError from "./public-page-error";
 import { Root } from "~/routes/root";
 
 const routes = (queryClient: QueryClient): RouteObject[] => [
@@ -84,17 +85,60 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       };
     },
   },
-  // This page displays a public blog.
+  // This page displays a public headless "portal", and preloads blog data.
   {
+    id: "public-portal",
     path: "/pub/:slug",
     async lazy() {
-      const { Component, loader } = await import("~/routes/blog-public");
+      const { Component, loader } = await import("~/routes/public-portal");
       return {
         loader: loader(queryClient),
         Component,
       };
     },
-    errorElement: <PageError />,
+    children: [
+      // This page displays a public blog.
+      {
+        path: "",
+        async lazy() {
+          const { Component } = await import("~/routes/public-blog");
+          return {
+            Component,
+          };
+        },
+      },
+      // This page prints a public blog.
+      {
+        path: "print",
+        async lazy() {
+          const { Component } = await import("~/routes/public-blog-print");
+          return {
+            Component,
+          };
+        },
+      },
+      // This page displays an existing post from a public blog.
+      {
+        path: "post/:postId",
+        async lazy() {
+          const { Component } = await import("~/routes/public-post");
+          return {
+            Component,
+          };
+        },
+      },
+      // This page prints an existing post from a public blog.
+      {
+        path: "print/post/:postId",
+        async lazy() {
+          const { Component } = await import("~/routes/public-post-print");
+          return {
+            Component,
+          };
+        },
+      },
+    ],
+    errorElement: <PublicPageError />,
   },
   // This page displays an existing post from a blog.
   {

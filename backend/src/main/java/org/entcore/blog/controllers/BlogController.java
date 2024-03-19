@@ -601,24 +601,16 @@ public class BlogController extends BaseController {
 	}
 
 	// Routes for public blogs
-	@Get("/pub/print/:blog")
-	public void printPublic(HttpServerRequest request) {
-		String blogId = request.params().get("blog");
-		blog.isPublicBlog(blogId, BlogService.IdType.Id, ev->{
-			if(ev){
-				JsonObject context = new JsonObject().put("printBlogId", blogId);
-				blog.getPublic(blogId, BlogService.IdType.Id, json -> {
-					if (json.isLeft()) {
-						badRequest(request);
-						return;
-					}
-					JsonObject blog = json.right().getValue();
-					renderView(request, context.put("public", true).put("blog",blog).put("blogStr",blog.toString()), "print.html", null);
-				});
-			}else{
-				unauthorized(request);
-			}
-		});
+	@Get("/pub/:slug/print")
+	public void printPublicBlog(HttpServerRequest request) {
+		// Display react front page
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
+	@Get("/pub/:slug/print/post/:postid")
+	public void printPublicPost(HttpServerRequest request) {
+		// Display react front page
+		renderView(request, new JsonObject(), "index.html", null);
 	}
 
 	@Get("/pub/:slug")

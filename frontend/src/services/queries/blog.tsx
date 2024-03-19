@@ -23,15 +23,23 @@ import { IActionDefinition } from "~/utils/types";
 export const blogQueryKeys = {
   all: (blogId: string) => ["blog", blogId],
   counter: (blogId: string) => [...blogQueryKeys.all(blogId), "counter"],
-  postsList: (blogId: string, state?: PostState, search?: string) => {
+  postsList: (
+    blogId: string,
+    state?: PostState,
+    search?: string,
+    isPublic?: boolean,
+  ) => {
     const queryKey = [...blogQueryKeys.all(blogId), "postsList"];
     const queryKeyFilter: any = {};
-    if (state || search) {
+    if (state || search || isPublic) {
       if (state) {
         queryKeyFilter.state = state;
       }
       if (search) {
         queryKeyFilter.search = search;
+      }
+      if (isPublic) {
+        queryKeyFilter.isPublic = true;
       }
       queryKey.push(queryKeyFilter);
     }
@@ -69,11 +77,12 @@ export const postsListQuery = (
   state?: PostState,
   search?: string,
   nbComments: boolean = true,
+  isPublic: boolean = false,
 ) => {
   return {
-    queryKey: blogQueryKeys.postsList(blogId, state, search),
+    queryKey: blogQueryKeys.postsList(blogId, state, search, isPublic),
     queryFn: ({ pageParam = 0 }) =>
-      loadPostsList(blogId, pageParam, state, search, nbComments),
+      loadPostsList(blogId, pageParam, state, search, nbComments, isPublic),
     initialPageParam: 0,
     getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
       if (
@@ -160,6 +169,7 @@ export const usePostsList = (
   blogId?: string,
   state?: PostState,
   withNbComments: boolean = true,
+  isPublic: boolean = false,
 ) => {
   const params = useParams<{ blogId: string }>();
   const { postsFilters } = usePostsFilter();
@@ -179,6 +189,7 @@ export const usePostsList = (
       state || postsFilters.state,
       postsFilters.search,
       withNbComments,
+      isPublic,
     ),
   );
 

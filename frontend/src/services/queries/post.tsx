@@ -9,6 +9,7 @@ import {
   goUpPost,
   publishPost,
   savePost,
+  loadPublicPost,
 } from "../api/post";
 import { Post, PostMetadata, PostState } from "~/models/post";
 
@@ -24,6 +25,14 @@ export const originalPostQuery = (blogId: string, post: PostMetadata) => {
   return {
     queryKey: ["original-post", post._id, post.state],
     queryFn: () => loadOriginalPost(blogId, post),
+  };
+};
+
+/** Query a public post */
+export const publicPostQuery = (blogId: string, postId: string) => {
+  return {
+    queryKey: ["public-post", blogId, postId],
+    queryFn: () => loadPublicPost(blogId, postId),
   };
 };
 

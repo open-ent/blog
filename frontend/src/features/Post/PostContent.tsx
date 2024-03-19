@@ -17,6 +17,7 @@ import { postContentActions } from "~/config/postContentActions";
 import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
 import { baseUrl } from "~/routes";
+import { useBlog } from "~/services/queries";
 
 export interface PostContentProps {
   post: Post;
@@ -25,6 +26,7 @@ export interface PostContentProps {
 }
 
 export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
+  const { blog } = useBlog();
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
   const { mustSubmit, save, trash, publish, readOnly } = postActions;
@@ -57,6 +59,8 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
+  const { slug, visibility } = blog!;
+
   // Handlers for actions triggered from the post title component.
   const postActionsHandlers = {
     onBackward: () => {
@@ -69,8 +73,13 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     onEdit: () => {
       setMode("edit");
     },
-    onPrint: () =>
-      window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank"),
+    onPrint: () => {
+      if (visibility === "PUBLIC") {
+        window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, "_blank");
+      } else {
+        window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
+      }
+    },
     onPublish: () => {
       publish();
     },
@@ -187,11 +196,11 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         )}
       </div>
 
-      {mode === "read" && (
+      {mode === "read" && !!comments && (
         <div className="mx-md-8 mt-24">
-          <CommentsHeader comments={comments ?? []} />
+          <CommentsHeader comments={comments} />
           <CommentsCreate />
-          <CommentsList comments={comments ?? []} />
+          <CommentsList comments={comments} />
         </div>
       )}
       <Suspense>

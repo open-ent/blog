@@ -39,8 +39,11 @@ export function loadPostsList(
   state?: PostState,
   search?: string,
   nbComments: boolean = true,
+  isPublic: boolean = false,
 ) {
-  let path = `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=${nbComments}`;
+  let path = isPublic
+    ? `/blog/pub/posts/${blogId}?page=${page}&content=true`
+    : `/blog/post/list/all/${blogId}?page=${page}&content=true&comments=false&nbComments=${nbComments}`;
   if (state) {
     path += `&states=${state}`;
   }

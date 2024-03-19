@@ -10,7 +10,12 @@ import { PostState } from "~/models/post";
 import { useBlogCounter, usePostsList } from "~/services/queries";
 import { useBlogState } from "~/store";
 
-const BlogPostList = () => {
+export interface BlogPostListProps {
+  blogId?: string;
+  isPublic?: boolean;
+}
+
+const BlogPostList = ({ blogId, isPublic }: BlogPostListProps) => {
   const { t } = useTranslation("blog");
   const [imagePath] = usePaths();
 
@@ -18,9 +23,15 @@ const BlogPostList = () => {
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
-  } = usePostsList();
+  } = usePostsList(
+    blogId,
+    isPublic ? PostState.PUBLISHED : undefined,
+    isPublic ? false : undefined,
+    isPublic ? true : undefined,
+  );
+
   const { postsFilters } = usePostsFilter();
-  const { counters } = useBlogCounter();
+  const { counters } = useBlogCounter(blogId);
 
   const { sidebarHighlightedPost } = useBlogState();
 

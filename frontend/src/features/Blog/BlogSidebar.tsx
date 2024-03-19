@@ -15,11 +15,15 @@ const BlogSidebar = ({ state }: BlogSidebarProps) => {
   const { t } = useTranslation("blog");
 
   const { blog } = useBlog();
+
+  const isPublic = blog?.visibility === "PUBLIC";
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
-  } = usePostsList(blog?._id, state);
+  } = usePostsList(blog?._id, state, undefined, isPublic);
+
   const { currentApp } = useOdeClient();
+
   const { setSidebarHighlightedPost } = useStoreUpdaters();
 
   const handleOnClick = (id: string) => {

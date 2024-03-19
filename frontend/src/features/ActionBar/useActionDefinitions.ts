@@ -45,6 +45,7 @@ export const useActionDefinitions = (
   // Check resource rights.
   const { user } = useUser();
   const { blog } = useBlog();
+
   const rights = useMemo(() => {
     const defaultRights = {
       creator: false,
@@ -62,8 +63,7 @@ export const useActionDefinitions = (
     }
 
     const { shared, author } = blog;
-    const { userId, groupsIds } = user;
-    const isAuthor = author.userId === userId;
+    const isAuthor = author.userId === user?.userId;
 
     // Look for granted rights in the "shared" array.
     const sharedRights = (shared as any).reduce(
@@ -76,7 +76,8 @@ export const useActionDefinitions = (
       ) => {
         if (
           current &&
-          (current.userId === userId || groupsIds.indexOf(current.groupId) >= 0)
+          (current.userId === user?.userId ||
+            user?.groupsIds.indexOf(current.groupId) >= 0)
         ) {
           previous.read ||=
             current["org-entcore-blog-controllers-PostController|list"];
@@ -91,7 +92,9 @@ export const useActionDefinitions = (
             current["org-entcore-blog-controllers-PostController|comment"];
 
           previous.canContrib ||=
-            author.userId === userId || previous.contrib || previous.manager;
+            author.userId === user?.userId ||
+            previous.contrib ||
+            previous.manager;
 
           // Also look for the real publish/submit URL to use.
           // If both are acceptable, prefer publish over submit.

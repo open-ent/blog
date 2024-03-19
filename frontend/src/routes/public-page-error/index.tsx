@@ -1,8 +1,8 @@
-import { Button, EmptyScreen, Layout, usePaths } from "@edifice-ui/react";
+import { Button, EmptyScreen, usePaths } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useRouteError } from "react-router-dom";
 
-export default function PageError() {
+export default function PublicPageError() {
   const error = useRouteError();
   console.error(error);
 
@@ -14,7 +14,7 @@ export default function PageError() {
   const handleBackClick = () => navigate(-1);
 
   return (
-    <Layout>
+    <main className="container-fluid d-flex flex-column bg-white">
       <div className="d-flex flex-column gap-16 align-items-center mt-64">
         <EmptyScreen
           imageSrc={`${imagePath}/emptyscreen/illu-error.svg`}
@@ -28,6 +28,6 @@ export default function PageError() {
           {t("back")}
         </Button>
       </div>
-    </Layout>
+    </main>
   );
 }

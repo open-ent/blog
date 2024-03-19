@@ -33,6 +33,15 @@ export function loadOriginalPost(blogId: string, post: PostMetadata) {
   );
 }
 
+export async function loadPublicPost(blogId: string, postId: string) {
+  const results = await checkHttpError(
+    odeServices
+      .http()
+      .get<Post[]>(`/blog/pub/posts/${blogId}?postId=${postId}`),
+  );
+  return results[0];
+}
+
 export function deletePost(blogId: string, postId: string) {
   return checkHttpError(
     odeServices.http().delete<void>(`/blog/post/${blogId}/${postId}`),
