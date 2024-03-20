@@ -59,8 +59,6 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  const { slug, visibility } = blog!;
-
   // Handlers for actions triggered from the post title component.
   const postActionsHandlers = {
     onBackward: () => {
@@ -74,8 +72,11 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
       setMode("edit");
     },
     onPrint: () => {
-      if (visibility === "PUBLIC") {
-        window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, "_blank");
+      if (blog?.visibility === "PUBLIC") {
+        window.open(
+          `${baseUrl}/pub/${blog?.slug}/print/post/${post._id}`,
+          "_blank",
+        );
       } else {
         window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
       }
