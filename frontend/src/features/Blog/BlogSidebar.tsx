@@ -7,20 +7,19 @@ import { PostState } from "~/models/post";
 import { useBlog, usePostsList } from "~/services/queries";
 import { useStoreUpdaters } from "~/store";
 
-export interface BlogSidebarProps {
-  state?: PostState;
-}
-
-const BlogSidebar = ({ state }: BlogSidebarProps) => {
+const BlogSidebar = () => {
   const { t } = useTranslation("blog");
 
-  const { blog } = useBlog();
+  const { blog, publicView } = useBlog();
 
-  const isPublic = blog?.visibility === "PUBLIC";
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
-  } = usePostsList(blog?._id, state, undefined, isPublic);
+  } = usePostsList(
+    blog?._id,
+    publicView ? PostState.PUBLISHED : undefined,
+    publicView ? false : undefined,
+  );
 
   const { currentApp } = useOdeClient();
 

@@ -39,7 +39,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
 
-  const { blog } = useBlog();
+  const { blog, publicView } = useBlog();
   const { contrib, manager, creator } = useActionDefinitions([]);
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
@@ -256,6 +256,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
           post={post}
           blog={blog}
           index={index}
+          publicView={publicView}
         ></PostPreviewActionBar>
       )}
     </>

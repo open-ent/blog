@@ -14,7 +14,7 @@ export function Component() {
   const {
     posts,
     query: { fetchNextPage, hasNextPage, isSuccess, data },
-  } = usePostsList(blog?._id, PostState.PUBLISHED, false, true);
+  } = usePostsList(blog?._id, PostState.PUBLISHED, false);
 
   useEffect(() => {
     // Load all posts with recurcive fetchNextPage calls.

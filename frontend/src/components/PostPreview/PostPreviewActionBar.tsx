@@ -30,12 +30,17 @@ export interface PostPreviewActionBarProps {
    * Index of the post in the list of posts.
    */
   index: number;
+  /**
+   * from a public view ?
+   */
+  publicView?: boolean;
 }
 
 export const PostPreviewActionBar = ({
-  blog: { _id: blogId, slug, visibility },
+  blog: { _id: blogId, slug },
   post,
   index,
+  publicView,
 }: PostPreviewActionBarProps) => {
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
@@ -50,14 +55,12 @@ export const PostPreviewActionBar = ({
   const { setActionBarPostId } = useStoreUpdaters();
   const { actionBarPostId } = useBlogState();
 
-  const isPublic = visibility === "PUBLIC";
-
   const handleEditClick = () => {
     navigate(`/id/${blogId}/post/${post._id}?edit=true`);
   };
 
   const handlePrintClick = () => {
-    if (isPublic) {
+    if (publicView) {
       window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, "_blank");
     } else {
       window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
@@ -120,7 +123,7 @@ export const PostPreviewActionBar = ({
         >
           {t("blog.print")}
         </Button>
-        {!isPublic && (
+        {!publicView && (
           <Button
             type="button"
             color="primary"

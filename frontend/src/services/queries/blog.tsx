@@ -136,6 +136,7 @@ export const useBlog = (blogId?: string, slug?: string) => {
   return {
     blog: query.data,
     query,
+    publicView: !!slug,
   };
 };
 
@@ -169,9 +170,8 @@ export const usePostsList = (
   blogId?: string,
   state?: PostState,
   withNbComments: boolean = true,
-  isPublic: boolean = false,
 ) => {
-  const params = useParams<{ blogId: string }>();
+  const params = useParams<{ blogId: string; slug: string }>();
   const { postsFilters } = usePostsFilter();
   const { postPageSize } = useBlogState();
 
@@ -182,6 +182,8 @@ export const usePostsList = (
     blogId = params.blogId;
   }
 
+  const publicView = !!params.slug;
+
   const query = useInfiniteQuery(
     postsListQuery(
       blogId!,
@@ -189,13 +191,14 @@ export const usePostsList = (
       state || postsFilters.state,
       postsFilters.search,
       withNbComments,
-      isPublic,
+      publicView,
     ),
   );
 
   return {
     posts: query.data?.pages.flatMap((page) => page) as Post[],
     query,
+    publicView,
   };
 };
 

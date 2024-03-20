@@ -7,31 +7,27 @@ import { PostPreview } from "~/components/PostPreview/PostPreview";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { PostState } from "~/models/post";
-import { useBlogCounter, usePostsList } from "~/services/queries";
+import { useBlog, useBlogCounter, usePostsList } from "~/services/queries";
 import { useBlogState } from "~/store";
 
-export interface BlogPostListProps {
-  blogId?: string;
-  isPublic?: boolean;
-}
-
-const BlogPostList = ({ blogId, isPublic }: BlogPostListProps) => {
+const BlogPostList = () => {
   const { t } = useTranslation("blog");
   const [imagePath] = usePaths();
+
+  const { blog, publicView } = useBlog();
 
   const { creator, manager } = useActionDefinitions([]);
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
   } = usePostsList(
-    blogId,
-    isPublic ? PostState.PUBLISHED : undefined,
-    isPublic ? false : undefined,
-    isPublic ? true : undefined,
+    blog?._id,
+    publicView ? PostState.PUBLISHED : undefined,
+    publicView ? false : undefined,
   );
 
   const { postsFilters } = usePostsFilter();
-  const { counters } = useBlogCounter(blogId);
+  const { counters } = useBlogCounter(blog?._id);
 
   const { sidebarHighlightedPost } = useBlogState();
 

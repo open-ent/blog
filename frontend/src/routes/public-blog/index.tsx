@@ -17,7 +17,7 @@ export function Component() {
   // Load all posts with recurcive fetchNextPage calls.
   const {
     query: { fetchNextPage, hasNextPage, isSuccess, data },
-  } = usePostsList(blog?._id, PostState.PUBLISHED, false, true);
+  } = usePostsList(blog?._id, PostState.PUBLISHED, false);
 
   useEffect(() => {
     // Check if the second page of post is not null to set the page size. (not given by the backend)
@@ -45,7 +45,7 @@ export function Component() {
       <div className="d-flex flex-fill">
         <BlogSidebar />
         <div className="flex-fill py-16 ps-md-16 d-flex flex-column">
-          <BlogPostList blogId={blog?._id} isPublic={true} />
+          <BlogPostList />
         </div>
       </div>
     </main>

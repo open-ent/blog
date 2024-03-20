@@ -26,7 +26,7 @@ export interface PostContentProps {
 }
 
 export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
-  const { blog } = useBlog();
+  const { blog, publicView } = useBlog();
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
   const { mustSubmit, save, trash, publish, readOnly } = postActions;
@@ -72,7 +72,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
       setMode("edit");
     },
     onPrint: () => {
-      if (blog?.visibility === "PUBLIC") {
+      if (publicView) {
         window.open(
           `${baseUrl}/pub/${blog?.slug}/print/post/${post._id}`,
           "_blank",
