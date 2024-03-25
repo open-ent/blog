@@ -77,7 +77,7 @@ export const useActionDefinitions = (
         if (
           current &&
           (current.userId === user?.userId ||
-            user?.groupsIds.indexOf(current.groupId) >= 0)
+            user?.groupsIds?.indexOf(current.groupId) >= 0)
         ) {
           previous.read ||=
             current["org-entcore-blog-controllers-PostController|list"];
