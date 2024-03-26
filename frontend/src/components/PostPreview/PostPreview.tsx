@@ -147,7 +147,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
           </div>
           <div className="d-flex flex-column gap-2">
             <div className="d-flex align-items-center">
-              <h4>{post.title}</h4>
+              <h4 className="post-preview-title">{post.title}</h4>
               {post.state === PostState.DRAFT &&
                 (creator || manager || contrib) && (
                   <Badge
@@ -191,7 +191,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 variant="ghost"
               />
             </div>
-            <div className="flex-fill text-truncate text-truncate-2">
+            <div className="flex-fill text-truncate text-truncate-2 post-preview-content">
               {summaryContentPlain}
             </div>
             <div className="d-flex align-items-center justify-content-center gap-24 mx-32">

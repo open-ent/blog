@@ -88,3 +88,8 @@ main {
   border: 0;
   border-left: 1px solid var(--edifice-gray-700);
 }
+
+.post-preview-content,
+.post-preview-title {
+  overflow-wrap: anywhere;
+}
