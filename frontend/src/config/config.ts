@@ -1,8 +1,11 @@
+import { AppParams } from "ode-explorer/lib";
+
 import { workflows } from ".";
 
-export const explorerConfig = {
+export const explorerConfig: AppParams = {
   app: "blog",
   types: ["blog"],
+  enableOnboarding: false,
   filters: [
     { id: "owner", defaultValue: true },
     { id: "public", defaultValue: false },

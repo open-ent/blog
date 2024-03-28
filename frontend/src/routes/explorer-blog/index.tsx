@@ -10,7 +10,7 @@ export function ExplorerBlog() {
   const { t } = useTranslation();
   return (
     <>
-      <Explorer config={explorerConfig as any} />
+      <Explorer config={explorerConfig} />
 
       <Suspense fallback={<LoadingScreen />}>
         <OnboardingModal
