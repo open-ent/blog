@@ -115,7 +115,7 @@ public class BlogController extends BaseController {
 	}
 
 	@Get("/id/:id")
-	@SecuredAction("blog.view")
+	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void displayBlog(HttpServerRequest request) {
 		eventHelper.onAccess(request);
 		renderView(request, new JsonObject(), "index.html", null);
@@ -126,7 +126,7 @@ public class BlogController extends BaseController {
 	 * @param request
 	 */
 	@Get("/id/:id/post/:postid")
-	@SecuredAction(value = "blog.view")
+	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void viewPostById(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);
 	}
@@ -136,8 +136,8 @@ public class BlogController extends BaseController {
 	 * @param request
 	 */
 	@Get("/print/:id")
-	@SecuredAction(value = "blog.view")
-	public void viewPrintById(HttpServerRequest request) {
+	@SecuredAction("blog.print")
+	public void print(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);
 	}
 
@@ -146,7 +146,7 @@ public class BlogController extends BaseController {
 	 * @param request
 	 */
 	@Get("/print/:id/post/:postid")
-	@SecuredAction(value = "blog.view")
+	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void viewPrintPostById(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);
 	}
@@ -156,16 +156,9 @@ public class BlogController extends BaseController {
 	 * @param request
 	 */
 	@Get("/oldformat/:id/:postid")
-	@SecuredAction(value = "blog.view")
+	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void viewOldPostById(HttpServerRequest request) {
 		renderView(request, new JsonObject(), "index.html", null);
-	}
-
-	@Deprecated
-	@Get("/print/blog")
-	@SecuredAction("blog.print")
-	public void print(HttpServerRequest request) {
-		renderView(request, new JsonObject().put("printBlogId", request.params().get("blog")).put("public", false), "print.html", null);
 	}
 
 	// TODO improve fields matcher and validater
