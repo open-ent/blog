@@ -18,6 +18,14 @@ export function redirectBlogHashLocation(): Response | null {
         location.origin + basename.replace(/\/$/g, "") + redirectPath,
       );
     }
+    const isViewPostPath = matchPath("/view/:blogId/:postId", hashLocation);
+    if (isViewPostPath) {
+      // Redirect to the new format
+      const redirectPath = `/id/${isViewPostPath?.params.blogId}/post/${isViewPostPath?.params.postId}`;
+      location.replace(
+        location.origin + basename.replace(/\/$/g, "") + redirectPath,
+      );
+    }
 
     const isPostPath = matchPath("/detail/:blogId/:postId", hashLocation);
     if (isPostPath) {
