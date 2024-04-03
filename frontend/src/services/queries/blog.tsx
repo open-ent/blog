@@ -103,10 +103,12 @@ export const availableActionsQuery = (actions: IActionDefinition[]) => {
     queryKey: actionRights,
     queryFn: async () => await sessionHasWorkflowRights(actionRights),
     select: (data: Record<string, boolean>) => {
-      return actions.map((action) => ({
-        ...action,
-        available: data[action.workflow],
-      })) as IAction[];
+      return actions
+        .filter((action: IAction) => data[action.workflow])
+        .map((action) => ({
+          ...action,
+          available: true,
+        })) as IAction[];
     },
     staleTime: Infinity,
   };

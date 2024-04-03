@@ -4,7 +4,6 @@ import { useUser } from "@edifice-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { ACTION, ActionType, IAction, RightRole } from "edifice-ts-client";
 
-import { Blog } from "~/models/blog";
 import { Post } from "~/models/post";
 import { availableActionsQuery, useBlog } from "~/services/queries";
 import { IActionDefinition } from "~/utils/types";
@@ -127,7 +126,7 @@ export const useActionDefinitions = (
   const hasRight = useCallback(
     (id: ActionType) => {
       const action = availableActions?.find((action) => action.id === id);
-      if (!action) return false;
+      if (!action || !action.available) return false;
 
       const rolesPrecedence = [
         "creator",
@@ -208,30 +207,15 @@ export const useActionDefinitions = (
     rights.contrib &&
     !(rights.manager || rights.creator);
 
-  const availableActionsForBlog = useCallback(
-    (blog: Blog) => {
-      if (!availableActions || availableActions?.length === 0) return [];
+  const availableActionsForBlog = useMemo(() => {
+    if (!availableActions || availableActions?.length === 0) return [];
 
-      const isBlogAuthor = blog.author.userId === user?.userId;
-      const authorizedActions: IAction[] = availableActions.filter((action) =>
-        hasRight(action.id),
-      );
-      if (isBlogAuthor) {
-        const publishAction = availableActions.find(
-          (action) => action.id === ACTION.PUBLISH,
-        );
-        if (
-          publishAction &&
-          !authorizedActions.some((action) => action.id === ACTION.PUBLISH)
-        ) {
-          authorizedActions.push(publishAction);
-        }
-      }
+    const authorizedActions: IAction[] = availableActions.filter((action) =>
+      hasRight(action.id),
+    );
 
-      return authorizedActions || [];
-    },
-    [availableActions, user?.userId, hasRight],
-  );
+    return authorizedActions || [];
+  }, [availableActions, hasRight]);
 
   return {
     availableActions,
