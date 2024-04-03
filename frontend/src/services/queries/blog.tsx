@@ -1,14 +1,15 @@
+import { useToast } from "@edifice-ui/react";
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { IAction } from "edifice-ts-client";
+import { IAction, odeServices } from "edifice-ts-client";
+import { t } from "i18next";
 import { useParams } from "react-router-dom";
 
 import {
-  deleteBlog,
   loadBlog,
   loadBlogCounter,
   loadBlogPublic,
@@ -205,11 +206,24 @@ export const usePostsList = (
 };
 
 export const useDeleteBlog = (blogId: string) => {
+  const toast = useToast();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: () => deleteBlog(blogId),
-    onSuccess: () =>
+    mutationFn: async () =>
+      await odeServices.resource("blog").trashAll(
+        {
+          application: "blog",
+          resourceIds: [blogId],
+          folderIds: [],
+          resourceType: "blog",
+        },
+        true,
+      ),
+    onSuccess: () => {
+      toast.success(t("explorer.trash.title"));
       // Invalidate all queries for this blog.
-      queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) }),
+      queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) });
+    },
   });
 };
