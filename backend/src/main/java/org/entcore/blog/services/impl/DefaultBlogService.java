@@ -23,7 +23,7 @@
 package org.entcore.blog.services.impl;
 
 import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
+import com.mongodb.client.model.Filters;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
@@ -35,6 +35,8 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.bson.conversions.Bson;
+import org.entcore.blog.Blog;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
@@ -50,6 +52,7 @@ import org.entcore.common.utils.StringUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.mongodb.client.model.Filters.*;
 import static java.lang.System.currentTimeMillis;
 
 public class DefaultBlogService implements BlogService{
@@ -152,7 +155,7 @@ public class DefaultBlogService implements BlogService{
 		//
 		JsonObject b = Utils.validAndGet(blog, UPDATABLE_FIELDS, Collections.<String>emptyList());
 		if (validationError(result, b)) return;
-		QueryBuilder query = QueryBuilder.start("_id").is(blogId);
+		final Bson query = eq("_id", blogId);
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
 		for (String attr: b.fieldNames()) {
 			modifier.set(attr, b.getValue(attr));
@@ -179,7 +182,7 @@ public class DefaultBlogService implements BlogService{
 	@Override
 	public void delete(UserInfos user, final String blogId, final Handler<Either<String, JsonObject>> result) {
 		final long now = currentTimeMillis();
-		QueryBuilder q = QueryBuilder.start("blog.$id").is(blogId);
+		final Bson q = eq("blog.$id", blogId);
 		mongo.find("posts", MongoQueryBuilder.build(q), null, new JsonObject().put("_id", 1), findPostsResults -> {
 			Either<String, JsonObject> validFindPostsResult = Utils.validResult(findPostsResults);
 			if (validFindPostsResult.isRight()) {
@@ -189,7 +192,7 @@ public class DefaultBlogService implements BlogService{
 				mongo.delete("posts", MongoQueryBuilder.build(q), deletePostsResult -> {
 					Either<String, JsonObject> validatedResult = Utils.validResult(deletePostsResult);
 					if (validatedResult.isRight()) {
-						QueryBuilder query = QueryBuilder.start("_id").is(blogId);
+						final Bson query = eq("_id", blogId);
 						mongo.delete(BLOG_COLLECTION, MongoQueryBuilder.build(query), event -> {
 							final Either<String, JsonObject> either = Utils.validResult(event);
 							if(either.isLeft()){
@@ -216,7 +219,7 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void get(String blogId, final Handler<Either<String, JsonObject>> result) {
-		QueryBuilder query = QueryBuilder.start("_id").is(blogId);
+		final Bson query = eq("_id", blogId);
 		mongo.findOne(BLOG_COLLECTION, MongoQueryBuilder.build(query),
 				new Handler<Message<JsonObject>>() {
 			@Override
@@ -239,7 +242,7 @@ public class DefaultBlogService implements BlogService{
 
 	@Override
 	public void getPublic(String slug, IdType type, Handler<Either<String, JsonObject>> result) {
-		QueryBuilder querySlug = QueryBuilder.start(IdType.Slug.equals(type)?"slug":"_id").is(slug);
+		final Bson querySlug = eq(IdType.Slug.equals(type)?"slug":"_id", slug);
 		mongo.findOne(BLOG_COLLECTION, MongoQueryBuilder.build(querySlug),event -> {
 			Either<String,JsonObject> eitherBlog = Utils.validResult(event);
 			if(eitherBlog.isRight()){
@@ -260,7 +263,7 @@ public class DefaultBlogService implements BlogService{
 	public void isPublicBlog(String id, IdType type, Handler<Boolean> handler){
 		if (id!=null) {
 			final String prop = IdType.Slug.equals(type)?"slug":"_id";
-			JsonObject query = MongoQueryBuilder.build(QueryBuilder.start(prop).is(id).and("visibility").is(VisibilityFilter.PUBLIC.name()));
+			JsonObject query = MongoQueryBuilder.build(and(eq(prop, id), eq("visibility", VisibilityFilter.PUBLIC.name())));
 			mongo.count(BLOG_COLLECTION, query, event -> {
 				JsonObject res = (JsonObject)event.body();
 				handler.handle(res != null && "ok".equals(res.getString("status")) && 1 == res.getInteger("count"));
@@ -271,9 +274,9 @@ public class DefaultBlogService implements BlogService{
 	}
 
 	public void isBlogExists(Optional<String> blogId, String slug, Handler<Boolean> handler){
-		QueryBuilder queryM = QueryBuilder.start("slug").is(slug);
+		Bson queryM = eq("slug", slug);
 		if(blogId.isPresent()){
-			queryM = queryM.and("_id").notEquals(blogId.get());
+			queryM = and(queryM, not(eq("_id", blogId.get())));
 		}
 		JsonObject query = MongoQueryBuilder.build(queryM);
 		mongo.count(BLOG_COLLECTION, query, event -> {
@@ -285,55 +288,53 @@ public class DefaultBlogService implements BlogService{
 	@Override
 	public void list(UserInfos user, final Integer page, final String search, final Handler<Either<String, JsonArray>> result) {
 
-		List<DBObject> groups = new ArrayList<>();
-		groups.add(QueryBuilder.start("userId").is(user.getUserId()).get());
+		List<Bson> groups = new ArrayList<>();
+		groups.add(eq("userId", user.getUserId()));
 		for (String gpId: user.getProfilGroupsIds()) {
-			groups.add(QueryBuilder.start("groupId").is(gpId).get());
+			groups.add(eq("groupId", gpId));
 		}
-		QueryBuilder rightQuery = new QueryBuilder().or(
-				QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-				QueryBuilder.start("shared").elemMatch(
-				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
-		).get());
+		final Bson rightQuery = or(
+				eq("author.userId", user.getUserId()),
+				elemMatch("shared", or(groups))
+		);
 
-		final QueryBuilder query;
+		final Bson query;
 
 		if (!StringUtils.isEmpty(search)) {
 			final List<String> searchWords = checkAndComposeWordFromSearchText(search, this.searchWordMinSize);
 			if (!searchWords.isEmpty()) {
-				final QueryBuilder searchQuery = new QueryBuilder();
-				searchQuery.text(MongoDbSearchService.textSearchedComposition(searchWords));
-				query = new QueryBuilder().and(rightQuery.get(), searchQuery.get());
+				query = and(
+					rightQuery,
+					Filters.text(MongoDbSearchService.textSearchedComposition(searchWords))
+				);
 			} else {
 				query = null;
 				//empty result (no word to search)
-				result.handle(new Either.Right<String, JsonArray>(new JsonArray()));
+				result.handle(new Either.Right<>(new JsonArray()));
 				return;
 			}
 		} else {
 			query = rightQuery;
 		}
-
 		JsonObject sort = new JsonObject().put("modified", -1);
-
-        if (page != null && query != null) {
-	        final int skip = (0 == page) ? -1 : page * this.pagingSize;
-	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null, skip, this.pagingSize, this.pagingSize,
-			        new Handler<Message<JsonObject>>() {
-				        @Override
-				        public void handle(Message<JsonObject> event) {
-					        result.handle(Utils.validResults(event));
-				        }
-			        });
-        } else if (query != null) {
-	        mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
-			        new Handler<Message<JsonObject>>() {
-				        @Override
-				        public void handle(Message<JsonObject> event) {
-					        result.handle(Utils.validResults(event));
-				        }
-			        });
-        }
+		if (page != null && query != null) {
+			final int skip = (0 == page) ? -1 : page * this.pagingSize;
+			mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null, skip, this.pagingSize, this.pagingSize,
+					new Handler<Message<JsonObject>>() {
+						@Override
+						public void handle(Message<JsonObject> event) {
+							result.handle(Utils.validResults(event));
+						}
+					});
+		} else if (query != null) {
+			mongo.find(BLOG_COLLECTION, MongoQueryBuilder.build(query), sort, null,
+					new Handler<Message<JsonObject>>() {
+						@Override
+						public void handle(Message<JsonObject> event) {
+							result.handle(Utils.validResults(event));
+						}
+					});
+		}
 	}
 
 	//TODO put this code in SearchUtils on entcore with (same code in searchengine app) and adding searchWordMinSize param

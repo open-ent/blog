@@ -22,11 +22,11 @@
 
 package org.entcore.blog.services.impl;
 
-import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDbAPI;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import io.vertx.core.Vertx;
+import org.bson.conversions.Bson;
 import org.entcore.common.service.impl.MongoDbRepositoryEvents;
 import org.entcore.common.folders.impl.DocumentHelper;
 import io.vertx.core.Handler;
@@ -37,6 +37,8 @@ import io.vertx.core.json.JsonObject;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
@@ -51,21 +53,21 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 	public void exportResources(JsonArray resourcesIds, boolean exportDocuments, boolean exportSharedResources, String exportId, String userId,
 								JsonArray groups, String exportPath, String locale, String host, Handler<Boolean> handler)
 	{
-			QueryBuilder findByAuthor = QueryBuilder.start("author.userId").is(userId);
-			QueryBuilder findByShared = QueryBuilder.start().or(
-					QueryBuilder.start("shared.userId").is(userId).get(),
-					QueryBuilder.start("shared.groupId").in(groups).get()
+		final Bson findByAuthor = eq("author.userId", userId);
+		final Bson findByShared = or(
+					eq("shared.userId", userId),
+					in("shared.groupId", groups)
 			);
-			QueryBuilder findByAuthorOrShared = exportSharedResources == false ? findByAuthor : QueryBuilder.start().or(findByAuthor.get(),findByShared.get());
+			final Bson findByAuthorOrShared = exportSharedResources ? or(findByAuthor,findByShared) :  findByAuthor ;
 
 			JsonObject query;
 
-			if(resourcesIds == null)
+			if(resourcesIds == null) {
 				query = MongoQueryBuilder.build(findByAuthorOrShared);
-			else
-			{
-				QueryBuilder limitToResources = findByAuthorOrShared.and(
-					QueryBuilder.start("_id").in(resourcesIds).get()
+			} else {
+				final Bson limitToResources = and(
+					findByAuthorOrShared,
+					in("_id", resourcesIds)
 				);
 				query = MongoQueryBuilder.build(limitToResources);
 			}
@@ -90,7 +92,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 						});
 
 						final Set<String> ids = results.stream().map(res -> ((JsonObject)res).getString("_id")).collect(Collectors.toSet());
-						QueryBuilder findByBlogId = QueryBuilder.start("blog.$id").in(ids);
+						final Bson findByBlogId = in("blog.$id", ids);
 						JsonObject query2 = MongoQueryBuilder.build(findByBlogId);
 
 						mongo.find(DefaultPostService.POST_COLLECTION, query2, new Handler<Message<JsonObject>>()
@@ -198,12 +200,12 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 			userIds[i] = j.getString("id");
 		}
 
-		final JsonObject criteria = MongoQueryBuilder.build(QueryBuilder.start("shared.userId").in(userIds));
+		final JsonObject criteria = MongoQueryBuilder.build(in("shared.userId", userIds));
 
 		long timestamp = System.currentTimeMillis();
 		MongoUpdateBuilder modifier = new MongoUpdateBuilder();
 		modifier.set("_deleteUsersKey", timestamp);
-		modifier.pull("shared", MongoQueryBuilder.build(QueryBuilder.start("userId").in(userIds)));
+		modifier.pull("shared", MongoQueryBuilder.build(in("userId", userIds)));
 
 		final String collection = DefaultBlogService.BLOG_COLLECTION;
 		mongo.update(collection, criteria, modifier.build(), false, true, MongoDbAPI.WriteConcern.MAJORITY, new Handler<Message<JsonObject>>() {
@@ -214,7 +216,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 							" : " + event.body().getString("message"));
 				}
 
-				final JsonObject criteria = MongoQueryBuilder.build(QueryBuilder.start("author.userId").in(userIds));
+				final JsonObject criteria = MongoQueryBuilder.build(in("author.userId", userIds));
 				MongoUpdateBuilder modifier = new MongoUpdateBuilder();
 				modifier.set("_deleteUsersKey", timestamp);
 				modifier.set("author.deleted", true);
@@ -225,13 +227,12 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 							log.error("Error deleting users shared in collection " + collection +
 									" : " + event.body().getString("message"));
 						} else {
-							final QueryBuilder findByKey = QueryBuilder.start("_deleteUsersKey").is(timestamp);
-							final JsonObject query = MongoQueryBuilder.build(findByKey);
+							final JsonObject query = new JsonObject().put("_deleteUsersKey", timestamp);
 							// fetch for update
 							mongo.find(collection, query, (eventFind) -> {
-								JsonArray results = ((JsonObject)eventFind.body()).getJsonArray("results");
+								JsonArray results = eventFind.body().getJsonArray("results");
 								List<ResourceChanges> list = new ArrayList();
-								if ("ok".equals(((JsonObject)eventFind.body()).getString("status")) && results != null && !results.isEmpty()) {
+								if ("ok".equals(eventFind.body().getString("status")) && results != null && !results.isEmpty()) {
 									log.info("[deleteUsers] resource to update count=" + results.size());
 									results.forEach((elem) -> {
 										if (elem instanceof JsonObject) {
@@ -241,7 +242,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 										}
 									});
 								} else {
-									log.error("[deleteUsers] Could not found updated resources:" + eventFind.body());
+									log.error("[deleteUsers] Could not find updated resources:" + eventFind.body());
 								}
 								handler.handle(list);
 							});
@@ -255,8 +256,11 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 	private void delete(final String collection, Handler<List<ResourceChanges>> handler) {
 		final JsonObject query = MongoQueryBuilder.build(
-				QueryBuilder.start("shared.org-entcore-blog-controllers-BlogController|shareJson").notEquals(true)
-						.put("author.deleted").is(true));
+				and(
+					not(eq("shared.org-entcore-blog-controllers-BlogController|shareJson", true)),
+					eq("author.deleted", true)
+				)
+		);
 
 		mongo.find(collection, query, null, new JsonObject().put("_id", 1), new Handler<Message<JsonObject>>() {
 					@Override
@@ -269,7 +273,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 						JsonObject j = results.getJsonObject(i);
 						blogIds[i] = j.getString("_id");
 					}
-					QueryBuilder q = QueryBuilder.start("blog.$id").in(blogIds);
+					final Bson q = in("blog.$id", blogIds);
 					mongo.delete(DefaultPostService.POST_COLLECTION, MongoQueryBuilder.build(q),
 							new Handler<Message<JsonObject>>() {
 								@Override
@@ -281,23 +285,20 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 									}
 								}
 							});
-					QueryBuilder query = QueryBuilder.start("_id").in(blogIds);
+					final Bson query = in("_id", blogIds);
 					mongo.delete(collection, MongoQueryBuilder.build(query),
-							new Handler<Message<JsonObject>>() {
-								@Override
-								public void handle(Message<JsonObject> event) {
-									if (!"ok".equals(event.body().getString("status"))) {
-										log.error("Error deleting blogs : " + event.body().encode());
-									} else {
-										log.info("Blogs deleted : " + event.body().getInteger("number"));
-										final List<ResourceChanges> changes = new ArrayList<>();
-										for(final String id : blogIds) {
-											changes.add(new ResourceChanges(id, true));
-										}
-										handler.handle(changes);
-									}
-								}
-							});
+            event -> {
+              if (!"ok".equals(event.body().getString("status"))) {
+                log.error("Error deleting blogs : " + event.body().encode());
+              } else {
+                log.info("Blogs deleted : " + event.body().getInteger("number"));
+                final List<ResourceChanges> changes = new ArrayList<>();
+                for(final String id : blogIds) {
+                  changes.add(new ResourceChanges(id, true));
+                }
+                handler.handle(changes);
+              }
+            });
 				}
 			}
 		});

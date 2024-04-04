@@ -23,7 +23,6 @@
 package org.entcore.blog.security;
 
 import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.Either;
@@ -38,6 +37,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.bson.conversions.Bson;
 import org.entcore.blog.controllers.BlogController;
 import org.entcore.blog.controllers.PostController;
 import org.entcore.blog.services.PostService;
@@ -46,6 +46,8 @@ import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
 import java.util.*;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class BlogResourcesProvider implements ResourcesProvider {
 
@@ -103,25 +105,31 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			Handler<Boolean> handler) {
 		String id = request.params().get("blogId");
 		if (id != null && !id.trim().isEmpty()) {
-			QueryBuilder query = getDefaultQueryBuilder(user, serviceMethod, id);
+			Bson query = getDefaultQueryBuilder(user, serviceMethod, id);
 			executeCountQuery(request, "blogs", MongoQueryBuilder.build(query), 1, handler);
 		} else {
 			handler.handle(false);
 		}
 	}
 
-	private QueryBuilder getDefaultQueryBuilder(UserInfos user, String serviceMethod, String id) {
-		List<DBObject> groups = new ArrayList<>();
-		groups.add(QueryBuilder.start("userId").is(user.getUserId()).put(serviceMethod.replaceAll("\\.", "-")).is(true)
-				.get());
-		groups.add(QueryBuilder.start("userId").is(user.getUserId()).put("manager").is(true).get());
+	private Bson getDefaultQueryBuilder(UserInfos user, String serviceMethod, String id) {
+		final List<Bson> groups = new ArrayList<>();
+		groups.add(and(
+			eq("userId", user.getUserId()),
+			eq(serviceMethod.replaceAll("\\.", "-"), true)
+		));
+		groups.add(and(eq("userId", user.getUserId()), eq("manager", true)));
 		for (String gpId : user.getGroupsIds()) {
-			groups.add(QueryBuilder.start("groupId").is(gpId).put(serviceMethod.replaceAll("\\.", "-")).is(true).get());
-			groups.add(QueryBuilder.start("groupId").is(gpId).put("manager").is(true).get());
+			groups.add(and(eq("groupId", gpId), eq(serviceMethod.replaceAll("\\.", "-"), true)));
+			groups.add(and(eq("groupId", gpId), eq("manager", true)));
 		}
-		return QueryBuilder.start("_id").is(id).or(QueryBuilder.start("author.userId").is(user.getUserId()).get(),
-				QueryBuilder.start("shared")
-						.elemMatch(new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()).get());
+		return and(
+			eq("_id", id),
+			or(
+				eq("author.userId", user.getUserId()),
+				elemMatch("shared", or(groups))
+			)
+		);
 	}
 
 	private void authorizeGetPost(HttpServerRequest request, final UserInfos user, String serviceMethod,
@@ -131,7 +139,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 		if (blogId != null && !blogId.trim().isEmpty() && postId != null && !postId.trim().isEmpty()) {
 			PostService.StateType state = getStateType(request);
 			if (PostService.StateType.PUBLISHED.equals(state)) {
-				QueryBuilder query = getDefaultQueryBuilder(user, serviceMethod, blogId);
+				final Bson query = getDefaultQueryBuilder(user, serviceMethod, blogId);
 				executeCountQuery(request, "blogs", MongoQueryBuilder.build(query), 1, handler);
 			} else {
 				//if not published, can i submit it?
@@ -171,7 +179,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 		final JsonObject blogKeys = new JsonObject()
 				.put("author", 1)
 				.put("shared", 1);
-		final QueryBuilder postsQuery = QueryBuilder.start("_id").in(resourceIdsArray);
+		final Bson postsQuery = in("_id", resourceIdsArray);
 		// retrieve posts
 		mongo.find("posts", MongoQueryBuilder.build(postsQuery), null, postKeys, postsQueryResponse -> {
 			Either<String, JsonArray> postsQueryResult = Utils.validResults(postsQueryResponse);
@@ -186,7 +194,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 						promise.complete(true);
 					} else {
 						// Check rights on blog level
-						final QueryBuilder blogQuery = QueryBuilder.start("_id").in(blogIdsToBeChecked);
+						final Bson blogQuery = in("_id", blogIdsToBeChecked);
 						mongo.find("blogs", MongoQueryBuilder.build(blogQuery), null, blogKeys, blogQueryResponse -> {
 							Either<String, JsonArray> blogQueryResult = Utils.validResults(blogQueryResponse);
 							if (blogQueryResult.isRight()) {

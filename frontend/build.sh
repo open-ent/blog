@@ -69,10 +69,16 @@ clean () {
 
 doInit () {
   echo "[init] Get branch name from jenkins env..."
-  BRANCH_NAME=`echo $GIT_BRANCH | sed -e "s|origin/||g"`
-  if [ "$BRANCH_NAME" = "" ]; then
-    echo "[init] Get branch name from git..."
-    BRANCH_NAME=`git branch | sed -n -e "s/^\* \(.*\)/\1/p"`
+
+  if [ ! -z "$FRONT_BRANCH" ]; then
+      echo "[buildNode] Get tag name from jenkins param... $FRONT_BRANCH"
+      BRANCH_NAME="$FRONT_BRANCH"
+  else
+    BRANCH_NAME=`echo $GIT_BRANCH | sed -e "s|origin/||g"`
+    if [ "$BRANCH_NAME" = "" ]; then
+      echo "[init] Get branch name from git..."
+      BRANCH_NAME=`git branch | sed -n -e "s/^\* \(.*\)/\1/p"`
+    fi
   fi
 
   echo "[init] Generate package.json from package.json.template..."

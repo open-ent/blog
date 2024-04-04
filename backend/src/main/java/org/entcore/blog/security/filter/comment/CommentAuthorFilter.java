@@ -22,27 +22,25 @@
 
 package org.entcore.blog.security.filter.comment;
 
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
-import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
-import fr.wseduc.webutils.http.Binding;
-import org.entcore.blog.security.filter.comment.CommentFilter;
-import org.entcore.common.user.DefaultFunctions;
+import org.bson.conversions.Bson;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpServerRequest;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class CommentAuthorFilter extends CommentFilter {
 
 	@Override
 	public void authorize(CommentFilter.Data data, UserInfos user, Handler<Boolean> handler) {
 		// Check if this user is the author of the post comment.
-		QueryBuilder query = QueryBuilder.start("_id").is(data.postId)
-			.put("comments").elemMatch(
-				QueryBuilder.start("id").is(data.commentId)
-					.put("author.userId").is(user.getUserId()).get()
-			);
+		final Bson query = and(
+			eq("_id", data.postId),
+			elemMatch("comments", and(
+				eq("id", data.commentId),
+				eq("author.userId", user.getUserId())
+			))
+		);
 		executeCountQuery(data.request, "posts", MongoQueryBuilder.build(query), 1, handler);
     }
 }

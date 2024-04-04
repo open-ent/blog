@@ -1,6 +1,5 @@
 package org.entcore.blog.explorer;
 
-import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -10,12 +9,13 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.MongoClientDeleteResult;
 import org.entcore.blog.Blog;
-import org.entcore.common.explorer.ExplorerMessage;
 import org.entcore.common.explorer.impl.ExplorerSubResourceMongo;
 import org.entcore.common.user.UserInfos;
 
 import java.util.Collection;
 import java.util.Optional;
+
+import static com.mongodb.client.model.Filters.in;
 
 public class PostExplorerPlugin extends ExplorerSubResourceMongo {
     public static final String TYPE = Blog.BLOG_TYPE;
@@ -45,7 +45,7 @@ public class PostExplorerPlugin extends ExplorerSubResourceMongo {
             return Future.succeededFuture();
         }
         final MongoClient mongo = ((BlogExplorerPlugin)super.parent).getMongoClient();
-        final JsonObject filter = MongoQueryBuilder.build(QueryBuilder.start("blog.$id").in(ids));
+        final JsonObject filter = MongoQueryBuilder.build(in("blog.$id", ids));
         final Promise<MongoClientDeleteResult> promise = Promise.promise();
         log.info("Deleting post related to deleted blog. Number of blogs="+ids.size());
         mongo.removeDocuments(COLLECTION, filter, promise);

@@ -23,11 +23,11 @@
 package org.entcore.blog.events;
 
 import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Either.Right;
+import org.bson.conversions.Bson;
 import org.entcore.blog.Blog;
 import org.entcore.common.search.SearchingEvents;
 import org.entcore.common.service.impl.MongoDbSearchService;
@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.mongodb.client.model.Filters.*;
 import static org.entcore.common.mongodb.MongoDbResult.validResults;
 import static org.entcore.common.mongodb.MongoDbResult.validResultsHandler;
 
@@ -62,17 +63,16 @@ public class BlogSearchingEvents implements SearchingEvents {
 		if (appFilters.contains(BlogSearchingEvents.class.getSimpleName())) {
 
 			final List<String> groupIdsLst = groupIds.getList();
-			final List<DBObject> groups = new ArrayList<DBObject>();
-			groups.add(QueryBuilder.start("userId").is(userId).get());
+			final List<Bson> groups = new ArrayList<>();
+			groups.add(eq("userId", userId));
 			for (String gpId: groupIdsLst) {
-				groups.add(QueryBuilder.start("groupId").is(gpId).get());
+				groups.add(eq("groupId", gpId));
 			}
 
-			final QueryBuilder rightsQuery = new QueryBuilder().or(
-					QueryBuilder.start("author.userId").is(userId).get(),
-					QueryBuilder.start("shared").elemMatch(
-							new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
-					).get());
+			final Bson rightsQuery = or(
+					eq("author.userId", userId),
+					elemMatch("shared", or(groups))
+			);
 
 			final JsonObject projection = new JsonObject();
 			projection.put("_id", 1);
@@ -119,13 +119,12 @@ public class BlogSearchingEvents implements SearchingEvents {
 	private void searchPosts(int page, int limit, List<String> searchWords, final Set<String> setIds, Handler<Either<String, JsonArray>> handler) {
 		final int skip = (0 == page) ? -1 : page * limit;
 
-		final QueryBuilder worldsQuery = new QueryBuilder();
-		worldsQuery.text(MongoDbSearchService.textSearchedComposition(searchWords));
+		final Bson worldsQuery = text(MongoDbSearchService.textSearchedComposition(searchWords));
 
-		final QueryBuilder blogQuery = new QueryBuilder().start("blog.$id").in(setIds);
-		final QueryBuilder publishedQuery = new QueryBuilder().start("state").is(PUBLISHED_STATE);
+		final Bson blogQuery = in("blog.$id", setIds);
+		final Bson publishedQuery = eq("state", PUBLISHED_STATE);
 
-		final QueryBuilder query = new QueryBuilder().and(worldsQuery.get(), blogQuery.get(), publishedQuery.get());
+		final Bson query = and(worldsQuery, blogQuery, publishedQuery);
 
 		JsonObject sort = new JsonObject().put("modified", -1);
 		final JsonObject projection = new JsonObject();
