@@ -22,20 +22,16 @@
 
 package org.entcore.blog.security.filter.comment;
 
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
-import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
-import fr.wseduc.webutils.http.Binding;
-import org.entcore.blog.security.filter.comment.CommentFilter;
-import org.entcore.common.user.DefaultFunctions;
+import org.bson.conversions.Bson;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.http.HttpServerRequest;
 
 import java.util.*;
+
+import static com.mongodb.client.model.Filters.*;
 
 public class CommentAuthorOrManagerFilter extends CommentAuthorFilter {
 
@@ -58,21 +54,28 @@ public class CommentAuthorOrManagerFilter extends CommentAuthorFilter {
 
 		final String userId = user.getUserId();
 
-		List<DBObject> groups = new ArrayList<>();
-		groups.add(QueryBuilder.start("userId").is(userId).put("manager").is(true).get());
+		final List<Bson> groups = new ArrayList<>();
+		groups.add(and(
+			eq("userId", userId),
+			eq("manager", true)
+		));
 		for (String gpId : user.getGroupsIds()) {
-			groups.add(QueryBuilder.start("groupId").is(gpId).put("manager").is(true).get());
+			groups.add(and(
+				eq("groupId", gpId),
+				eq("manager", true)
+			));
 		}
 		// Check if this user is manager or author of the blog.
-		QueryBuilder query = QueryBuilder.start("_id").is(data.blogId).or(
-			QueryBuilder.start("author.userId").is(userId).get(),
-			QueryBuilder.start("shared").elemMatch(
-				new QueryBuilder().or(groups.toArray(new DBObject[groups.size()])).get()
-			).get()
+		final Bson query = and(
+			eq("_id", data.blogId),
+			or(
+				eq("author.userId", userId),
+				elemMatch("shared", or(groups))
+			)
 		);
 
 		executeCountQuery(data.request, "blogs", MongoQueryBuilder.build(query), 1, isManager -> {
-			promise.complete(isManager!=null && isManager.booleanValue());
+			promise.complete(isManager!=null && isManager);
 		});
 
 		return promise.future();

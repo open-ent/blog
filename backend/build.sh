@@ -1,5 +1,7 @@
 #!/bin/bash
 
+MVN_OPTS="-Duser.home=/var/maven"
+
 # Params
 NO_DOCKER=""
 for i in "$@"
@@ -27,52 +29,65 @@ case `uname -s` in
     fi
 esac
 
+init() {
+  me=`id -u`:`id -g`
+  echo "DEFAULT_DOCKER_USER=$me" > .env
+}
+
 # Nettoyage du dossier `backend`
 function clean() {
   echo "Cleaning..."
   if [ "$NO_DOCKER" = "true" ] ; then
-    gradle clean
+    mvn clean
   else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
+    docker compose run --rm maven mvn $MVN_OPTS clean
   fi
   echo "Clean done!"
+}
+
+install () {
+  docker compose run --rm maven mvn $MVN_OPTS install -DskipTests
+}
+
+test () {
+  docker compose run --rm maven mvn $MVN_OPTS test
 }
 
 function build() {
   echo "Building..."
   if [ "$NO_DOCKER" = "true" ] ; then
-    gradle shadowJar install publishToMavenLocal
+    mvn $MVN_OPTS install -DskipTests
   else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle shadowJar install publishToMavenLocal
+    docker compose run --rm maven mvn $MVN_OPTS install -DskipTests
   fi
   echo "Build done!"
 }
 
-function publish() {
-  echo "Publishing..."
-  if [ -e "?/.gradle" ] && [ ! -e "?/.gradle/gradle.properties" ]
-  then
-    echo "odeUsername=$NEXUS_ODE_USERNAME" > "?/.gradle/gradle.properties"
-    echo "odePassword=$NEXUS_ODE_PASSWORD" >> "?/.gradle/gradle.properties"
-    echo "sonatypeUsername=$NEXUS_SONATYPE_USERNAME" >> "?/.gradle/gradle.properties"
-    echo "sonatypePassword=$NEXUS_SONATYPE_PASSWORD" >> "?/.gradle/gradle.properties"
-  fi
-  if [ "$NO_DOCKER" = "true" ] ; then
-    gradle publish
-  else
-    docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
-  fi
-  echo "Publish done!"
+publish() {
+  version=`docker compose run --rm maven mvn $MVN_OPTS help:evaluate -Dexpression=project.version -q -DforceStdout`
+  level=`echo $version | cut -d'-' -f3`
+  case "$level" in
+    *SNAPSHOT) export nexusRepository='snapshots' ;;
+    *)         export nexusRepository='releases' ;;
+  esac
+
+  docker compose run --rm  maven mvn -DrepositoryId=ode-$nexusRepository -DskipTests --settings /var/maven/.m2/settings.xml deploy
 }
 
 for param in "$@"
 do
   case $param in
+    init)
+      init
+      ;;
     clean)
       clean
       ;;
     build)
       build
+      ;;
+    test)
+      test
       ;;
     publish)
       publish

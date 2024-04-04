@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.conversions.Bson;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.notification.NotificationUtils;
 import org.entcore.common.notification.TimelineHelper;
 import org.entcore.common.user.UserInfos;
-import org.entcore.common.utils.Config;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
@@ -41,17 +41,13 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-
-import com.mongodb.QueryBuilder;
 
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.collections.Joiner;
-import fr.wseduc.webutils.http.Renders;
+
+import static com.mongodb.client.model.Filters.eq;
 
 public class DefaultBlogTimelineService implements BlogTimelineService {
 
@@ -69,7 +65,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	public void notifyShare(final HttpServerRequest request, final String blogId, final UserInfos user,
 			final JsonArray sharedArray, final String resourceUri) {
 		if (sharedArray != null && user != null && blogId != null && request != null && resourceUri != null) {
-			QueryBuilder query = QueryBuilder.start("_id").is(blogId);
+			final Bson query = eq("_id", blogId);
 			JsonObject keys = new JsonObject().put("title", 1);
 			mongo.findOne("blogs", MongoQueryBuilder.build(query), keys, new Handler<Message<JsonObject>>() {
 				@Override
@@ -114,7 +110,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	public void notifySubmitPost(final HttpServerRequest request, final String blogId, final String postId,
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
-			QueryBuilder blogQuery = QueryBuilder.start("_id").is(blogId);
+			final Bson blogQuery = eq("_id", blogId);
 			JsonObject blogKeys = new JsonObject().put("author", 1);
 			mongo.findOne("blogs", MongoQueryBuilder.build(blogQuery), blogKeys, new Handler<Message<JsonObject>>() {
 				@Override
@@ -125,7 +121,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 								.getJsonObject("author", new JsonObject())
 								.getString("userId");
 
-						final QueryBuilder query = QueryBuilder.start("_id").is(postId);
+						final Bson query = eq("_id", postId);
 						final JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
 						final JsonArray fetch = new JsonArray().add("blog");
 
@@ -137,7 +133,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 
 								final JsonObject post = event.right().getValue();
 
-								findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|publish", user, new Handler<Map<String, Object>>() {
+								findRecipients("posts", query, keys, fetch, "org-entcore-blog-controllers-PostController|publish", user, new Handler<Map<String, Object>>() {
 									@Override
 									public void handle(Map<String, Object> event) {
 										List<String> recipients = new ArrayList<>();
@@ -170,10 +166,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	public void notifyPublishPost(final HttpServerRequest request, final String blogId, final String postId,
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
-			QueryBuilder query = QueryBuilder.start("_id").is(postId);
+			final Bson query = eq("_id", postId);
 			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1).put("jsonContent", 1);
 			JsonArray fetch = new JsonArray().add("blog");
-			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
+			findRecipients("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
 				@Override
 				public void handle(Map<String, Object> event) {
 					if (event != null) {
@@ -203,10 +199,10 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 	public void notifyPublishComment(final HttpServerRequest request, final String blogId, final String postId,
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
-			QueryBuilder query = QueryBuilder.start("_id").is(postId);
+			final Bson query = eq("_id", postId);
 			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1);
 			JsonArray fetch = new JsonArray().add("blog");
-			findRecipiants("posts", query, keys, fetch, "org-entcore-blog-controllers-BlogController|update", user, new Handler<Map<String, Object>>() {
+			findRecipients("posts", query, keys, fetch, "org-entcore-blog-controllers-BlogController|update", user, new Handler<Map<String, Object>>() {
 				@Override
 				public void handle(Map<String, Object> event) {
 					if (event != null) {
@@ -240,13 +236,13 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 		}
 	}
 
-	private void findRecipiants(String collection, QueryBuilder query, JsonObject keys,
-			final JsonArray fetch, final UserInfos user, final Handler<Map<String, Object>> handler) {
-		findRecipiants(collection, query, keys, fetch, null, user, handler);
+	private void findRecipients(String collection, final Bson query, JsonObject keys,
+															final JsonArray fetch, final UserInfos user, final Handler<Map<String, Object>> handler) {
+		findRecipients(collection, query, keys, fetch, null, user, handler);
 	}
-	private void findRecipiants(String collection, QueryBuilder query, JsonObject keys,
-			final JsonArray fetch, final String filterRights, final UserInfos user,
-				final Handler<Map<String, Object>> handler) {
+	private void findRecipients(String collection, final Bson query, JsonObject keys,
+															final JsonArray fetch, final String filterRights, final UserInfos user,
+															final Handler<Map<String, Object>> handler) {
 		mongo.findOne(collection, MongoQueryBuilder.build(query), keys, fetch, new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {

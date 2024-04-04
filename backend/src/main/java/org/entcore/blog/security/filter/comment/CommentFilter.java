@@ -22,22 +22,14 @@
 
 package org.entcore.blog.security.filter.comment;
 
-import com.mongodb.DBObject;
-import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.webutils.http.Binding;
 import org.entcore.common.http.filter.ResourcesProvider;
-import org.entcore.common.user.DefaultFunctions;
 import org.entcore.common.user.UserInfos;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-
-import java.util.Map;
 
 import static org.entcore.common.utils.StringUtils.isEmpty;
 
