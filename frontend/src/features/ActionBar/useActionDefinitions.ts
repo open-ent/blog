@@ -65,49 +65,52 @@ export const useActionDefinitions = (
     const isAuthor = author.userId === user?.userId;
 
     // Look for granted rights in the "shared" array.
-    const sharedRights = (shared as any).reduce(
-      (
-        previous: SharedRoles & SpecialPostRights,
-        current: {
-          userId: string;
-          groupId: string;
-        } & SharedRight,
-      ) => {
-        if (
-          current &&
-          (current.userId === user?.userId ||
-            user?.groupsIds?.indexOf(current.groupId) >= 0)
-        ) {
-          previous.read ||=
-            current["org-entcore-blog-controllers-PostController|list"];
-          previous.contrib ||=
-            current["org-entcore-blog-controllers-PostController|submit"] ||
-            current["org-entcore-blog-controllers-PostController|publish"];
-          previous.manager ||=
-            current[
-              "org-entcore-blog-controllers-BlogController|shareResource"
-            ];
-          previous.canComment ||=
-            current["org-entcore-blog-controllers-PostController|comment"];
+    const sharedRights =
+      (shared?.reduce(
+        (
+          previous: SharedRoles & SpecialPostRights,
+          current: {
+            userId: string;
+            groupId: string;
+          } & SharedRight,
+        ) => {
+          if (
+            current &&
+            (current.userId === user?.userId ||
+              user?.groupsIds?.indexOf(current.groupId) >= 0)
+          ) {
+            previous.read ||=
+              current["org-entcore-blog-controllers-PostController|list"];
+            previous.contrib ||=
+              current["org-entcore-blog-controllers-PostController|submit"] ||
+              current["org-entcore-blog-controllers-PostController|publish"];
+            previous.manager ||=
+              current[
+                "org-entcore-blog-controllers-BlogController|shareResource"
+              ];
+            previous.canComment ||=
+              current["org-entcore-blog-controllers-PostController|comment"];
 
-          previous.canContrib ||=
-            author.userId === user?.userId ||
-            previous.contrib ||
-            previous.manager;
+            previous.canContrib ||=
+              author.userId === user?.userId ||
+              previous.contrib ||
+              previous.manager;
 
-          // Also look for the real publish/submit URL to use.
-          // If both are acceptable, prefer publish over submit.
-          if (current["org-entcore-blog-controllers-PostController|publish"]) {
-            previous.hasPublishPostRight = true;
+            // Also look for the real publish/submit URL to use.
+            // If both are acceptable, prefer publish over submit.
+            if (
+              current["org-entcore-blog-controllers-PostController|publish"]
+            ) {
+              previous.hasPublishPostRight = true;
+            }
+            if (current["org-entcore-blog-controllers-PostController|submit"]) {
+              previous.hasSubmitPostRight = true;
+            }
           }
-          if (current["org-entcore-blog-controllers-PostController|submit"]) {
-            previous.hasSubmitPostRight = true;
-          }
-        }
-        return previous;
-      },
-      defaultRights,
-    ) as SharedRoles & SpecialPostRights;
+          return previous;
+        },
+        defaultRights,
+      ) as SharedRoles & SpecialPostRights) ?? [];
 
     return {
       ...sharedRights,

@@ -13,7 +13,7 @@ export type Blog = {
     login: string;
   };
   thumbnail: string;
-  shared: [];
+  shared?: [];
   "publish-type": PublishType;
   "comment-type": CommentType;
   visibility: "OWNER" | "PUBLIC";
