@@ -169,6 +169,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           content={content}
           mode={mode}
           variant={variant}
+          visibility={blog?.visibility === "PUBLIC" ? "public" : "protected"}
         ></Editor>
         {mode === "edit" && (
           <ButtonGroup

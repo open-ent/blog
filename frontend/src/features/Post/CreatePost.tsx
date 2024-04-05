@@ -8,13 +8,14 @@ import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
-import { useCreatePost, usePublishPost } from "~/services/queries";
+import { useBlog, useCreatePost, usePublishPost } from "~/services/queries";
 
 export interface CreatePostProps {
   blogId: string;
 }
 
 export const CreatePost = ({ blogId }: CreatePostProps) => {
+  const { blog } = useBlog(blogId);
   const editorRef = useRef<EditorRef>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation("blog");
@@ -25,10 +26,12 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const createMutation = useCreatePost(blogId);
   const publishMutation = usePublishPost(blogId);
 
+  if (!blog) return <></>;
+
   const create = async () => {
     const content = editorRef.current?.getContent("html") as string;
     const title = titleRef.current?.value;
-    if (!blogId || !title || title.trim().length == 0 || !content) return;
+    if (blogId || !title || title.trim().length == 0 || !content) return;
     return await createMutation.mutateAsync({ title, content });
   };
 
@@ -38,7 +41,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
 
   const handleSaveClick = async () => {
     const post = await create();
-    if (post) navigate(`/id/${blogId}/post/${post?._id}`);
+    if (post) navigate(`/id/${blog?._id}/post/${post?._id}`);
   };
 
   const handlePublishClick = async () => {
@@ -48,7 +51,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
         post,
         publishWith: getDefaultPublishKeyword(post.author.userId),
       });
-      navigate(`/id/${blogId}/post/${post?._id}`);
+      navigate(`/id/${blog?._id}/post/${post?._id}`);
     }
   };
 
@@ -67,7 +70,12 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
         <Label>{t("blog.post.content-helper")}</Label>
       </FormControl>
       <div className="mx-md-16">
-        <Editor ref={editorRef} content="" mode="edit"></Editor>
+        <Editor
+          ref={editorRef}
+          content=""
+          mode="edit"
+          visibility={blog?.visibility === "PUBLIC" ? "public" : "protected"}
+        ></Editor>
       </div>
       <ButtonGroup className="gap-8 mt-16 mx-md-16" variant="reverse">
         <Button type="button" variant="ghost" onClick={handleCancelClick}>

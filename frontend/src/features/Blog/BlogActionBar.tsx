@@ -135,7 +135,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   };
 
   const handlePrintClick = () => {
-    if (blog.slug) {
+    if (blog.visibility === "PUBLIC" && blog.slug) {
       // Public print
       window.open(`${baseUrl}/pub/${blog.slug}/print`, "_blank");
     } else {
