@@ -43,6 +43,7 @@ export const blogPrintLoader =
 
 export function BlogPrint() {
   const { blog } = useBlog();
+
   const { hasRight } = useActionDefinitions(blogActions);
 
   const {

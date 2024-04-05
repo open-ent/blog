@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-import { useOdeTheme } from "@edifice-ui/react";
+import { useOdeTheme, useTrashedResource } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { LoaderFunctionArgs, useLoaderData } from "react-router-dom";
+import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { Post } from "~/models/post";
 import { loadPostMetadata } from "~/services/api";
@@ -25,6 +25,9 @@ export const loader =
   };
 
 export const Component = () => {
+  const { blogId } = useParams();
+  useTrashedResource(blogId);
+
   const post = useLoaderData() as Post | null;
   const { theme } = useOdeTheme();
   const { t } = useTranslation();

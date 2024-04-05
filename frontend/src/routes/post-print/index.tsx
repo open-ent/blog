@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { Editor } from "@edifice-ui/editor";
-import { LoadingScreen } from "@edifice-ui/react";
+import { LoadingScreen, useTrashedResource } from "@edifice-ui/react";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { ACTION } from "edifice-ts-client";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
@@ -38,6 +38,8 @@ export const postPrintLoader =
 
 export function PostPrint() {
   const { blogId } = useParams();
+  useTrashedResource(blogId);
+
   const { hasRight } = useActionDefinitions(postContentActions);
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const { data: post } = useQuery(postQuery(blogId!, postMetadata));

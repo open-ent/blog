@@ -1,3 +1,4 @@
+import { useTrashedResource } from "@edifice-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouteLoaderData } from "react-router-dom";
 
@@ -10,6 +11,7 @@ export function Component() {
   const { blog } = useRouteLoaderData("public-portal") as { blog: Blog }; // see public-portal loader
   const { postId } = useParams();
   const query = useQuery(publicPostQuery(blog._id, postId!));
+  useTrashedResource(blog._id);
 
   if (!blog || !postId || !query.data) {
     return <></>;

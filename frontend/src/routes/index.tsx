@@ -9,17 +9,16 @@ import { Root } from "~/routes/root";
 const routes = (queryClient: QueryClient): RouteObject[] => [
   {
     path: "/*",
+    async lazy() {
+      const { rootLoader } = await import("~/routes/root");
+      return {
+        loader: rootLoader,
+      };
+    },
     element: <Root />,
     children: [
       {
         index: true,
-        async lazy() {
-          const { rootLoader } = await import("~/routes/root");
-          return {
-            loader: rootLoader,
-          };
-        },
-
         // TODO remove cast as any when ode-explorer is fixed
         element: <ExplorerBlog />,
       },
