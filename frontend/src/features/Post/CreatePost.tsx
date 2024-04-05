@@ -31,7 +31,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const create = async () => {
     const content = editorRef.current?.getContent("html") as string;
     const title = titleRef.current?.value;
-    if (blogId || !title || title.trim().length == 0 || !content) return;
+    if (!blogId || !title || title.trim().length == 0 || !content) return;
     return await createMutation.mutateAsync({ title, content });
   };
 
