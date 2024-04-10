@@ -1,28 +1,17 @@
-import { useEffect } from "react";
-
-import { LoadingScreen } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
 import { LoaderFunctionArgs } from "react-router-dom";
 
 import { blogActions } from "~/config/blogActions";
-import { BlogFilter } from "~/features/Blog/BlogFilter";
-import { BlogHeader } from "~/features/Blog/BlogHeader";
-import BlogPostList from "~/features/Blog/BlogPostList";
-import BlogSidebar from "~/features/Blog/BlogSidebar";
-import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
+import { Blog } from "~/features/Blog/Blog";
 import { PostState } from "~/models/post";
 import {
   availableActionsQuery,
   blogCounterQuery,
   blogQuery,
   postsListQuery,
-  useBlog,
-  useBlogCounter,
-  usePostsList,
 } from "~/services/queries";
-import { useStoreUpdaters } from "~/store";
 
-export const blogLoader =
+export const loader =
   (queryClient: QueryClient) =>
   async ({ params, request }: LoaderFunctionArgs) => {
     const queryBlog = blogQuery(params.blogId as string);
@@ -50,47 +39,6 @@ export const blogLoader =
     return null;
   };
 
-export function Blog() {
-  useBlogErrorToast();
-  const { blog } = useBlog();
-  const { counters } = useBlogCounter();
-  const { setPostPageSize } = useStoreUpdaters();
-
-  // Load all posts with recurcive fetchNextPage calls.
-  const {
-    query: { fetchNextPage, hasNextPage, isSuccess, data },
-  } = usePostsList();
-
-  useEffect(() => {
-    // Check if the second page of post is not null to set the page size. (not given by the backend)
-    if (hasNextPage && data?.pageParams.includes(1) && data?.pages[0]) {
-      setPostPageSize(data?.pages[0].length);
-    }
-
-    // Load at least the 2 first pages of posts to display the page.
-    if (
-      isSuccess &&
-      hasNextPage &&
-      data?.pageParams?.length &&
-      data?.pageParams?.length < 2
-    ) {
-      fetchNextPage();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasNextPage, isSuccess, fetchNextPage, data]);
-
-  if (!blog) return <LoadingScreen />;
-
-  return (
-    <>
-      <BlogHeader blog={blog} />
-      <div className="d-flex flex-fill">
-        <BlogSidebar />
-        <div className="flex-fill py-16 ps-md-16 d-flex flex-column">
-          {!!counters?.countAll && <BlogFilter blog={blog} />}
-          <BlogPostList />
-        </div>
-      </div>
-    </>
-  );
+export function Component() {
+  return <Blog></Blog>;
 }

@@ -19,7 +19,7 @@ export function Component() {
 
   return (
     <main className="container-fluid d-flex flex-column bg-white">
-      <BlogHeader blog={blog} />
+      <BlogHeader blog={blog} readonly={true} />
       <PostContent blogId={blog._id} post={query.data} />
     </main>
   );

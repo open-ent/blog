@@ -18,7 +18,7 @@ import {
 } from "~/services/queries";
 
 /** Load a blog post content + comments to print it*/
-export const postPrintLoader =
+export const loader =
   (queryClient: QueryClient) =>
   async ({ params }: LoaderFunctionArgs) => {
     const { blogId, postId } = params;
@@ -36,7 +36,7 @@ export const postPrintLoader =
     return null;
   };
 
-export function PostPrint() {
+export function Component() {
   const { blogId } = useParams();
   useTrashedResource(blogId);
 

@@ -26,10 +26,10 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       {
         path: "id/:blogId",
         async lazy() {
-          const { Blog, blogLoader } = await import("~/routes/blog");
+          const { Component, loader } = await import("~/routes/blog");
           return {
-            loader: blogLoader(queryClient),
-            Component: Blog,
+            loader: loader(queryClient),
+            Component,
           };
         },
       },
@@ -62,12 +62,10 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
   {
     path: "/print/:blogId",
     async lazy() {
-      const { BlogPrint, blogPrintLoader } = await import(
-        "~/routes/blog-print"
-      );
+      const { Component, loader } = await import("~/routes/blog-print");
       return {
-        loader: blogPrintLoader(queryClient),
-        Component: BlogPrint,
+        loader: loader(queryClient),
+        Component,
       };
     },
   },
@@ -75,12 +73,10 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
   {
     path: "/print/:blogId/post/:postId",
     async lazy() {
-      const { PostPrint, postPrintLoader } = await import(
-        "~/routes/post-print"
-      );
+      const { Component, loader } = await import("~/routes/post-print");
       return {
-        loader: postPrintLoader(queryClient),
-        Component: PostPrint,
+        loader: loader(queryClient),
+        Component,
       };
     },
   },
@@ -100,8 +96,9 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       {
         path: "",
         async lazy() {
-          const { Component } = await import("~/routes/public-blog");
+          const { Component, loader } = await import("~/routes/public-blog");
           return {
+            loader: loader(queryClient),
             Component,
           };
         },
@@ -110,8 +107,10 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       {
         path: "print",
         async lazy() {
+          const { loader } = await import("~/routes/public-blog");
           const { Component } = await import("~/routes/public-blog-print");
           return {
+            loader: loader(queryClient),
             Component,
           };
         },

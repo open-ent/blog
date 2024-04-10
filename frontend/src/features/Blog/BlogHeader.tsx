@@ -6,10 +6,10 @@ import { basename } from "~/routes";
 
 export interface BlogProps {
   blog: Blog;
-  print?: boolean;
+  readonly?: boolean;
 }
 
-export const BlogHeader = ({ blog, print }: BlogProps) => {
+export const BlogHeader = ({ blog, readonly = false }: BlogProps) => {
   return (
     <AppHeader>
       <div className="d-flex flex-column flex-md-row flex-nowrap justify-content-md-between flex-fill gap-12 overflow-hidden">
@@ -27,7 +27,7 @@ export const BlogHeader = ({ blog, print }: BlogProps) => {
             name={blog.title}
           />
         </div>
-        {!print && <BlogActionBar blog={blog} />}
+        {!readonly && <BlogActionBar blog={blog} />}
       </div>
     </AppHeader>
   );

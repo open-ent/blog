@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
 import { PostActions } from "../ActionBar/usePostActions";
 import { Post } from "~/models/post";
+import { useBlog } from "~/services/queries";
 import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
 
 const ConfirmModal = lazy(
@@ -50,6 +51,7 @@ export const PostTitle = ({
   onPublish,
   onDelete,
 }: PostTitleProps) => {
+  const { publicView } = useBlog();
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
   const { fromNow } = useDate();
@@ -78,7 +80,7 @@ export const PostTitle = ({
             {common_t("back")}
           </Button>
           <div className="d-flex ms-16 gap-12">
-            {readOnly ? (
+            {readOnly || publicView ? (
               <>
                 <IconButton
                   icon={<Print />}
