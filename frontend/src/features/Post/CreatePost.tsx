@@ -28,6 +28,8 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
 
   if (!blog) return <></>;
 
+  const disableButtons = createMutation.isPending || publishMutation.isPending;
+
   const create = async () => {
     const content = editorRef.current?.getContent("html") as string;
     const title = titleRef.current?.value;
@@ -85,11 +87,17 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           type="button"
           variant="outline"
           leftIcon={<Save />}
+          disabled={disableButtons}
           onClick={handleSaveClick}
         >
           {t("blog.save")}
         </Button>
-        <Button type="button" leftIcon={<Send />} onClick={handlePublishClick}>
+        <Button
+          type="button"
+          leftIcon={<Send />}
+          disabled={disableButtons}
+          onClick={handlePublishClick}
+        >
           {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
         </Button>
       </ButtonGroup>

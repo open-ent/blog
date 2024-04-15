@@ -33,6 +33,8 @@ export interface PostActions {
   publish: () => Promise<Post>;
   /** Action to move up a post; invalidates cached queries if needed. */
   goUp: () => Promise<PostMetadata>;
+  /** Truthy when a mutation is currently pending on this blog post. */
+  isMutating: boolean;
 }
 
 export const usePostActions = (
@@ -75,6 +77,11 @@ export const usePostActions = (
   return {
     ...memoized,
     mustSubmit,
+    isMutating:
+      saveMutation.isPending ||
+      deleteMutation.isPending ||
+      publishMutation.isPending ||
+      goUpMutation.isPending,
     save: () => saveMutation.mutateAsync(),
     trash: () => deleteMutation.mutateAsync(),
     publish: () =>

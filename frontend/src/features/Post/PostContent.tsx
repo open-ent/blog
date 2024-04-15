@@ -29,7 +29,8 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const { blog, publicView } = useBlog();
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
-  const { mustSubmit, save, trash, publish, readOnly } = postActions;
+  const { mustSubmit, save, trash, publish, readOnly, isMutating } =
+    postActions;
 
   // Get the query parameters in URL to know if the post is in edit mode.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -183,6 +184,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               type="button"
               variant="outline"
               leftIcon={<Save />}
+              disabled={isMutating}
               onClick={handleSaveClick}
             >
               {t("blog.save")}
@@ -190,6 +192,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             <Button
               type="button"
               leftIcon={<Send />}
+              disabled={isMutating}
               onClick={handlePublishClick}
             >
               {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
