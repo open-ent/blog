@@ -1,4 +1,4 @@
-import { LoadingScreen } from "@edifice-ui/react";
+import { LoadingScreen, useTrashedResource } from "@edifice-ui/react";
 
 import { BlogFilter } from "./BlogFilter";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
@@ -13,6 +13,7 @@ import { useBlog, useBlogCounter } from "~/services/queries";
 export function Blog() {
   useBlogErrorToast();
   const { blog, publicView } = useBlog();
+  useTrashedResource(blog?._id);
   const { counters } = useBlogCounter();
 
   useLoadPostList();
