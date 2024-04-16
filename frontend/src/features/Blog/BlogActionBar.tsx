@@ -46,6 +46,7 @@ const ShareBlog = lazy(
 
 export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const { t } = useTranslation("blog");
+  const { t: common_t } = useTranslation("common");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -176,7 +177,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleEditClick}
             >
-              {t("blog.edit.title")}
+              {common_t("explorer.actions.edit")}
             </Button>
           ) : (
             <></>
@@ -188,7 +189,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleShareClick}
             >
-              {t("share")}
+              {common_t("explorer.actions.share")}
             </Button>
           ) : (
             <></>
@@ -200,7 +201,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handlePublishClick}
             >
-              {t("blog.publish")}
+              {common_t("explorer.actions.publish")}
             </Button>
           ) : (
             <></>
@@ -211,7 +212,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             variant="filled"
             onClick={handlePrintClick}
           >
-            {t("blog.print")}
+            {common_t("explorer.actions.print")}
           </Button>
           {isActionAvailable(ACTION.DELETE) ? (
             <Button
@@ -220,7 +221,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleDeleteClick}
             >
-              {t("blog.delete")}
+              {common_t("explorer.actions.delete")}
             </Button>
           ) : (
             <></>
