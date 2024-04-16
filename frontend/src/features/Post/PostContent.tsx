@@ -111,7 +111,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     if (!post || !title || title.trim().length == 0 || !contentHtml) return;
     post.title = title;
     post.content = contentHtml;
-    await save();
+    await save(true);
     await publish();
     setMode("read");
   };

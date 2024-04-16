@@ -26,7 +26,7 @@ export interface PostActions {
    */
   isActionAvailable: (action: ActionType) => boolean;
   /** Action to save a post as draft; invalidates cached queries if needed. */
-  save: () => Promise<PostMetadata>;
+  save: (withoutNotification?: boolean) => Promise<PostMetadata>;
   /** Action to delete a post; invalidates cached queries if needed. */
   trash: () => Promise<void>;
   /** Action to publish or submit a post; invalidates cached queries if needed. */
@@ -82,7 +82,8 @@ export const usePostActions = (
       deleteMutation.isPending ||
       publishMutation.isPending ||
       goUpMutation.isPending,
-    save: () => saveMutation.mutateAsync(),
+    save: (withoutNotification) =>
+      saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),
     publish: () =>
       publishMutation.mutateAsync({ post, publishWith: memoized.publishWith }),

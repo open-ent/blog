@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { IAction, odeServices } from "edifice-ts-client";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import {
@@ -208,6 +208,7 @@ export const usePostsList = (
 
 export const useDeleteBlog = (blogId: string) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return useMutation({
