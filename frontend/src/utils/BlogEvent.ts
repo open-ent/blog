@@ -31,6 +31,18 @@ export async function checkHttpError<T>(promise: Promise<T>) {
     code: ERROR_CODE.TRANSPORT_ERROR,
     text: odeServices.http().latestResponse.statusText,
   });
+
+  if (
+    odeServices.http().latestResponse.headers.get("content-type") !==
+    "application/json"
+  ) {
+    throw new Error(
+      odeServices.http().latestResponse.status === 401
+        ? "Unauthorized"
+        : "Error " + odeServices.http().latestResponse.status,
+    );
+  }
+
   // Throw an error here. React Query will use it effectively.
   throw odeServices.http().latestResponse.statusText;
 }
