@@ -44,7 +44,8 @@ export const PostPreviewActionBar = ({
 }: PostPreviewActionBarProps) => {
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
-  const { mustSubmit, isActionAvailable, goUp, publish, trash } = postActions;
+  const { mustSubmit, isActionAvailable, goUp, publish, trash, isMutating } =
+    postActions;
 
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
@@ -94,14 +95,37 @@ export const PostPreviewActionBar = ({
     <>
       <ActionBarContainer visible={actionBarPostId === post._id}>
         {isActionAvailable(ACTION.OPEN) && (
-          <Button type="button" variant="filled" onClick={handleEditClick}>
+          <Button
+            type="button"
+            variant="filled"
+            disabled={isMutating}
+            onClick={handleEditClick}
+          >
             {t("blog.edit.post")}
           </Button>
         )}
-        {post.state !== PostState.PUBLISHED &&
+        {mustSubmit &&
+          post.state !== PostState.SUBMITTED &&
           isActionAvailable(ACTION.PUBLISH) && (
-            <Button type="button" variant="filled" onClick={handlePublishClick}>
-              {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+            <Button
+              type="button"
+              variant="filled"
+              disabled={isMutating}
+              onClick={handlePublishClick}
+            >
+              {t("blog.submitPost")}
+            </Button>
+          )}
+        {!mustSubmit &&
+          post.state !== PostState.PUBLISHED &&
+          isActionAvailable(ACTION.PUBLISH) && (
+            <Button
+              type="button"
+              variant="filled"
+              disabled={isMutating}
+              onClick={handlePublishClick}
+            >
+              {t("blog.publish")}
             </Button>
           )}
         {post.state === PostState.PUBLISHED &&
@@ -110,6 +134,7 @@ export const PostPreviewActionBar = ({
             <Button
               type="button"
               variant="filled"
+              disabled={isMutating}
               onClick={() => toggleGoUpModalOpen()}
             >
               {t("goUp")}
