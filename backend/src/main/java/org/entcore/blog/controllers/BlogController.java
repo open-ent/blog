@@ -600,6 +600,12 @@ public class BlogController extends BaseController {
 		renderView(request, new JsonObject(), "index.html", null);
 	}
 
+	@Get("/pub/:slug/post/:postid")
+	public void printPublicPost(HttpServerRequest request) {
+		// Display react front page
+		renderView(request, new JsonObject(), "index.html", null);
+	}
+
 	@Get("/pub/:slug/print/post/:postid")
 	public void printPublicPost(HttpServerRequest request) {
 		// Display react front page
