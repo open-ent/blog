@@ -279,7 +279,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               <p className="body">
                 <p>{t("confirm.remove.blog")}</p>
                 {blog.visibility === "PUBLIC" &&
-                  t("confirm.remove.blog.publication")}
+                  t("confirm.remove.blog.public")}
               </p>
             }
             onSuccess={handleDeleteSuccess}
