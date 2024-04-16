@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 import { PostState } from "~/models/post";
 import { PostsFilters } from "~/models/postFilter";
@@ -9,8 +9,12 @@ function usePostsFilter(): {
 } {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Try to find the default state from the navigation history
+  const location = useLocation();
+  const defaultState = location?.state?.defaultFilter ?? PostState.PUBLISHED;
+
   const postsFilters = {
-    state: (searchParams.get("state") as PostState) || PostState.PUBLISHED,
+    state: (searchParams.get("state") as PostState) || defaultState,
     search: searchParams.get("search") || "",
   };
 

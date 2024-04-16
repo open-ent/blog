@@ -63,7 +63,10 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Handlers for actions triggered from the post title component.
   const postActionsHandlers = {
     onBackward: () => {
-      navigate(`../..`, { relative: "path" });
+      navigate(`../..`, {
+        relative: "path",
+        state: { defaultFilter: post.state },
+      });
     },
     onDelete: () => {
       trash();
