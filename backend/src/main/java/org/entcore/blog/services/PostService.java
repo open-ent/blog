@@ -81,9 +81,12 @@ public interface PostService extends AudienceRightChecker {
 	void list(String blogId, StateType state, UserInfos user, Integer page, int limit, String search,
 			Handler<Either<String, JsonArray>> result);
 
-	void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result);
+	void listPublic(String blogId, Integer page, int limit, String search,
+									final HttpServerRequest request, Handler<Either<String, JsonArray>> result);
 
-	void listOnePublic(String blogId, String postId, Handler<Either<String, JsonArray>> result);
+	void listOnePublic(String blogId, String postId,
+										 final HttpServerRequest request,
+										 final Handler<Either<String, JsonArray>> result);
 
 	void listOne(String blogId, String postId, final UserInfos user, final Handler<Either<String, JsonArray>> result);
 

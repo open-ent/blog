@@ -22,14 +22,18 @@
 
 package org.entcore.blog.controllers;
 
-import static org.entcore.common.http.response.DefaultResponseHandler.*;
-import static org.entcore.common.user.UserUtils.getUserInfos;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.rs.*;
+import fr.wseduc.security.ActionType;
+import fr.wseduc.security.SecuredAction;
+import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.http.BaseController;
+import fr.wseduc.webutils.request.RequestUtils;
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
 import org.entcore.blog.Blog;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
@@ -47,17 +51,12 @@ import org.entcore.common.user.UserUtils;
 import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
 
-import fr.wseduc.mongodb.MongoDb;
-import fr.wseduc.security.ActionType;
-import fr.wseduc.security.SecuredAction;
-import fr.wseduc.webutils.Either;
-import fr.wseduc.webutils.http.BaseController;
-import fr.wseduc.webutils.request.RequestUtils;
-import io.vertx.core.Handler;
-import io.vertx.core.MultiMap;
-import io.vertx.core.Vertx;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.json.JsonObject;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.entcore.common.http.response.DefaultResponseHandler.*;
+import static org.entcore.common.user.UserUtils.getUserInfos;
 
 
 public class PostController extends BaseController {
@@ -471,7 +470,7 @@ public class PostController extends BaseController {
 				return;
 			}
 			if (!StringUtils.isEmpty(postId)) {
-				post.listOnePublic(blogId, postId, arrayResponseHandler(request));
+				post.listOnePublic(blogId, postId, request, arrayResponseHandler(request));
 				return;
 			}
 			final Integer page;
@@ -483,7 +482,7 @@ public class PostController extends BaseController {
 			}
 			final int pagingSize = (page == null) ? 0 : this.pagingSize;
 			final String search = request.params().get("search");
-			post.listPublic(blogId, page, pagingSize, search, arrayResponseHandler(request));
+			post.listPublic(blogId, page, pagingSize, search, request, arrayResponseHandler(request));
 		});
 	}
 

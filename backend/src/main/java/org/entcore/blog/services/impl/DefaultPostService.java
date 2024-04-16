@@ -426,14 +426,24 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void listPublic(String blogId, Integer page, int limit, String search, Handler<Either<String, JsonArray>> result) {
+	public void listPublic(String blogId, Integer page, int limit, String search,
+												 final HttpServerRequest request,
+												 final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder accessQuery = QueryBuilder.start("blog.$id").is(blogId).put("state").is(StateType.PUBLISHED.name());
 		final QueryBuilder query = getQueryListBuilder(search, result, accessQuery);
 		final JsonObject sort = new JsonObject().put("sorted", -1);
 		final JsonObject projection = defaultKeys.copy();
 		//projection.remove("content");
-		final Handler<Message<JsonObject>> finalHandler =event -> {
-			result.handle(Utils.validResults(event));
+		final Handler<Message<JsonObject>> finalHandler = event -> {
+			final Either<String, JsonArray> results = Utils.validResults(event);
+			if(results.isRight()) {
+				final List<Future> transformedContents = results.right().getValue().stream()
+					.map(post -> handleOldContent((JsonObject) post, false, request))
+					.collect(Collectors.toList());
+				CompositeFuture.join(transformedContents).onComplete(e -> result.handle(results));
+			} else {
+				result.handle(results);
+			}
 		};
 		if (limit > 0 && page == null) {
 			mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), sort, projection, 0, limit, limit, finalHandler);
@@ -446,12 +456,22 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void listOnePublic(String blogId, String postId, Handler<Either<String, JsonArray>> result) {
+	public void listOnePublic(String blogId, String postId,
+														final HttpServerRequest request,
+														final Handler<Either<String, JsonArray>> result) {
 		final QueryBuilder query = QueryBuilder.start("blog.$id").is(blogId).put("state").is(StateType.PUBLISHED.name()).put("_id").is(postId);
 		final JsonObject projection = defaultKeys.copy();
 		//projection.remove("content");
 		final Handler<Message<JsonObject>> finalHandler =event -> {
-			result.handle(Utils.validResults(event));
+			final Either<String, JsonArray> results = Utils.validResults(event);
+			if(results.isRight()) {
+				final List<Future> transformedContents = results.right().getValue().stream()
+					.map(post -> handleOldContent((JsonObject) post, false, request))
+					.collect(Collectors.toList());
+				CompositeFuture.join(transformedContents).onComplete(e -> result.handle(results));
+			} else {
+				result.handle(results);
+			}
 		};
 		mongo.find(POST_COLLECTION, MongoQueryBuilder.build(query), null, projection, finalHandler);
 	}
