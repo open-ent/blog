@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 import { QueryClient } from "@tanstack/react-query";
-import { ACTION } from "edifice-ts-client";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { createPostActions } from "~/config/createPostActions";
@@ -23,12 +22,13 @@ export function Component() {
   const { blogId } = useParams();
   const navigate = useNavigate();
   // Check for the right to create a new post
-  const { hasRight } = useActionDefinitions(createPostActions);
+  const { canContrib } = useActionDefinitions(createPostActions);
 
   useEffect(() => {
     // If the user cannot contrib, go back to the blog
-    hasRight(ACTION.PUBLISH) || navigate(`../..`);
-  }, [hasRight, navigate]);
+    canContrib || navigate(`../..`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!blogId) {
     return <></>;
