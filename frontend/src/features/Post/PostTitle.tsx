@@ -1,10 +1,10 @@
 import { ArrowLeft, Print, TextToSpeech } from "@edifice-ui/icons";
-import { Avatar, Button, IconButton, useDate } from "@edifice-ui/react";
+import { Avatar, Badge, Button, IconButton, useDate } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
 import { PostActionBar } from "./PostActionBar";
 import { PostActions } from "../ActionBar/usePostActions";
-import { Post } from "~/models/post";
+import { Post, PostState } from "~/models/post";
 import { useBlog } from "~/services/queries";
 import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
 
@@ -92,7 +92,33 @@ export const PostTitle = ({
       )}
 
       <div className="d-flex flex-column mt-8 mx-md-8">
-        <h2 className="text-gray-800">{post.title}</h2>
+        <div className="d-flex align-items-center">
+          <h2 className="text-gray-800">{post.title}</h2>
+          {post.state === PostState.DRAFT && postActions?.showBadge && (
+            <Badge
+              className="ms-16 fs-6"
+              variant={{
+                type: "notification",
+                level: "info",
+                color: "text",
+              }}
+            >
+              {t("draft")}
+            </Badge>
+          )}
+          {post.state === PostState.SUBMITTED && postActions?.showBadge && (
+            <Badge
+              className="blog-post-badge ms-16 fs-6"
+              variant={{
+                type: "notification",
+                level: "warning",
+                color: "text",
+              }}
+            >
+              {t("blog.filters.submitted")}
+            </Badge>
+          )}
+        </div>
         <div className="d-flex align-items-center gap-12 mb-16 mb-md-24 mt-8">
           <Avatar
             alt={t("post.author.avatar")}

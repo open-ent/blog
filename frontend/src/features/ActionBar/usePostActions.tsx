@@ -35,6 +35,8 @@ export interface PostActions {
   goUp: () => Promise<PostMetadata>;
   /** Truthy when a mutation is currently pending on this blog post. */
   isMutating: boolean;
+  /** Truthy when the post's state should be displayed in a badge. */
+  showBadge: boolean;
 }
 
 export const usePostActions = (
@@ -42,8 +44,14 @@ export const usePostActions = (
   blogId: string,
   post: Post,
 ): PostActions => {
-  const { availableActionsForPost, mustSubmit, getDefaultPublishKeyword } =
-    useActionDefinitions(actionDefinitions);
+  const {
+    availableActionsForPost,
+    mustSubmit,
+    getDefaultPublishKeyword,
+    creator,
+    manager,
+    contrib,
+  } = useActionDefinitions(actionDefinitions);
 
   // Memoize a set of expensive computations
   const memoized = useMemo(() => {
@@ -82,6 +90,7 @@ export const usePostActions = (
       deleteMutation.isPending ||
       publishMutation.isPending ||
       goUpMutation.isPending,
+    showBadge: creator || manager || contrib,
     save: (withoutNotification) =>
       saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),

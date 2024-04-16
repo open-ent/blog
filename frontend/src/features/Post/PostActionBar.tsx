@@ -1,6 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 
-import { Edit, Options } from "@edifice-ui/icons";
+import { Edit, Options, Send } from "@edifice-ui/icons";
 import { Button, IconButton, useToggle } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
@@ -38,16 +38,30 @@ export const PostActionBar = ({
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
 
+  const shouldBeSubmitted =
+    mustSubmit && post.state === PostState.DRAFT && canPublish;
+  const shouldBePublished =
+    !mustSubmit && post.state !== PostState.PUBLISHED && canPublish;
+
+  // Is `edit` the main action ?
+  const isMainActionEdit = !shouldBePublished;
+
   return (
     <>
-      <Button leftIcon={<Edit />} onClick={onEdit}>
-        {common_t("edit")}
-      </Button>
+      {isMainActionEdit ? (
+        <Button leftIcon={<Edit />} disabled={isMutating} onClick={onEdit}>
+          {common_t("edit")}
+        </Button>
+      ) : (
+        <Button leftIcon={<Send />} disabled={isMutating} onClick={onPublish}>
+          {t("blog.publish")}
+        </Button>
+      )}
 
       <IconButton variant="outline" icon={<Options />} onClick={toggleBar} />
 
       <ActionBarContainer visible={isBarOpen}>
-        {mustSubmit && post.state === PostState.DRAFT && canPublish && (
+        {shouldBeSubmitted && (
           <Button
             type="button"
             variant="filled"
@@ -57,7 +71,7 @@ export const PostActionBar = ({
             {t("blog.submitPost")}
           </Button>
         )}
-        {!mustSubmit && post.state !== PostState.PUBLISHED && canPublish && (
+        {isMainActionEdit ? (
           <Button
             type="button"
             variant="filled"
@@ -66,8 +80,16 @@ export const PostActionBar = ({
           >
             {t("blog.publish")}
           </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="filled"
+            disabled={isMutating}
+            onClick={onEdit}
+          >
+            {common_t("edit")}
+          </Button>
         )}
-
         <Button
           type="button"
           color="primary"
@@ -81,6 +103,7 @@ export const PostActionBar = ({
           type="button"
           color="primary"
           variant="filled"
+          disabled={isMutating}
           onClick={() => setConfirmDeleteModal(true)}
         >
           {t("blog.delete.post")}
