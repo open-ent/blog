@@ -72,14 +72,16 @@ export const PostActionBar = ({
           </Button>
         )}
         {isMainActionEdit ? (
-          <Button
-            type="button"
-            variant="filled"
-            disabled={isMutating}
-            onClick={onPublish}
-          >
-            {t("blog.publish")}
-          </Button>
+          shouldBePublished && (
+            <Button
+              type="button"
+              variant="filled"
+              disabled={isMutating}
+              onClick={onPublish}
+            >
+              {t("blog.publish")}
+            </Button>
+          )
         ) : (
           <Button
             type="button"
