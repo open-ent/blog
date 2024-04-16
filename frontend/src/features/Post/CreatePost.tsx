@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
+import { TTITLE_LENGTH_MAX } from "~/config/init-config";
 import { useBlog, useCreatePost, usePublishPost } from "~/services/queries";
 
 export interface CreatePostProps {
@@ -66,6 +67,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           type="text"
           size="md"
           placeholder={t("post.title.placeholder")}
+          maxLength={TTITLE_LENGTH_MAX}
         ></Input>
       </FormControl>
       <FormControl id="postContent" className="mt-16 mx-md-16">

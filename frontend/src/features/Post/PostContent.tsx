@@ -13,6 +13,7 @@ import { CommentsHeader } from "../Comments/CommentsHeader";
 import { CommentsList } from "../Comments/CommentsList";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
+import { TTITLE_LENGTH_MAX } from "~/config/init-config";
 import { postContentActions } from "~/config/postContentActions";
 import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
@@ -161,6 +162,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
                 placeholder={t("post.title.placeholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                maxLength={TTITLE_LENGTH_MAX}
               ></Input>
             </FormControl>
             <FormControl id="postContent" className="mt-16">
