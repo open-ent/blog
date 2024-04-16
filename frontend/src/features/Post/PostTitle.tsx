@@ -1,30 +1,12 @@
-import { Suspense, lazy, useState } from "react";
-
-import {
-  ArrowLeft,
-  Edit,
-  Options,
-  Print,
-  TextToSpeech,
-} from "@edifice-ui/icons";
-import {
-  Avatar,
-  Button,
-  IconButton,
-  useDate,
-  useToggle,
-} from "@edifice-ui/react";
+import { ArrowLeft, Print, TextToSpeech } from "@edifice-ui/icons";
+import { Avatar, Button, IconButton, useDate } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
-import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
+import { PostActionBar } from "./PostActionBar";
 import { PostActions } from "../ActionBar/usePostActions";
 import { Post } from "~/models/post";
 import { useBlog } from "~/services/queries";
 import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
-
-const ConfirmModal = lazy(
-  async () => await import("~/components/ConfirmModal/ConfirmModal"),
-);
 
 export interface PostTitleProps {
   post: Post;
@@ -55,10 +37,7 @@ export const PostTitle = ({
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
   const { fromNow } = useDate();
-  const { mustSubmit, readOnly, canPublish } = postActions || {};
-
-  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
-  const [isBarOpen, toggleBar] = useToggle();
+  const { readOnly } = postActions || {};
 
   if (mode === "edit") return;
 
@@ -99,45 +78,14 @@ export const PostTitle = ({
                 />
               </>
             ) : (
-              <>
-                <Button leftIcon={<Edit />} onClick={onEdit}>
-                  {common_t("edit")}
-                </Button>
-
-                <IconButton
-                  variant="outline"
-                  icon={<Options />}
-                  onClick={toggleBar}
-                />
-
-                <ActionBarContainer visible={isBarOpen}>
-                  {canPublish ? (
-                    <Button type="button" variant="filled" onClick={onPublish}>
-                      {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
-                    </Button>
-                  ) : (
-                    <></>
-                  )}
-
-                  <Button
-                    type="button"
-                    color="primary"
-                    variant="filled"
-                    onClick={onPrint}
-                  >
-                    {t("blog.print")}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    color="primary"
-                    variant="filled"
-                    onClick={() => setConfirmDeleteModal(true)}
-                  >
-                    {t("blog.delete.post")}
-                  </Button>
-                </ActionBarContainer>
-              </>
+              <PostActionBar
+                post={post}
+                postActions={postActions}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onPublish={onPublish}
+                onPrint={onPrint}
+              />
             )}
           </div>
         </div>
@@ -164,19 +112,6 @@ export const PostTitle = ({
           </div>
         </div>
       </div>
-
-      <Suspense>
-        {confirmDeleteModal && (
-          <ConfirmModal
-            id="confirmDeleteModal"
-            isOpen={confirmDeleteModal}
-            header={<>{t("blog.delete.post")}</>}
-            body={<p className="body">{t("confirm.remove.post")}</p>}
-            onSuccess={onDelete}
-            onCancel={() => setConfirmDeleteModal(false)}
-          />
-        )}
-      </Suspense>
     </>
   );
 };
