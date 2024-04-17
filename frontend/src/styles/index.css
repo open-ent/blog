@@ -93,3 +93,7 @@ main {
 .post-preview-title {
   overflow-wrap: anywhere;
 }
+
+#editorContent {
+  min-height: 180px;
+}
