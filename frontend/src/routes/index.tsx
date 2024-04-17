@@ -26,34 +26,47 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
       {
         path: "id/:blogId",
         async lazy() {
-          const { Component, loader } = await import("~/routes/blog");
+          const { Component, loader } = await import("~/routes/blog-root");
           return {
             loader: loader(queryClient),
             Component,
           };
         },
-      },
-      // This page displays a new blank post in edit mode, for a blog.
-      {
-        path: "id/:blogId/post/edit",
-        async lazy() {
-          const { Component, loader } = await import("~/routes/post-edit");
-          return {
-            loader: loader(queryClient),
-            Component,
-          };
-        },
-      },
-      // This page displays an existing post from a blog.
-      {
-        path: "id/:blogId/post/:postId",
-        async lazy() {
-          const { Component, loader } = await import("~/routes/post");
-          return {
-            loader: loader(queryClient),
-            Component,
-          };
-        },
+        children: [
+          // This page displays all information about the blog and its list of posts.
+          {
+            path: "",
+            async lazy() {
+              const { Component, loader } = await import("~/routes/blog");
+              return {
+                loader: loader(queryClient),
+                Component,
+              };
+            },
+          },
+          // This page displays a new blank post in edit mode, for a blog.
+          {
+            path: "post/edit",
+            async lazy() {
+              const { Component, loader } = await import("~/routes/post-edit");
+              return {
+                loader: loader(queryClient),
+                Component,
+              };
+            },
+          },
+          // This page displays an existing post from a blog.
+          {
+            path: "post/:postId",
+            async lazy() {
+              const { Component, loader } = await import("~/routes/post");
+              return {
+                loader: loader(queryClient),
+                Component,
+              };
+            },
+          },
+        ],
       },
     ],
     errorElement: <PageError />,

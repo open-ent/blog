@@ -7,14 +7,12 @@ import { PostState } from "~/models/post";
 import {
   availableActionsQuery,
   blogCounterQuery,
-  blogQuery,
   postsListQuery,
 } from "~/services/queries";
 
 export const loader =
   (queryClient: QueryClient) =>
   async ({ params, request }: LoaderFunctionArgs) => {
-    const queryBlog = blogQuery(params.blogId as string);
     const queryBlogCounter = blogCounterQuery(params.blogId as string);
     const actions = availableActionsQuery(blogActions);
 
@@ -30,7 +28,6 @@ export const loader =
     );
 
     await Promise.all([
-      queryClient.fetchQuery(queryBlog),
       queryClient.fetchInfiniteQuery(queryPostsList),
       queryClient.fetchQuery(queryBlogCounter),
       queryClient.fetchQuery(actions),
