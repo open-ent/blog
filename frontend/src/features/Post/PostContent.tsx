@@ -123,7 +123,8 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     setMode("read");
   };
 
-  const handleContentChange = (content: string) => {
+  const handleContentChange = ({ editor }: { editor: any }) => {
+    const content = editor?.getHTML();
     const emptyContent = isEmptyEditorContent(content);
     setIsEmptyContent(emptyContent);
   };
