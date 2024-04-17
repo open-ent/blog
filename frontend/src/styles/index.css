@@ -94,6 +94,6 @@ main {
   overflow-wrap: anywhere;
 }
 
-#editorContent {
+.post-content-editor .ProseMirror[contenteditable="true"] {
   min-height: 180px;
 }

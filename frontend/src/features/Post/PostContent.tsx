@@ -150,7 +150,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
       ) : (
         <></>
       )}
-      <div className="mx-md-8">
+      <div className="mx-md-8 post-content-editor">
         {mode === "edit" && (
           <div className="mt-24">
             <FormControl id="postTitle" isRequired>
