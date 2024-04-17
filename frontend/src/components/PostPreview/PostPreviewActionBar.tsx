@@ -44,8 +44,15 @@ export const PostPreviewActionBar = ({
 }: PostPreviewActionBarProps) => {
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
-  const { mustSubmit, isActionAvailable, goUp, publish, trash, isMutating } =
-    postActions;
+  const {
+    mustSubmit,
+    isActionAvailable,
+    goUp,
+    publish,
+    trash,
+    isMutating,
+    emptyContent,
+  } = postActions;
 
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
@@ -122,7 +129,7 @@ export const PostPreviewActionBar = ({
             <Button
               type="button"
               variant="filled"
-              disabled={isMutating}
+              disabled={isMutating || emptyContent}
               onClick={handlePublishClick}
             >
               {t("blog.publish")}

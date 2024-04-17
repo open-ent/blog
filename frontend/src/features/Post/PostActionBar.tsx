@@ -32,7 +32,8 @@ export const PostActionBar = ({
 }: PostActionBarProps) => {
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
-  const { mustSubmit, canPublish, isMutating } = postActions || {};
+  const { mustSubmit, canPublish, isMutating, emptyContent } =
+    postActions || {};
 
   const [isBarOpen, toggleBar] = useToggle();
 
@@ -53,7 +54,11 @@ export const PostActionBar = ({
           {common_t("edit")}
         </Button>
       ) : (
-        <Button leftIcon={<Send />} disabled={isMutating} onClick={onPublish}>
+        <Button
+          leftIcon={<Send />}
+          disabled={isMutating || emptyContent}
+          onClick={onPublish}
+        >
           {t("blog.publish")}
         </Button>
       )}
@@ -76,7 +81,7 @@ export const PostActionBar = ({
             <Button
               type="button"
               variant="filled"
-              disabled={isMutating}
+              disabled={isMutating || emptyContent}
               onClick={onPublish}
             >
               {t("blog.publish")}

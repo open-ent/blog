@@ -19,6 +19,7 @@ import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
 import { baseUrl } from "~/routes";
 import { useBlog } from "~/services/queries";
+import { isEmptyEditorContent } from "~/utils/EditorHasContent";
 
 export interface PostContentProps {
   post: Post;
@@ -47,6 +48,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   );
   const [variant, setVariant] = useState<"ghost" | "outline">("ghost");
   const [isOldFormatOpen, setIsOldFormat] = useState(false);
+  const [isEmptyContent, setIsEmptyContent] = useState<boolean>(false);
 
   const { t } = useTranslation("blog");
 
@@ -102,22 +104,28 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Save modifications
   const handleSaveClick = () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
-    if (!post || !title || title.trim().length == 0 || !contentHtml) return;
-    post.title = title;
-    post.content = contentHtml;
-    save();
-    setMode("read");
+    if (post || !isEmptyContent || !title) {
+      post.title = title;
+      post.content = contentHtml;
+      save();
+      setMode("read");
+    }
   };
 
   // Publish or submit modifications
   const handlePublishClick = async () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
-    if (!post || !title || title.trim().length == 0 || !contentHtml) return;
+    if (!post || !title || title.trim().length == 0 || isEmptyContent) return;
     post.title = title;
     post.content = contentHtml;
     await save(true);
     await publish();
     setMode("read");
+  };
+
+  const handleContentChange = (content: string) => {
+    const emptyContent = isEmptyEditorContent(content);
+    setIsEmptyContent(emptyContent);
   };
 
   return (
@@ -176,6 +184,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           mode={mode}
           variant={variant}
           visibility={blog?.visibility === "PUBLIC" ? "public" : "protected"}
+          onContentChange={handleContentChange}
         ></Editor>
         {mode === "edit" && (
           <ButtonGroup
@@ -189,7 +198,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               type="button"
               variant="outline"
               leftIcon={<Save />}
-              disabled={isMutating}
+              disabled={isMutating || (isEmptyContent && title.length == 0)}
               onClick={handleSaveClick}
             >
               {t("blog.save")}
@@ -197,7 +206,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             <Button
               type="button"
               leftIcon={<Send />}
-              disabled={isMutating}
+              disabled={isMutating || title.length == 0 || isEmptyContent}
               onClick={handlePublishClick}
             >
               {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
