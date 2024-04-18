@@ -93,3 +93,7 @@ main {
 .post-preview-title {
   overflow-wrap: anywhere;
 }
+
+.post-content-editor .ProseMirror[contenteditable="true"] {
+  min-height: 180px;
+}

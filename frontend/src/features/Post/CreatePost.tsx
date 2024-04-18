@@ -95,7 +95,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
       <FormControl id="postContent" className="mt-16 mx-md-16">
         <Label>{t("blog.post.content-helper")}</Label>
       </FormControl>
-      <div className="mx-md-16">
+      <div className="mx-md-16 post-content-editor">
         <Editor
           ref={editorRef}
           content=""

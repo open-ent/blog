@@ -60,7 +60,7 @@ export function Component() {
 
   return (
     <>
-      <div className="rounded border pt-16 bg-white">
+      <div className="rounded border p-16 bg-white">
         <PostTitle post={post} mode="print" />
         <div className="mx-32">
           <Editor content={post.content} mode="read" variant="ghost"></Editor>
