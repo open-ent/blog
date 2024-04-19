@@ -105,7 +105,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const handleSaveClick = () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
     const contentJson = editorRef.current?.getContent("json") as JSON;
-    if (post || (!isEmptyContent && !title)) {
+    if (post && (!isEmptyContent || title.length !== 0)) {
       post.title = title;
       post.content = contentHtml;
       post.jsonContent = contentJson;

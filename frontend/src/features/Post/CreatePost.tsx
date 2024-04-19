@@ -46,14 +46,14 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   };
 
   const handleSaveClick = async () => {
-    if (blogId || titleRef.current?.value.length !== 0 || !isEmptyContent) {
+    if ((blogId && titleRef.current?.value.length !== 0) || !isEmptyContent) {
       const post = await create();
       if (post) navigate(`/id/${blogId}/post/${post?._id}`);
     }
   };
 
   const handlePublishClick = async () => {
-    if (blogId || (titleRef.current?.value.length == 0 && !isEmptyContent)) {
+    if (blogId && titleRef.current?.value.length !== 0 && !isEmptyContent) {
       const post = await create();
       if (post) {
         await publishMutation.mutate({
