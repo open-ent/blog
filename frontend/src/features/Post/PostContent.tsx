@@ -104,9 +104,11 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Save modifications
   const handleSaveClick = () => {
     const contentHtml = editorRef.current?.getContent("html") as string;
-    if (post || !isEmptyContent || !title) {
+    const contentJson = editorRef.current?.getContent("json") as JSON;
+    if (post || (!isEmptyContent && !title)) {
       post.title = title;
       post.content = contentHtml;
+      post.jsonContent = contentJson;
       save();
       setMode("read");
     }
@@ -124,7 +126,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   };
 
   const handleContentChange = ({ editor }: { editor: any }) => {
-    const content = editor?.getHTML();
+    const content = editor?.getJSON();
     const emptyContent = isEmptyEditorContent(content);
     setIsEmptyContent(emptyContent);
   };

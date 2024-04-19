@@ -84,8 +84,7 @@ export const usePostActions = (
   const deleteMutation = useDeletePost(blogId, post._id);
   const publishMutation = usePublishPost(blogId);
   const goUpMutation = useGoUpPost(blogId, post._id);
-
-  const emptyContent = isEmptyEditorContent(post.content);
+  const emptyContent = isEmptyEditorContent(post.jsonContent);
 
   return {
     ...memoized,

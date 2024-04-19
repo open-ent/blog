@@ -56,7 +56,7 @@ export const PostActionBar = ({
       ) : (
         <Button
           leftIcon={<Send />}
-          disabled={isMutating || emptyContent}
+          disabled={isMutating || emptyContent || post.title.length == 0}
           onClick={onPublish}
         >
           {t("blog.publish")}
@@ -81,7 +81,7 @@ export const PostActionBar = ({
             <Button
               type="button"
               variant="filled"
-              disabled={isMutating || emptyContent}
+              disabled={isMutating || emptyContent || post.title.length == 0}
               onClick={onPublish}
             >
               {t("blog.publish")}

@@ -46,22 +46,14 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   };
 
   const handleSaveClick = async () => {
-    if (
-      blogId ||
-      titleRef.current?.value.trim().length !== 0 ||
-      !isEmptyContent
-    ) {
+    if (blogId || titleRef.current?.value.length !== 0 || !isEmptyContent) {
       const post = await create();
       if (post) navigate(`/id/${blogId}/post/${post?._id}`);
     }
   };
 
   const handlePublishClick = async () => {
-    if (
-      blogId ||
-      titleRef.current?.value.trim().length == 0 ||
-      !isEmptyContent
-    ) {
+    if (blogId || (titleRef.current?.value.length == 0 && !isEmptyContent)) {
       const post = await create();
       if (post) {
         await publishMutation.mutate({
@@ -74,7 +66,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   };
 
   const handleContentChange = ({ editor }: { editor: any }) => {
-    const content = editor?.getHTML();
+    const content = editor?.getJSON();
     const emptyContent = isEmptyEditorContent(content);
     setIsEmptyContent(emptyContent);
   };
@@ -123,7 +115,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           type="button"
           leftIcon={<Send />}
           disabled={
-            isEmptyTitle.length == 0 || isEmptyContent || disableButtons
+            isEmptyTitle.trim().length == 0 || isEmptyContent || disableButtons
           }
           onClick={handlePublishClick}
         >

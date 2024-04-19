@@ -129,7 +129,7 @@ export const PostPreviewActionBar = ({
             <Button
               type="button"
               variant="filled"
-              disabled={isMutating || emptyContent}
+              disabled={isMutating || emptyContent || post.title.length == 0}
               onClick={handlePublishClick}
             >
               {t("blog.publish")}
