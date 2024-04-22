@@ -20,6 +20,7 @@ export interface PostActionBarProps {
   onEdit?: () => void;
   onPublish?: () => void;
   onDelete?: () => void;
+  onTts?: () => void;
 }
 
 export const PostActionBar = ({
@@ -29,6 +30,7 @@ export const PostActionBar = ({
   onEdit,
   onPublish,
   onDelete,
+  onTts,
 }: PostActionBarProps) => {
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
@@ -99,6 +101,9 @@ export const PostActionBar = ({
           onClick={onPrint}
         >
           {t("blog.print")}
+        </Button>
+        <Button color="primary" variant="filled" onClick={onTts}>
+          {t("tiptap.toolbar.tts")}
         </Button>
 
         <Button

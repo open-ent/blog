@@ -82,6 +82,7 @@ export const PostTitle = ({
                 onDelete={onDelete}
                 onPublish={onPublish}
                 onPrint={onPrint}
+                onTts={onTts}
               />
             )}
           </div>
