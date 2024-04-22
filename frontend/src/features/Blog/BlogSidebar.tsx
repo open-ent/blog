@@ -58,7 +58,7 @@ const BlogSidebar = () => {
             list={posts.map((post) => ({
               id: post._id,
               title: post.title,
-              date: post.modified,
+              date: post.firstPublishDate || post.modified,
             }))}
             onClick={(item) => handleOnClick(item.id)}
           />

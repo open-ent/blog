@@ -10,7 +10,6 @@ import {
   Card,
   Image,
   getThumbnail,
-  useDate,
 } from "@edifice-ui/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -18,10 +17,11 @@ import { useNavigate } from "react-router-dom";
 
 import { PostPreviewActionBar } from "./PostPreviewActionBar";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
+import { PostDate } from "~/features/Post/PostDate";
 import { Post, PostState } from "~/models/post";
 import { useBlog } from "~/services/queries";
 import { useBlogState, useStoreUpdaters } from "~/store";
-import { getAvatarURL, getDatedKey } from "~/utils/PostUtils";
+import { getAvatarURL } from "~/utils/PostUtils";
 
 export type PostPreviewProps = {
   /**
@@ -35,7 +35,6 @@ export type PostPreviewProps = {
 };
 
 export const PostPreview = ({ post, index }: PostPreviewProps) => {
-  const { fromNow } = useDate();
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
 
@@ -53,11 +52,6 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
 
   // Number of media to display on the preview card
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
-
-  const getDatedState = (): string =>
-    t(getDatedKey(post.state), {
-      date: fromNow(post.modified),
-    });
 
   const handleCardClick = () => {
     navigate(`./post/${post?._id}`);
@@ -176,8 +170,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
             </div>
             <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row align-items-md-center">
               <span>{post.author.username}</span>
-              <span className="separator d-none d-md-inline-block"></span>
-              <span>{getDatedState()}</span>
+              <PostDate post={post} shortDisplay={true}></PostDate>
             </div>
           </div>
         </div>

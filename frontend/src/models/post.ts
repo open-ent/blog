@@ -12,6 +12,9 @@ export type PostMetadata = {
   // "created": {
   //     "$date": 1704384023754
   // },
+  firstPublishDate?: {
+    $date: string;
+  };
   modified: {
     $date: string;
   };

@@ -1,12 +1,13 @@
 import { ArrowLeft, Print, TextToSpeech } from "@edifice-ui/icons";
-import { Avatar, Badge, Button, IconButton, useDate } from "@edifice-ui/react";
+import { Avatar, Badge, Button, IconButton } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
 import { PostActionBar } from "./PostActionBar";
+import { PostDate } from "./PostDate";
 import { PostActions } from "../ActionBar/usePostActions";
 import { Post, PostState } from "~/models/post";
 import { useBlog } from "~/services/queries";
-import { getAvatarURL, getDatedKey, getUserbookURL } from "~/utils/PostUtils";
+import { getAvatarURL, getUserbookURL } from "~/utils/PostUtils";
 
 export interface PostTitleProps {
   post: Post;
@@ -36,13 +37,9 @@ export const PostTitle = ({
   const { publicView } = useBlog();
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
-  const { fromNow } = useDate();
   const { readOnly } = postActions || {};
 
   if (mode === "edit") return;
-
-  const getDatedState = (post: Post): string =>
-    t(getDatedKey(post.state), { date: fromNow(post.modified) });
 
   return (
     <>
@@ -133,8 +130,7 @@ export const PostTitle = ({
             >
               {post.author.username}
             </a>
-            <span className="separator d-none d-md-block"></span>
-            <span>{getDatedState(post)}</span>
+            <PostDate post={post}></PostDate>
           </div>
         </div>
       </div>
