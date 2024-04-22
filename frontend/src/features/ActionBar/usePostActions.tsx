@@ -10,6 +10,7 @@ import {
   usePublishPost,
   useSavePost,
 } from "~/services/queries";
+import { isEmptyEditorContent } from "~/utils/EditorHasContent";
 import { IActionDefinition } from "~/utils/types";
 
 export interface PostActions {
@@ -37,6 +38,8 @@ export interface PostActions {
   isMutating: boolean;
   /** Truthy when the post's state should be displayed in a badge. */
   showBadge: boolean;
+  /** Truthy if post have editor content */
+  emptyContent: boolean;
 }
 
 export const usePostActions = (
@@ -81,6 +84,7 @@ export const usePostActions = (
   const deleteMutation = useDeletePost(blogId, post._id);
   const publishMutation = usePublishPost(blogId);
   const goUpMutation = useGoUpPost(blogId, post._id);
+  const emptyContent = isEmptyEditorContent(post.jsonContent);
 
   return {
     ...memoized,
@@ -97,5 +101,6 @@ export const usePostActions = (
     publish: () =>
       publishMutation.mutateAsync({ post, publishWith: memoized.publishWith }),
     goUp: () => goUpMutation.mutateAsync(),
+    emptyContent,
   };
 };
