@@ -601,7 +601,7 @@ public class BlogController extends BaseController {
 	}
 
 	@Get("/pub/:slug/post/:postid")
-	public void printPublicPost(HttpServerRequest request) {
+	public void getPublicPost(HttpServerRequest request) {
 		// Display react front page
 		renderView(request, new JsonObject(), "index.html", null);
 	}
