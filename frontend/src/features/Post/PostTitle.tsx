@@ -70,7 +70,7 @@ export const PostTitle = ({
                   color="primary"
                   variant="outline"
                   className={isSpeeching ? "bg-secondary" : ""}
-                  aria-label={t("tiptap.toolbar.tts")}
+                  aria-label={common_t("tiptap.toolbar.tts")}
                   onClick={onTts}
                 />
               </>

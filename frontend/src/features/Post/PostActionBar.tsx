@@ -108,7 +108,7 @@ export const PostActionBar = ({
           {t("blog.print")}
         </Button>
         <Button color="primary" variant="filled" onClick={onTts}>
-          {t("tiptap.toolbar.tts")}
+          {common_t("tiptap.toolbar.tts")}
         </Button>
 
         <Button
