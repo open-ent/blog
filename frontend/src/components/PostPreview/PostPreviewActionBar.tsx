@@ -101,7 +101,7 @@ export const PostPreviewActionBar = ({
   return (
     <>
       <ActionBarContainer visible={actionBarPostId === post._id}>
-        {isActionAvailable(ACTION.OPEN) && (
+        {!publicView && isActionAvailable(ACTION.OPEN) && (
           <Button
             type="button"
             variant="filled"
