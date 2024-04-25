@@ -154,14 +154,14 @@ public class BlogResourcesProvider implements ResourcesProvider {
 		}
 		request.pause();
 		hasRightsOnAllPosts(user.getUserId(), new HashSet<>(user.getGroupsIds()), Collections.singleton(postId), action)
-				.onComplete(event -> {
-					request.resume();
-					if (event.succeeded()) {
-						handler.handle(event.result());
-					} else {
-						log.error("Error while checking access rights on posts.", event.cause().getMessage());
-					}
-				}).onSuccess(handler);
+		.onComplete(event -> {
+			request.resume();
+			final boolean succeeded = event.succeeded();
+			if (!succeeded) {
+				log.error("Error while checking access rights on posts.", event.cause());
+			}
+			handler.handle(succeeded);
+		});
 	}
 
 	public Future<Boolean> hasRightsOnAllPosts(final String userId, final Set<String> userGroups, final Set<String> postIds, String action) {
