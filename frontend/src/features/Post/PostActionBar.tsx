@@ -34,7 +34,7 @@ export const PostActionBar = ({
 }: PostActionBarProps) => {
   const { t } = useTranslation("blog");
   const { t: common_t } = useTranslation("common");
-  const { mustSubmit, canPublish, isMutating, emptyContent } =
+  const { mustSubmit, canPublish, isMutating, emptyContent, readOnly } =
     postActions || {};
 
   const [isBarOpen, toggleBar] = useToggle();
@@ -111,15 +111,17 @@ export const PostActionBar = ({
           {common_t("tiptap.toolbar.tts")}
         </Button>
 
-        <Button
-          type="button"
-          color="primary"
-          variant="filled"
-          disabled={isMutating}
-          onClick={() => setConfirmDeleteModal(true)}
-        >
-          {t("blog.delete.post")}
-        </Button>
+        {!readOnly && (
+          <Button
+            type="button"
+            color="primary"
+            variant="filled"
+            disabled={isMutating}
+            onClick={() => setConfirmDeleteModal(true)}
+          >
+            {t("blog.delete.post")}
+          </Button>
+        )}
       </ActionBarContainer>
 
       <Suspense>
