@@ -46,6 +46,7 @@ export const PostPreviewActionBar = ({
   const postActions = usePostActions(postContentActions, blogId, post);
   const {
     mustSubmit,
+    readOnly,
     isActionAvailable,
     goUp,
     publish,
@@ -155,7 +156,7 @@ export const PostPreviewActionBar = ({
         >
           {t("blog.print")}
         </Button>
-        {!publicView && (
+        {!publicView && !readOnly && (
           <Button
             type="button"
             color="primary"
