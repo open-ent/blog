@@ -1,0 +1,220 @@
+plugins {
+  id 'java'
+  id 'scala'
+  id 'maven'
+  id 'maven-publish'
+  id 'com.github.johnrengelman.shadow' version '2.0.1'
+}
+
+if (!hasProperty('odeUsername')) {
+  ext.odeUsername = ''
+}
+if (!hasProperty('odePassword')) {
+  ext.odePassword = ''
+}
+
+repositories {
+  mavenLocal()
+    maven {
+      url "https://maven.opendigitaleducation.com/nexus/content/groups/public"
+    }
+  mavenCentral()
+    maven {
+      url "https://oss.sonatype.org/content/repositories/iovertx-3720/"
+    }
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+configurations {
+  provided
+    runtime.exclude module: 'vertx-core'
+}
+
+sourceSets {
+  main { compileClasspath += configurations.provided }
+  test {
+    runtimeClasspath += configurations.compileOnly
+    resources.srcDirs = ["src/test/resources"]
+  }
+}
+
+configurations.all {
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+configurations.testRuntime {
+  exclude 'group': 'io.gatling'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+task generateCommitId {
+  doLast {
+    def commitId = 'unknown'
+    def stdout = new ByteArrayOutputStream()
+    try {
+      def result = exec {
+        commandLine 'git', 'rev-parse', 'HEAD'
+        standardOutput = stdout
+      }
+      commitId = stdout.toString().trim()
+    } catch (Exception e) {
+      e.printStackTrace()
+      commitId = 'error'
+    }
+    project.ext.set('commitId', commitId)
+    def branch = 'unknown'
+    try {
+      def stdoutBranch = new ByteArrayOutputStream()
+      def resultBranch = exec {
+        commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+        standardOutput = stdoutBranch
+      }
+      branch = stdoutBranch.toString().trim()
+    } catch (Exception e) {
+      e.printStackTrace()
+      branch = 'error'
+    }
+    project.ext.set('branchName', branch)
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMddHHmmss')
+    project.ext.set('buildTime', formattedDate)
+  }
+}
+
+task gatherDependenciesBuildInformation {
+  doLast {
+    // Filter dependencies by group and name
+    def selectedDependencies = configurations.compile
+            .findAll { it.name.startsWith("web-utils") }
+
+    // Iterate over the selected dependencies
+    selectedDependencies.each { File dependency ->
+      def jarFile = new java.util.jar.JarFile(dependency)
+      def dependencyManifest = jarFile.getManifest()
+      def depName = dependency.name.replaceAll("^(.*?)-\\d+\\..+\$", "\$1").replace("-", "")
+      project.ext.set(depName + '_commitId', dependencyManifest.mainAttributes.getValue('SCM-Commit-Id'))
+      project.ext.set(depName + '_branch', dependencyManifest.mainAttributes.getValue('SCM-Branch'))
+      project.ext.set(depName + '_buildTime', dependencyManifest.mainAttributes.getValue('Build-Time'))
+      // Close the JarFile
+      jarFile.close()
+    }
+  }
+}
+compileJava {
+  sourceCompatibility = project.sourceCompatibility
+  targetCompatibility = project.targetCompatibility
+  dependsOn generateCommitId
+  dependsOn gatherDependenciesBuildInformation
+}
+
+compileTestJava {
+  sourceCompatibility = project.sourceCompatibility
+    targetCompatibility = project.targetCompatibility
+}
+dependencies {
+  compileOnly "io.vertx:vertx-core:$vertxVersion"
+  compile "org.entcore:common:$entCoreVersion"
+  testCompile "io.vertx:vertx-unit:$vertxVersion"
+  testCompile "io.vertx:vertx-codegen:$vertxVersion"
+  testCompile "junit:junit:$junitVersion"
+  testCompile "org.entcore:test:$entCoreVersion:fat"
+  testCompile "org.entcore:tests:$entCoreVersion"
+  testCompile "com.opendigitaleducation:explorer:$explorerVersion:fat"
+  testCompile "com.opendigitaleducation:explorer:$explorerVersion:tests"
+  testCompile 'io.gatling.highcharts:gatling-charts-highcharts:2.2.2'
+}
+
+jar {
+  sourceSets.main.resources.srcDirs += [ "deployment" ]
+  manifest {
+    attributes(
+        "Main-Verticle": "service:mod",
+        "SCM-Commit-Id": "${-> project.ext.commitId}",
+        "SCM-Branch": "${-> project.ext.branchName}",
+        "Build-Time": "${-> project.ext.buildTime}",
+        "Web-Utils-SCM-Commit-Id": "${-> project.ext.webutils_commitId}",
+        "Web-Utils-SCM-Branch": "${-> project.ext.webutils_branch}",
+        "Web-Utils-Build-Time": "${-> project.ext.webutils_buildTime}"
+        )
+  }
+}
+
+shadowJar {
+  classifier = 'fat'
+    archiveName = "${modowner}~${modname}~$version-$classifier.$extension"
+    mergeServiceFiles {
+      include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+}
+
+publishing {
+  repositories {
+    if (version.endsWith("SNAPSHOT")) {
+      maven {
+        name 'Snapshots'
+          url 'https://maven.opendigitaleducation.com/nexus/content/repositories/snapshots/'
+          credentials {
+            username "${odeUsername}"
+              password "${odePassword}"
+          }
+      }
+    } else {
+      maven {
+        name 'Releases'
+          url 'https://maven.opendigitaleducation.com/nexus/content/repositories/releases/'
+          credentials {
+            username "${odeUsername}"
+              password "${odePassword}"
+          }
+      }
+    }
+  }
+  publications {
+    maven(MavenPublication) {
+      groupId "${modowner}"
+      artifactId "${modname}"
+      artifact("build/libs/${modowner}~${modname}~$version-fat.jar") { classifier "fat" }
+    }
+    maven(MavenPublication) {
+      groupId "${modowner}"
+      artifactId "${modname}"
+      artifact("build/libs/${modname}-$version-deployment.jar") { classifier "deployment" }
+    }
+    maven(MavenPublication) {
+      groupId "${modowner}"
+      artifactId "${modname}"
+      artifact("build/libs/${modname}-$version-tests.jar") { classifier "tests" }
+    }
+  }
+}
+
+
+javadoc {
+  options.encoding = 'UTF-8'
+  classpath = configurations.provided
+  classpath += configurations.compile
+}
+
+test {
+}
+
+task testJar(type: Jar) {
+  classifier = 'tests'
+  baseName = "${modname}"
+  from sourceSets.test.output
+}
+
+task deploymentJar(type: Jar) {
+  classifier = 'deployment'
+  baseName = "${modname}"
+  from 'deployment'
+}
+
+artifacts {
+  archives testJar
+  archives deploymentJar
+}
+
