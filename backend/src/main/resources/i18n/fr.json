@@ -27,7 +27,7 @@
   "blog.post.publish.success": "Le billet a été publié avec succès",
   "blog.post.submit.success": "Le billet a été soumis avec succès",
   "blog.post.goup.success": "Le billet a été remonté avec succès",
-  "blog.publish": "Publier dans la Bibliothèque",
+  "blog.publish": "Publier",
   "blog.publish.warning": "Attention, les billets actuellement en brouillon et les billets ajoutés après la publication du Blog dans la Bibliothèque ne seront pas visibles.",
   "blog.read": "Consulter",
   "blog.save": "Enregistrer",
