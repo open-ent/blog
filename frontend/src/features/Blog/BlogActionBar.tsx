@@ -166,6 +166,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           color="primary"
           variant="outline"
           icon={<Options />}
+          aria-label={common_t("tiptap.tooltip.plus")}
           onClick={handleOpenMenuClick}
         />
 
