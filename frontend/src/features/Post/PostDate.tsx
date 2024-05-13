@@ -25,9 +25,7 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
   };
 
   const displayModifiedDate =
-    post.state !== PostState.PUBLISHED ||
-    (!shortDisplay &&
-      post.modified.$date > (post.firstPublishDate?.$date || 0));
+    !shortDisplay && post.modified.$date > (post.firstPublishDate?.$date || 0);
 
   return (
     <>
