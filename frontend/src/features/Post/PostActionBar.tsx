@@ -65,7 +65,12 @@ export const PostActionBar = ({
         </Button>
       )}
 
-      <IconButton variant="outline" icon={<Options />} onClick={toggleBar} />
+      <IconButton
+        variant="outline"
+        icon={<Options />}
+        aria-label={common_t("tiptap.tooltip.plus")}
+        onClick={toggleBar}
+      />
 
       <ActionBarContainer visible={isBarOpen}>
         {shouldBeSubmitted && (
