@@ -160,7 +160,7 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			if (!succeeded) {
 				log.error("Error while checking access rights on posts.", event.cause());
 			}
-			handler.handle(succeeded);
+			handler.handle(succeeded && event.result());
 		});
 	}
 
