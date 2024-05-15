@@ -190,10 +190,10 @@ export const useActionDefinitions = (
   */
   const getDefaultPublishKeyword = useCallback(
     (postAuthorId: string) => {
-      const isConstraint = blog?.["publish-type"] === "RESTRAINT";
+      const isRestraint = blog?.["publish-type"] === "RESTRAINT";
 
-      return !isConstraint && postAuthorId === user?.userId
-        ? "submit"
+      return !isRestraint && postAuthorId === user?.userId
+        ? "submit" // Logic would require "publish", but that would give a 401 Unauthorized :-/
         : rights.manager || rights.creator || rights.hasPublishPostRight
           ? "publish"
           : "submit";

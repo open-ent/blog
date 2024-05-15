@@ -18,14 +18,14 @@ import { Post, PostMetadata, PostState } from "~/models/post";
 /** Query metadata of a post */
 export const postQuery = (blogId: string, post: PostMetadata) => {
   return {
-    queryKey: ["post", post._id, post.state],
+    queryKey: ["post", blogId, post._id],
     queryFn: () => loadPost(blogId, post),
   };
 };
 
 export const originalPostQuery = (blogId: string, post: PostMetadata) => {
   return {
-    queryKey: ["original-post", post._id, post.state],
+    queryKey: ["original-post", blogId, post._id],
     queryFn: () => loadOriginalPost(blogId, post),
   };
 };
@@ -144,19 +144,23 @@ export const usePublishPost = (blogId: string) => {
       post: Post;
       publishWith?: "publish" | "submit";
     }) => publishPost(blogId, post, publishWith),
-    onSuccess: (_data, { post, publishWith }) => {
+    onSuccess: (result, { post, publishWith }) => {
       // Publishing/submitting a post change its state. Update the query data accordingly.
       // Use the state which is sent back, or guess it from the publish/submit mess.
       queryClient.setQueryData(postQuery(blogId, post).queryKey, {
         ...post,
         state:
-          _data?.state ?? publishWith === "submit"
-            ? PostState.SUBMITTED
-            : PostState.PUBLISHED,
+          result.state ||
+          (publishWith === "publish"
+            ? PostState.PUBLISHED
+            : PostState.SUBMITTED),
       });
-      if (_data?.state ?? publishWith) {
-        toast.success(t(`blog.post.${publishWith}.success`));
-      }
+
+      toast.success(
+        t(
+          `blog.post.${result.state === PostState.PUBLISHED ? "publish" : "submit"}.success`,
+        ),
+      );
 
       return Promise.all([
         // Publishing a post invalidates some queries.

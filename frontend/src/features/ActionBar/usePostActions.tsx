@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { ACTION, ActionType, IAction } from "edifice-ts-client";
 
 import { useActionDefinitions } from "./useActionDefinitions";
-import { Post, PostMetadata } from "~/models/post";
+import { Post, PostMetadata, PostState } from "~/models/post";
 import {
   useDeletePost,
   useGoUpPost,
@@ -38,6 +38,8 @@ export interface PostActions {
   isMutating: boolean;
   /** Truthy when the post's state should be displayed in a badge. */
   showBadge: boolean;
+  /** WB-2886 Thruthy when the save (as draft) button should be hidden. */
+  hideSaveDraft: boolean;
   /** Truthy if post have editor content */
   emptyContent: boolean;
 }
@@ -95,6 +97,7 @@ export const usePostActions = (
       publishMutation.isPending ||
       goUpMutation.isPending,
     showBadge: creator || manager || contrib,
+    hideSaveDraft: (manager || creator) && post.state === PostState.PUBLISHED,
     save: (withoutNotification) =>
       saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),

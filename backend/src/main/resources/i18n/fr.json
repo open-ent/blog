@@ -52,6 +52,7 @@
   "confirm.up.post": "Voulez-vous vraiment remonter ce billet en première position ? Cela aura pour effet de modifier sa date de publication.",
   "confirm.remove.comment": "Etes-vous sûr de vouloir supprimer le commentaire ?",
   "draft": "Brouillon",
+  "draft.save": "Brouillon",
   "draft.empty": "Votre brouillon est vide",
   "draft.saved": "Brouillon enregistré",
   "e404": "Adresse introuvable",

@@ -109,7 +109,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           }
           onClick={handleSaveClick}
         >
-          {t("blog.save")}
+          {t("draft.save")}
         </Button>
         <Button
           type="button"

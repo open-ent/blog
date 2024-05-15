@@ -31,8 +31,15 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const { blog, publicView } = useBlog();
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
-  const { mustSubmit, save, trash, publish, readOnly, isMutating } =
-    postActions;
+  const {
+    mustSubmit,
+    save,
+    trash,
+    publish,
+    readOnly,
+    isMutating,
+    hideSaveDraft,
+  } = postActions;
 
   // Get the query parameters in URL to know if the post is in edit mode.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -194,18 +201,24 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             className="gap-8 my-8 sticky-bottom py-8 bg-white z-0"
             variant="reverse"
           >
-            <Button type="button" variant="ghost" onClick={handleCancelClick}>
-              {t("cancel")}
-            </Button>
             <Button
               type="button"
-              variant="outline"
-              leftIcon={<Save />}
-              disabled={isMutating || (isEmptyContent && title.length == 0)}
-              onClick={handleSaveClick}
+              variant={hideSaveDraft ? "outline" : "ghost"}
+              onClick={handleCancelClick}
             >
-              {t("blog.save")}
+              {t("cancel")}
             </Button>
+            {!hideSaveDraft && (
+              <Button
+                type="button"
+                variant="outline"
+                leftIcon={<Save />}
+                disabled={isMutating || (isEmptyContent && title.length == 0)}
+                onClick={handleSaveClick}
+              >
+                {t("draft.save")}
+              </Button>
+            )}
             <Button
               type="button"
               leftIcon={<Send />}
