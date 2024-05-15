@@ -26,7 +26,7 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
   const { formatDate } = useDate();
 
   const displayDate = (date: CoreDate) => {
-    return formatDate(date, "D MMMM YYYY");
+    return formatDate(date, "long");
   };
 
   const handleOnClick = (item: SummaryListObject) => {

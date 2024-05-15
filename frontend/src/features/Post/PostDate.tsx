@@ -13,7 +13,7 @@ export interface PostDateProps {
 
 export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
   const { t } = useTranslation("blog");
-  const { fromNow } = useDate();
+  const { fromNow, formatDate } = useDate();
 
   const getDatedKey = (state: PostState): string => {
     switch (state) {
@@ -27,9 +27,9 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
   const displayModifiedDate =
     !shortDisplay && post.modified.$date > (post.firstPublishDate?.$date || 0);
 
-  return (
-    <>
-      {post.state === PostState.PUBLISHED && post.firstPublishDate && (
+  if (post.state === PostState.PUBLISHED && post.firstPublishDate) {
+    return (
+      <>
         <>
           <span className="separator d-none d-md-block"></span>
           <span>
@@ -38,17 +38,22 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
             })}
           </span>
         </>
-      )}
-      {displayModifiedDate && (
-        <>
-          <span className="separator d-none d-md-block"></span>
-          <span>
-            {t(getDatedKey(post.state), {
-              date: fromNow(post.modified),
-            })}
-          </span>
-        </>
-      )}
+        {displayModifiedDate && (
+          <>
+            <span>{formatDate(post.modified, "short")}</span>
+          </>
+        )}
+      </>
+    );
+  }
+  return (
+    <>
+      <span className="separator d-none d-md-block"></span>
+      <span>
+        {t(getDatedKey(post.state), {
+          date: fromNow(post.modified),
+        })}
+      </span>
     </>
   );
 };

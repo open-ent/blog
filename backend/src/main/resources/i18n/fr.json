@@ -118,6 +118,7 @@
   "post.state.submitted.empty": "Pas de billets envoyés",
   "post.state.published.empty": "Pas de billets publiés",
   "post.author.avatar": "Avatar de l'auteur",
+  "post.dated.updated": "(modifié le  [[date]])",
   "post.dated.draft": "Enregistré [[date]]",
   "post.dated.submitted": "Soumis [[date]]",
   "post.dated.published": "Publié [[date]]",
