@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   gradle:
     image: opendigitaleducation/gradle:4.5.1
@@ -7,7 +6,6 @@ services:
       - ./:/home/gradle/project
       - ~/.m2:/home/gradle/.m2
       - ~/.gradle:/home/gradle/.gradle
-
   node:
     image: opendigitaleducation/node:16-alpine-pnpm
     working_dir: /home/node/app
@@ -15,3 +13,14 @@ services:
       - ./:/home/node/app
       - ~/.npm:/.npm
       - ../recette:/home/node/recette
+  k6:
+    image: grafana/k6:master
+    volumes:
+      - ./src/test/js:/home/k6/src
+    environment:
+      ROOT_URL: http://172.17.0.1:8090
+      DATA_ROOT_PATH: /home/k6/data
+      DURATION: 61s
+      VUS: 100
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password

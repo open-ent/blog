@@ -230,7 +230,12 @@ public class BlogResourcesProvider implements ResourcesProvider {
 	}
 
 	/**
-	 * Checks if user has access rights on all blogs
+	 * <p>
+	 * Checks if user has access rights on all blogs.
+	 * </p>
+	 * <p>
+	 *   <b>NB :</b> Only <u>the author</u> of a post can <u>delete</u> it, even if they have shares rights.
+	 * </p>
 	 * @param blogs the blogs to be checked
 	 * @param userGroups the groups of the user
 	 * @param userId id of user
@@ -245,7 +250,8 @@ public class BlogResourcesProvider implements ResourcesProvider {
 				JsonObject jsonRights = (JsonObject) rights;
 				return jsonRights.getBoolean(action, false) &&
 						(userId.equals(jsonRights.getString("userId"))
-								|| userGroups.contains(jsonRights.getString("groupId")));
+								|| userGroups.contains(jsonRights.getString("groupId"))) &&
+					(!action.equalsIgnoreCase("delete") || isBlogAuthor);
 			});
 			return isBlogAuthor || hasShareRights;
 		});

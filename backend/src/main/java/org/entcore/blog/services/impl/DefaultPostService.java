@@ -299,8 +299,10 @@ public class DefaultPostService implements PostService {
 						mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query2), incView.build());
 						handleOldContent(res.right().getValue(), filter.isOriginalFormat(), request)
 								.onComplete(promise);
-				} else {
+				} else if(res.isLeft()){
 					promise.fail(res.left().getValue());
+				} else {
+					promise.fail("post.does.not.exist");
 				}
 		});
 		return promise.future();
