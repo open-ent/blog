@@ -1,8 +1,16 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { Content, EditorContent, useCommentEditor } from "@edifice-ui/editor";
+import { Content } from "@edifice-ui/editor";
 import { Send } from "@edifice-ui/icons";
-import { Avatar, Badge, Button, CoreDate, useDate } from "@edifice-ui/react";
+import {
+  Avatar,
+  Badge,
+  Button,
+  CoreDate,
+  FormControl,
+  TextArea,
+  useDate,
+} from "@edifice-ui/react";
 import clsx from "clsx";
 import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
@@ -24,7 +32,7 @@ export interface CommentProps {
 
   created?: CoreDate;
 
-  content?: Content;
+  content?: string;
 
   onRemove?: () => void;
   onPublish?: (content: Content) => void;
@@ -40,14 +48,11 @@ export const CommentCard = ({
   onRemove,
 }: CommentProps) => {
   const [editable, setEditable] = useState(mode === "edit");
+  const [comment, setComment] = useState(content || "");
+  const refTextArea = useRef<HTMLTextAreaElement>(null);
 
   const { t } = useTranslation("common");
   const { fromNow } = useDate();
-  const { editor, commentLength, getComment, resetComment } = useCommentEditor(
-    editable,
-    content ?? "",
-    MAX_COMMENT_LENGTH,
-  );
   const badge = useMemo(() => {
     const profile = author.profiles?.[0] ?? "Guest";
     if (["Teacher", "Student", "Relative", "Personnel"].indexOf(profile) < 0)
@@ -66,8 +71,6 @@ export const CommentCard = ({
     );
   }, [author.profiles, t]);
 
-  if (!editor) return <></>;
-
   // Modifying an existing comment ? Truthy if yes, falsy if creating a new one.
   const modifying = content !== undefined;
 
@@ -76,13 +79,16 @@ export const CommentCard = ({
   const handleRemoveClick = () => onRemove?.();
 
   const handlePublishClick = () => {
-    onPublish?.(getComment());
-    resetComment();
+    onPublish?.(comment);
+    setComment("");
+    if (refTextArea.current) {
+      refTextArea.current.value = "";
+    }
     setEditable(mode === "edit");
   };
 
   const handleCancelClick = () => {
-    resetComment();
+    setComment("");
     setEditable(mode === "edit");
   };
 
@@ -104,10 +110,19 @@ export const CommentCard = ({
             <div className="d-flex flex-column flex-fill gap-8">
               <div>{t("comment.placeholder")}</div>
               <div className="border rounded-3 px-16 pt-12 pb-8 d-flex gap-2 flex-column bg-white">
-                <EditorContent editor={editor}></EditorContent>
+                <FormControl id="comment" isRequired>
+                  <TextArea
+                    size="sm"
+                    ref={refTextArea}
+                    className="border-0 bg-transparent text-break"
+                    maxLength={MAX_COMMENT_LENGTH}
+                    value={content}
+                    onChange={(e) => setComment(e.target.value)}
+                  ></TextArea>
+                </FormControl>
                 <ButtonGroup className="gap-12" variant="reverse">
                   <span className="small text-gray-700">
-                    {commentLength} / {MAX_COMMENT_LENGTH}
+                    {comment.length} / {MAX_COMMENT_LENGTH}
                   </span>
                   {modifying && (
                     <Button
@@ -149,7 +164,7 @@ export const CommentCard = ({
                   </>
                 )}
               </div>
-              <EditorContent className="mb-4" editor={editor}></EditorContent>
+              <div>{content}</div>
             </div>
           )}
         </div>
