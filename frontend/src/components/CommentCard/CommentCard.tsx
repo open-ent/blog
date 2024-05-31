@@ -41,14 +41,14 @@ export interface CommentProps {
 export const CommentCard = ({
   author,
   created,
-  content,
+  content = "",
   mode,
   className,
   onPublish,
   onRemove,
 }: CommentProps) => {
   const [editable, setEditable] = useState(mode === "edit");
-  const [comment, setComment] = useState(content || "");
+  const [comment, setComment] = useState(content);
   const refTextArea = useRef<HTMLTextAreaElement>(null);
 
   const { t } = useTranslation("common");
@@ -80,7 +80,6 @@ export const CommentCard = ({
 
   const handlePublishClick = () => {
     onPublish?.(comment);
-    setComment("");
     if (refTextArea.current) {
       refTextArea.current.value = "";
     }
@@ -88,7 +87,7 @@ export const CommentCard = ({
   };
 
   const handleCancelClick = () => {
-    setComment("");
+    setComment(content);
     setEditable(mode === "edit");
   };
 
@@ -116,7 +115,7 @@ export const CommentCard = ({
                     ref={refTextArea}
                     className="border-0 bg-transparent text-break"
                     maxLength={MAX_COMMENT_LENGTH}
-                    value={content}
+                    value={comment}
                     onChange={(e) => setComment(e.target.value)}
                   ></TextArea>
                 </FormControl>
