@@ -25,6 +25,7 @@ package org.entcore.blog.services.impl;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.mongodb.MongoDbAPI;
 import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.transformer.IContentTransformerClient;
@@ -148,7 +149,7 @@ public class DefaultPostService implements PostService {
 				}
 			}
 			plugin.setIngestJobStateAndVersion(b, IngestJobState.TO_BE_SENT, version);
-			mongo.save(POST_COLLECTION, b, MongoDbResult.validActionResultHandler(event -> {
+			mongo.save(POST_COLLECTION, b, MongoDbAPI.WriteConcern.MAJORITY, MongoDbResult.validActionResultHandler(event -> {
 				if(event.isLeft()){
 					log.error("Failed to create post: ", event.left().getValue());
 					result.handle(event);
@@ -242,7 +243,7 @@ public class DefaultPostService implements PostService {
 						modifier.unset(TRANSFORMED_CONTENT_DB_FIELD_NAME);
 					}
 					plugin.setIngestJobStateAndVersion(validatedPost, IngestJobState.TO_BE_SENT, version);
-					mongo.update(POST_COLLECTION, jQuery, modifier.build(), updateResponse -> {
+					mongo.update(POST_COLLECTION, jQuery, modifier.build(), false, false, MongoDbAPI.WriteConcern.MAJORITY, updateResponse -> {
 						if ("ok".equals(updateResponse.body().getString("status"))) {
 							final JsonObject blogRef = postFromDb.getJsonObject("blog");
 							final String blogId = blogRef.getString("$id");
@@ -771,7 +772,7 @@ public class DefaultPostService implements PostService {
 	public void publish(final String blogId, final String postId, final Handler<Either<String, JsonObject>> result) {
 		QueryBuilder query = QueryBuilder.start("_id").is(postId).put("blog.$id").is(blogId);
 		MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("state", StateType.PUBLISHED.name());
-		mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(),
+		mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(), false, false, MongoDbAPI.WriteConcern.MAJORITY,
 				MongoDbResult.validActionResultHandler(new Handler<Either<String,JsonObject>>() {
 			public void handle(Either<String, JsonObject> event) {
 				if(event.isLeft()){
@@ -786,7 +787,7 @@ public class DefaultPostService implements PostService {
 
 				MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().set("firstPublishDate", MongoDb.now()).set("sorted",  MongoDb.now());
 
-				mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(),
+				mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), updateQuery.build(), false, false, MongoDbAPI.WriteConcern.MAJORITY,
 						MongoDbResult.validActionResultHandler(result));
 			}
 		}));
