@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Blog tool for ENT Core.",
   "homepage": "https://github.com/opendigitaleducation/blog#readme",
   "bugs": {
@@ -44,14 +44,14 @@
     ]
   },
   "dependencies": {
-    "@edifice-ui/editor": "develop",
-    "@edifice-ui/icons": "develop",
-    "@edifice-ui/react": "develop",
+    "@edifice-ui/editor": "1.5.7",
+    "@edifice-ui/icons": "1.5.7",
+    "@edifice-ui/react": "1.5.7",
     "@react-spring/web": "9.7.3",
     "@tanstack/react-query": "5.8.4",
     "i18next": "23.8.1",
     "i18next-http-backend": "2.4.2",
-    "ode-explorer": "develop",
+    "ode-explorer": "1.4.9",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "4.0.12",
