@@ -47,6 +47,7 @@ function generateDeps(content) {
     "@edifice-ui/editor": BRANCH,
     "@edifice-ui/icons": BRANCH,
     "@edifice-ui/react": BRANCH,
+    "ode-explorer": BRANCH,
   };
 }
 
