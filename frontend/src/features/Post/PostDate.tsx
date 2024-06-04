@@ -40,7 +40,11 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
         </>
         {displayModifiedDate && (
           <>
-            <span>{formatDate(post.modified, "short")}</span>
+            <span>
+              {t("post.dated.updated", {
+                date: formatDate(post.modified, "short"),
+              })}
+            </span>
           </>
         )}
       </>
