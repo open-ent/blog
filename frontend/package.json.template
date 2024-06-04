@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "4.0-b2school-SNAPSHOT",
+  "version": "4.0.4-SNAPSHOT",
   "description": "Blog tool for ENT Core.",
   "homepage": "https://github.com/opendigitaleducation/blog#readme",
   "bugs": {
