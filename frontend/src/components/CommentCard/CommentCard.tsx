@@ -84,7 +84,9 @@ export const CommentCard = ({
       refTextArea.current.value = "";
     }
     setEditable(mode === "edit");
-    setComment("");
+    if (!content.length) {
+      setComment("");
+    }
   };
 
   const handleCancelClick = () => {
