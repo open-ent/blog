@@ -164,7 +164,7 @@ export const CommentCard = ({
                   </>
                 )}
               </div>
-              <div>{content}</div>
+              <div className="comment-card-content">{content}</div>
             </div>
           )}
         </div>

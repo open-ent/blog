@@ -18,6 +18,10 @@ main {
   text-decoration: underline;
 }
 
+.comment-card-content {
+  white-space: pre-line;
+}
+
 .summary-list-item {
   position: relative;
 }
