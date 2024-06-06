@@ -189,6 +189,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           </div>
         )}
         <Editor
+          id="postContent"
           ref={editorRef}
           content={content}
           mode={mode}
