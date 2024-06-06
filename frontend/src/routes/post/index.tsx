@@ -7,10 +7,10 @@ import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
 import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { PostMetadata } from "~/models/post";
-import { loadPostMetadata } from "~/services/api";
 import {
   availableActionsQuery,
   commentListQuery,
+  postMetadataQuery,
   postQuery,
 } from "~/services/queries";
 
@@ -27,7 +27,7 @@ export const loader =
       const comments = commentListQuery(blogId, postId);
       await queryClient.fetchQuery(comments);
 
-      return await loadPostMetadata(blogId, postId);
+      return await queryClient.fetchQuery(postMetadataQuery(blogId, postId));
     }
 
     return null;

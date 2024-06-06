@@ -3,7 +3,7 @@ import { odeServices } from "edifice-ts-client";
 import { Post, PostMetadata } from "~/models/post";
 import { checkHttpError } from "~/utils/BlogEvent";
 
-/** Use to get a the state of a post */
+/** Use to get a the state of a post without the content */
 export async function loadPostMetadata(blogId: string, postId: string) {
   const results = await checkHttpError(
     odeServices
@@ -13,7 +13,13 @@ export async function loadPostMetadata(blogId: string, postId: string) {
   return results[0];
 }
 
-export function loadPost(blogId: string, post: PostMetadata) {
+/**
+ * Load a post with its content /!\ You need to have the right state to call this function otherwise you will get an error
+ * @param blogId
+ * @param post
+ * @returns
+ */
+export async function loadPost(blogId: string, post: PostMetadata) {
   const { _id: postId, state } = post;
   return checkHttpError(
     odeServices

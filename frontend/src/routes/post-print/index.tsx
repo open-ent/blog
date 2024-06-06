@@ -10,10 +10,10 @@ import { postContentActions } from "~/config/postContentActions";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { PostTitle } from "~/features/Post/PostTitle";
 import { PostMetadata } from "~/models/post";
-import { loadPostMetadata } from "~/services/api";
 import {
   availableActionsQuery,
   commentListQuery,
+  postMetadataQuery,
   postQuery,
 } from "~/services/queries";
 
@@ -30,7 +30,7 @@ export const loader =
       const comments = commentListQuery(blogId, postId);
       await queryClient.fetchQuery(comments);
 
-      return await loadPostMetadata(blogId, postId);
+      return await queryClient.fetchQuery(postMetadataQuery(blogId, postId));
     }
 
     return null;

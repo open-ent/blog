@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { blogCounterQuery, blogQueryKeys } from "./blog";
+import { commentListQuery } from "./comment";
 import {
   createPost,
   deletePost,
@@ -12,9 +13,17 @@ import {
   publishPost,
   savePost,
   loadPublicPost,
+  loadPostMetadata,
 } from "../api/post";
 import { Post, PostMetadata, PostState } from "~/models/post";
 
+/** Query metadata of a post */
+export const postMetadataQuery = (blogId: string, postId: string) => {
+  return {
+    queryKey: ["postMeta", blogId, postId],
+    queryFn: () => loadPostMetadata(blogId, postId),
+  };
+};
 /** Query metadata of a post */
 export const postQuery = (blogId: string, post: PostMetadata) => {
   return {
@@ -46,7 +55,15 @@ export const useCreatePost = (blogId: string) => {
   return useMutation({
     mutationFn: ({ title, content }: { title: string; content: string }) =>
       createPost(blogId, title, content),
-    onSuccess: () => {
+    onSuccess: (post: Post) => {
+      // Save the new post in the cache.
+      queryClient.setQueryData(postQuery(blogId, post).queryKey, post);
+      queryClient.setQueryData(
+        postMetadataQuery(blogId, post._id).queryKey,
+        post,
+      );
+      queryClient.setQueryData(commentListQuery(blogId, post._id).queryKey, []);
+
       toast.success(t("blog.post.create.success"));
       return Promise.all([
         // Publishing a post invalidates some queries.
@@ -70,10 +87,16 @@ export const useSavePost = (blogId: string, post: Post) => {
       savePost(blogId, post),
     onSuccess: (result, { withoutNotification }) => {
       // Saving a post may change its state. Update the query data accordingly.
-      queryClient.setQueryData(postQuery(blogId, post).queryKey, {
+      const updatedPost = {
         ...post,
         state: result.state,
-      });
+      };
+      queryClient.setQueryData(postQuery(blogId, post).queryKey, updatedPost);
+      queryClient.setQueryData(
+        postMetadataQuery(blogId, post._id).queryKey,
+        updatedPost,
+      );
+
       if (!withoutNotification) {
         toast.success(t("blog.post.save.success"));
       }
@@ -147,14 +170,19 @@ export const usePublishPost = (blogId: string) => {
     onSuccess: (result, { post, publishWith }) => {
       // Publishing/submitting a post change its state. Update the query data accordingly.
       // Use the state which is sent back, or guess it from the publish/submit mess.
-      queryClient.setQueryData(postQuery(blogId, post).queryKey, {
+      const updatedPost = {
         ...post,
         state:
           result.state ||
           (publishWith === "publish"
             ? PostState.PUBLISHED
             : PostState.SUBMITTED),
-      });
+      };
+      queryClient.setQueryData(postQuery(blogId, post).queryKey, updatedPost);
+      queryClient.setQueryData(
+        postMetadataQuery(blogId, post._id).queryKey,
+        updatedPost,
+      );
 
       toast.success(
         t(
