@@ -57,10 +57,16 @@ export function deletePost(blogId: string, postId: string) {
 export function savePost(blogId: string, post: Post) {
   const { _id: postId, title, content } = post;
   return checkHttpError(
-    odeServices.http().putJson<PostMetadata>(`/blog/post/${blogId}/${postId}`, {
-      title,
-      content,
-    }),
+    odeServices.http().putJson<PostMetadata>(
+      `/blog/post/${blogId}/${postId}`,
+      {
+        title,
+        content,
+      },
+      // Do not emit any notification that is catched+shown by the MediaLibrary.
+      // The Post component has its own notification channel instead.
+      { disableNotifications: true },
+    ),
   );
 }
 
@@ -76,12 +82,17 @@ export function publishPost(
   blogId: string,
   post: Post,
   publishWith: "publish" | "submit",
+  fromEditor?: boolean,
 ) {
   const { _id: postId } = post;
   return checkHttpError(
-    odeServices
-      .http()
-      .putJson<Post>(`/blog/post/${publishWith}/${blogId}/${postId}`, {}),
+    odeServices.http().putJson<Post>(
+      `/blog/post/${publishWith}/${blogId}/${postId}`,
+      {},
+      // Do not emit any notification that is catched+shown by the MediaLibrary.
+      // The Post component has its own notification channel instead.
+      { disableNotifications: fromEditor },
+    ),
   );
 }
 

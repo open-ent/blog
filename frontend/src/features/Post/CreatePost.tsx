@@ -59,6 +59,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
         await publishMutation.mutate({
           post,
           publishWith: getDefaultPublishKeyword(post.author.userId),
+          fromEditor: true,
         });
         navigate(`/id/${blogId}/post/${post?._id}`);
       }
@@ -89,6 +90,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
       </FormControl>
       <div className="mx-md-16 post-content-editor">
         <Editor
+          id="postContent"
           ref={editorRef}
           content=""
           mode="edit"

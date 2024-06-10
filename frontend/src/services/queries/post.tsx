@@ -163,10 +163,12 @@ export const usePublishPost = (blogId: string) => {
     mutationFn: ({
       post,
       publishWith = "publish",
+      fromEditor,
     }: {
       post: Post;
       publishWith?: "publish" | "submit";
-    }) => publishPost(blogId, post, publishWith),
+      fromEditor?: boolean;
+    }) => publishPost(blogId, post, publishWith, fromEditor),
     onSuccess: (result, { post, publishWith }) => {
       // Publishing/submitting a post change its state. Update the query data accordingly.
       // Use the state which is sent back, or guess it from the publish/submit mess.

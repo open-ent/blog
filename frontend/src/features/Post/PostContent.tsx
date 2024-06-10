@@ -2,7 +2,14 @@ import { Suspense, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
 import { Save, Send } from "@edifice-ui/icons";
-import { Alert, Button, FormControl, Input, Label } from "@edifice-ui/react";
+import {
+  Alert,
+  Button,
+  FormControl,
+  Input,
+  Label,
+  Loading,
+} from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -128,7 +135,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     post.title = title;
     post.content = contentHtml;
     await save(true);
-    await publish();
+    await publish(true);
     setMode("read");
   };
 
@@ -213,7 +220,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               <Button
                 type="button"
                 variant="outline"
-                leftIcon={<Save />}
+                leftIcon={isMutating ? <Loading isLoading={true} /> : <Save />}
                 disabled={isMutating || (isEmptyContent && title.length == 0)}
                 onClick={handleSaveClick}
               >
@@ -222,7 +229,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             )}
             <Button
               type="button"
-              leftIcon={<Send />}
+              leftIcon={isMutating ? <Loading isLoading={true} /> : <Send />}
               disabled={isMutating || title.length == 0 || isEmptyContent}
               onClick={handlePublishClick}
             >
