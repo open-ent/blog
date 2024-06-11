@@ -43,6 +43,7 @@ import org.entcore.common.explorer.IdAndVersion;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.service.impl.MongoDbSearchService;
+import org.entcore.common.share.ShareNormalizer;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.utils.StringUtils;
 
@@ -63,13 +64,17 @@ public class DefaultBlogService implements BlogService{
 
 	private final AudienceHelper audienceHelper;
 
-	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize, BlogExplorerPlugin plugin, AudienceHelper audienceHelper) {
+	private final ShareNormalizer shareNormalizer;
+
+	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize,
+														BlogExplorerPlugin plugin, AudienceHelper audienceHelper) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.pagingSize = pagingSize;
 		this.postService = postService;
 		this.searchWordMinSize = searchWordMinSize;
 		this.audienceHelper = audienceHelper;
+		this.shareNormalizer = new ShareNormalizer(this.plugin.getSecuredActions());
 	}
 
 	@Override
@@ -216,9 +221,20 @@ public class DefaultBlogService implements BlogService{
 				new Handler<Message<JsonObject>>() {
 			@Override
 			public void handle(Message<JsonObject> event) {
+				final JsonObject body = event.body();
+				if(body.containsKey("result")) {
+					addNormalizedShares(body.getJsonObject("result"));
+				}
 				result.handle(Utils.validResult(event));
 			}
 		});
+	}
+
+	private JsonObject addNormalizedShares(final JsonObject blog) {
+		if(blog != null) {
+			shareNormalizer.addNormalizedRights(blog, e -> plugin.getCreatorForModel(e).map(UserInfos::getUserId));
+		}
+		return blog;
 	}
 
 	@Override
@@ -228,6 +244,7 @@ public class DefaultBlogService implements BlogService{
 			Either<String,JsonObject> eitherBlog = Utils.validResult(event);
 			if(eitherBlog.isRight()){
 				JsonObject blog = eitherBlog.right().getValue();
+				addNormalizedShares(blog);
 				postService.count(blog.getString("_id"), PostService.StateType.PUBLISHED,eventCount->{
 					if(eventCount.isRight()){
 						blog.put("countAll", eventCount.right().getValue());
