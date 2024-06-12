@@ -141,6 +141,7 @@ export const CommentCard = ({
                     variant="ghost"
                     size="sm"
                     onClick={handlePublishClick}
+                    disabled={!comment.length}
                   >
                     {t("comment.post")}
                   </Button>
