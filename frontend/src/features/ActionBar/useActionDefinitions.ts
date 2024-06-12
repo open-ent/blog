@@ -45,6 +45,8 @@ export const useActionDefinitions = (
   const { user } = useUser();
   const { blog } = useBlog();
 
+  const isRestraint = blog?.["publish-type"] === "RESTRAINT";
+
   const rights = useMemo(() => {
     const defaultRights = {
       creator: false,
@@ -62,7 +64,7 @@ export const useActionDefinitions = (
     }
 
     const { shared, author } = blog;
-    const isAuthor = author.userId === user?.userId;
+    const isBlogAuthor = author.userId === user?.userId;
 
     // Look for granted rights in the "shared" array.
     const sharedRights =
@@ -92,9 +94,7 @@ export const useActionDefinitions = (
               current["org-entcore-blog-controllers-PostController|comment"];
 
             previous.canContrib ||=
-              author.userId === user?.userId ||
-              previous.contrib ||
-              previous.manager;
+              isBlogAuthor || previous.contrib || previous.manager;
 
             // Also look for the real publish/submit URL to use.
             // If both are acceptable, prefer publish over submit.
@@ -115,9 +115,9 @@ export const useActionDefinitions = (
     return {
       ...sharedRights,
       // The creator has all rights.
-      canComment: sharedRights.canComment || isAuthor,
-      canContrib: sharedRights.canContrib || isAuthor,
-      creator: isAuthor,
+      canComment: sharedRights.canComment || isBlogAuthor,
+      canContrib: sharedRights.canContrib || isBlogAuthor,
+      creator: isBlogAuthor,
     };
   }, [blog, user]);
 
@@ -190,15 +190,13 @@ export const useActionDefinitions = (
   */
   const getDefaultPublishKeyword = useCallback(
     (postAuthorId: string) => {
-      const isRestraint = blog?.["publish-type"] === "RESTRAINT";
-
       return !isRestraint && postAuthorId === user?.userId
         ? "submit" // Logic would require "publish", but that would give a 401 Unauthorized :-/
         : rights.manager || rights.creator || rights.hasPublishPostRight
           ? "publish"
           : "submit";
     },
-    [blog, user, rights],
+    [isRestraint, user, rights],
   );
 
   /**
@@ -206,9 +204,7 @@ export const useActionDefinitions = (
    * This is intended for UI only (buttons label), not custom backend logic.
    */
   const mustSubmit =
-    blog?.["publish-type"] === "RESTRAINT" &&
-    rights.contrib &&
-    !(rights.manager || rights.creator);
+    isRestraint && rights.contrib && !(rights.manager || rights.creator);
 
   const availableActionsForBlog = useMemo(() => {
     if (!availableActions || availableActions?.length === 0) return [];
@@ -228,5 +224,6 @@ export const useActionDefinitions = (
     getDefaultPublishKeyword,
     availableActionsForPost,
     availableActionsForBlog,
+    isRestraint,
   };
 };

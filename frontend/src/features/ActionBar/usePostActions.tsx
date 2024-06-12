@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { useUser } from "@edifice-ui/react";
 import { ACTION, ActionType, IAction } from "edifice-ts-client";
 
 import { useActionDefinitions } from "./useActionDefinitions";
@@ -55,6 +56,9 @@ export const usePostActions = (
   blogId: string,
   post: Post,
 ): PostActions => {
+  const { user } = useUser();
+
+  // Check resource rights.
   const {
     availableActionsForPost,
     mustSubmit,
@@ -62,6 +66,7 @@ export const usePostActions = (
     creator,
     manager,
     contrib,
+    isRestraint,
   } = useActionDefinitions(actionDefinitions);
 
   // Memoize a set of expensive computations
@@ -103,7 +108,33 @@ export const usePostActions = (
       publishMutation.isPending ||
       goUpMutation.isPending,
     showBadge: creator || manager || contrib,
-    hideSaveDraft: (manager || creator) && post.state === PostState.PUBLISHED,
+    /* WB-3071 */
+    hideSaveDraft:
+      /* Circuit actif : un contributeur n'a pas le droit de mettre en brouillon
+         un billet publié dont il est l’auteur.
+         (car il n’a pas le droit de le publier seul),
+      */
+      (isRestraint &&
+        contrib &&
+        !(manager || creator) &&
+        post.state === PostState.PUBLISHED &&
+        post.author.userId === user?.userId) ||
+      /* Circuit actif : un gestionnaire n'a pas le droit de mettre en brouillon
+         un billet publié dont il n'est pas l’auteur.
+         (car si le billet appartient à un Contributeur il ne verra pas où est “transféré” le billet 
+         et il ne pourra alors pas le republier si besoin).
+      */
+      (isRestraint &&
+        (manager || creator) &&
+        post.state === PostState.PUBLISHED &&
+        post.author.userId !== user?.userId) ||
+      /* Circuit INACTIF : un contributeur ou gestionnaire n'a pas le droit de mettre en brouillon
+         un billet publié dont il n'est pas l’auteur.
+       */
+      (!isRestraint &&
+        (manager || creator || contrib) &&
+        post.state === PostState.PUBLISHED &&
+        post.author.userId !== user?.userId),
     save: (withoutNotification) =>
       saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),
