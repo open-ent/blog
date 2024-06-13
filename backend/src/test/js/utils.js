@@ -38,7 +38,7 @@ export function addShareToUser(blog, user, shareType, session) {
     const groups = existingShares.groups.checked;
     const users = existingShares.users.checked || {};
     const sharesToAdd = existingShares.actions.filter(action => action.displayName === `blog.${shareType}`)[0]
-    users[user.id] = sharesToAdd;
+    users[user.id] = sharesToAdd ? sharesToAdd.name : [];
     const newShares = {
         bookmarks: {},
         groups,
@@ -71,15 +71,26 @@ export function createPost(title, content, blog, session) {
     return null;
 }
 
+export function submitPost(blog, post, session) {
+    const headers = getHeaders(session)
+    headers['content-type'] = 'application/json'
+    return http.put(`${rootUrl}/blog/post/submit/${blog.id}/${post.id}`, {}, {headers});
+}
+
+export function publishPost(blog, post, session) {
+    const headers = getHeaders(session)
+    headers['content-type'] = 'application/json'
+    return http.put(`${rootUrl}/blog/post/publish/${blog.id}/${post.id}`, {}, {headers});
+}
+
 export function getPost(blogId, postId, state, session) {
-    console.log(`${rootUrl}/blog/post/${blogId}/${postId}?state=${state}`)
     const res = http.get(`${rootUrl}/blog/post/${blogId}/${postId}?state=${state}`, {headers: getHeaders(session)})
     if(res.status === 200) {
         const post = JSON.parse(res.body);
         post.id = post._id;
         return post;
     }
-    console.warn('Could not fetch post')
+    console.warn(`Could not fetch post ${postId}`)
     return null;
 }
 

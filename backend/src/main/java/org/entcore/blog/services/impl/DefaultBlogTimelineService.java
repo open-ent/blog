@@ -171,7 +171,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 			final UserInfos user, final String resourceUri) {
 		if (resourceUri != null && user != null && blogId != null && request != null) {
 			QueryBuilder query = QueryBuilder.start("_id").is(postId);
-			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1).put("content", 1);
+			JsonObject keys = new JsonObject().put("title", 1).put("blog", 1).put("jsonContent", 1);
 			JsonArray fetch = new JsonArray().add("blog");
 			findRecipiants("posts", query, keys, fetch, user, new Handler<Map<String, Object>>() {
 				@Override
@@ -191,7 +191,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.put("pushNotif", new JsonObject().put("title", "push.notif.blog.published.post").put("body", user.getUsername()+ " : "+ blog.getJsonObject("blog", new JsonObject()).getString("title")));
 							notification.notifyTimeline(request, "blog.publish-post", user, recipients,
 									blogId, postId, p, true,
-									NotificationUtils.htmlContentToPreview(blog.getString("content")));
+									NotificationUtils.jsonContentToPreview(blog.getJsonObject("jsonContent")));
 						}
 					}
 				}
