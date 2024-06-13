@@ -1,6 +1,8 @@
+import { useTrashedResource } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs, Outlet } from "react-router-dom";
+import { LoaderFunctionArgs, Outlet, useParams } from "react-router-dom";
 
+import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { blogQuery } from "~/services/queries";
 
 export const loader =
@@ -14,5 +16,10 @@ export const loader =
   };
 
 export function Component() {
+  const { blogId } = useParams();
+
+  useTrashedResource(blogId);
+  useBlogErrorToast();
+
   return <Outlet></Outlet>;
 }

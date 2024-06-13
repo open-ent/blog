@@ -1,4 +1,3 @@
-import { useTrashedResource } from "@edifice-ui/react";
 import { QueryClient, useQuery } from "@tanstack/react-query";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
@@ -36,7 +35,6 @@ export const loader =
 export function Component() {
   useBlogErrorToast();
   const { blogId, postId } = useParams();
-  useTrashedResource(blogId);
 
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const query = useQuery(postQuery(blogId!, postMetadata));

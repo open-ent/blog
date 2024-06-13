@@ -19,7 +19,6 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
     children: [
       {
         index: true,
-        // TODO remove cast as any when ode-explorer is fixed
         element: <ExplorerBlog />,
       },
       // This page displays all information about the blog and its list of posts.

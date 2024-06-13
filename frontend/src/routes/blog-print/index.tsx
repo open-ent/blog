@@ -1,8 +1,10 @@
+import { useTrashedResource } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs } from "react-router-dom";
+import { LoaderFunctionArgs, useParams } from "react-router-dom";
 
 import { blogActions } from "~/config/blogActions";
 import { BlogPrint } from "~/features/Blog/BlogPrint";
+import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { PostState } from "~/models/post";
 import {
   availableActionsQuery,
@@ -33,5 +35,10 @@ export const loader =
   };
 
 export function Component() {
+  const { blogId } = useParams();
+
+  useTrashedResource(blogId);
+  useBlogErrorToast();
+
   return <BlogPrint></BlogPrint>;
 }

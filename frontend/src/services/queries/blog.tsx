@@ -1,4 +1,4 @@
-import { useToast, useTrashedResource } from "@edifice-ui/react";
+import { useToast } from "@edifice-ui/react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -126,7 +126,6 @@ export const useBlog = (blogId?: string, slug?: string) => {
   if (!blogId) blogId = params.blogId;
   if (!slug) slug = params.slug;
 
-  useTrashedResource(blogId);
   let queryOptions = blogQuery(blogId!); // Default options
   if (!blogId) {
     if (!slug) {

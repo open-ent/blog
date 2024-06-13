@@ -1,8 +1,10 @@
+import { useTrashedResource } from "@edifice-ui/react";
 import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs, Outlet } from "react-router-dom";
+import { LoaderFunctionArgs, Outlet, useLoaderData } from "react-router-dom";
 
 import { blogActions } from "~/config/blogActions";
 import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
+import { Blog } from "~/models/blog";
 import { availableActionsQuery, blogPublicQuery } from "~/services/queries";
 
 export const loader =
@@ -21,6 +23,9 @@ export const loader =
   };
 
 export function Component() {
+  const { blog } = useLoaderData() as { blog: Blog };
+
+  useTrashedResource(blog._id);
   useBlogErrorToast();
 
   return <Outlet></Outlet>;
