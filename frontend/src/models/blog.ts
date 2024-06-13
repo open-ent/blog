@@ -13,7 +13,10 @@ export type Blog = {
     login: string;
   };
   thumbnail: string;
+  /** Old shared rights */
   shared?: [];
+  /**  Normalized shared rights */
+  rights: string[];
   "publish-type": PublishType;
   "comment-type": CommentType;
   visibility: "OWNER" | "PUBLIC";

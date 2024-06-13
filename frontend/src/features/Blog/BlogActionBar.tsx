@@ -7,7 +7,6 @@ import { ACTION, ActionType } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { blogActions } from "~/config/blogActions";
 import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
@@ -15,6 +14,7 @@ import { Blog } from "~/models/blog";
 import { baseUrl } from "~/routes";
 import { blogQuery, useDeleteBlog } from "~/services/queries";
 import { useBlogState, useStoreUpdaters } from "~/store";
+import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -49,6 +49,13 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   const { t: common_t } = useTranslation("common");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  /* shareOptions is used to share a resource from ShareModal */
+  const shareOptions = {
+    resourceCreatorId: blog.author.userId,
+    resourceId: blog._id,
+    resourceRights: blog.rights,
+  };
 
   const { availableActionsForBlog: availableActions, canContrib } =
     useActionDefinitions(blogActions);
@@ -256,11 +263,11 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
         {isShareModalOpen && (
           <ShareModal
             isOpen={isShareModalOpen}
-            resourceId={blog._id}
+            shareOptions={shareOptions}
             onCancel={handleShareClose}
             onSuccess={handleShareSuccess}
           >
-            {(ressource) => <ShareBlog resource={ressource} />}
+            <ShareBlog resourceId={blog._id} />
           </ShareModal>
         )}
         {isPublishModalOpen && (
