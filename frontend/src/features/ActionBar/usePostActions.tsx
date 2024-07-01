@@ -45,6 +45,8 @@ export interface PostActions {
   isMutating: boolean;
   /** Truthy when the post's state should be displayed in a badge. */
   showBadge: boolean;
+  /** Truthy when the views counter should be displayed. */
+  showViews: boolean;
   /** WB-2886 Thruthy when the save (as draft) button should be hidden. */
   hideSaveDraft: boolean;
   /** Truthy if post have editor content */
@@ -108,6 +110,7 @@ export const usePostActions = (
       publishMutation.isPending ||
       goUpMutation.isPending,
     showBadge: creator || manager || contrib,
+    showViews: creator || manager,
     /* WB-3071 */
     hideSaveDraft:
       /* Circuit actif : un contributeur n'a pas le droit de mettre en brouillon

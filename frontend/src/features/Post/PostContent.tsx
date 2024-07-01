@@ -13,6 +13,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+import { PostAudience } from "./PostAudience";
 import { PostTitle } from "./PostTitle";
 import { usePostActions } from "../ActionBar/usePostActions";
 import { CommentsCreate } from "../Comments/CommentsCreate";
@@ -46,6 +47,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     readOnly,
     isMutating,
     hideSaveDraft,
+    showViews,
   } = postActions;
 
   // Get the query parameters in URL to know if the post is in edit mode.
@@ -145,6 +147,8 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     setIsEmptyContent(emptyContent);
   };
 
+  const withAudience = !publicView && mode === "read";
+
   return (
     <div className="post-container mb-48">
       <PostTitle
@@ -239,9 +243,19 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         )}
       </div>
 
+      <div className="d-flex justify-content-between align-items-center pt-24 pb-8">
+        {mode === "read" && !!comments && (
+          <div className="mx-md-8 mt-24">
+            <CommentsHeader comments={comments} />
+          </div>
+        )}
+        {withAudience && (
+          <PostAudience blogId={blogId} post={post} withViews={showViews} />
+        )}
+      </div>
+
       {mode === "read" && !!comments && (
-        <div className="mx-md-8 mt-24">
-          <CommentsHeader comments={comments} />
+        <div className="mx-md-8">
           <CommentsCreate />
           <CommentsList comments={comments} />
         </div>

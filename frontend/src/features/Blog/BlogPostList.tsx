@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { Button, EmptyScreen, usePaths } from "@edifice-ui/react";
+import { Button, EmptyScreen, usePaths, useReactions } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
 import { PostPreview } from "~/components/PostPreview/PostPreview";
@@ -24,12 +24,16 @@ const BlogPostList = () => {
     blog?._id,
     publicView ? PostState.PUBLISHED : undefined,
     publicView ? false : undefined,
+    (creator || manager) && !publicView,
   );
 
   const { postsFilters } = usePostsFilter();
   const { counters } = useBlogCounter(blog?._id);
 
-  const { sidebarHighlightedPost } = useBlogState();
+  const { sidebarHighlightedPost, postsViewsCounters, postsReactionsSummary } =
+    useBlogState();
+
+  const { availableReactions } = useReactions("blog", "post");
 
   useEffect(() => {
     if (sidebarHighlightedPost) {
@@ -83,7 +87,16 @@ const BlogPostList = () => {
         </div>
       )}
       {posts?.map((post, index) => (
-        <PostPreview key={post._id} post={post} index={index} />
+        <PostPreview
+          key={post._id}
+          post={post}
+          index={index}
+          views={postsViewsCounters?.[post._id]}
+          reactions={{
+            available: availableReactions,
+            summary: postsReactionsSummary?.[post._id],
+          }}
+        />
       ))}
       {hasNextPage && (
         <div className="d-flex justify-content-center">

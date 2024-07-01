@@ -20,7 +20,7 @@ export function BlogPrint() {
   const {
     posts,
     query: { hasNextPage, isSuccess },
-  } = usePostsList(blog?._id, PostState.PUBLISHED, false);
+  } = usePostsList(blog?._id, PostState.PUBLISHED, false, false);
   useLoadPostList(true);
 
   useEffect(() => {

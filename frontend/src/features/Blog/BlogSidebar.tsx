@@ -19,6 +19,7 @@ const BlogSidebar = () => {
     blog?._id,
     publicView ? PostState.PUBLISHED : undefined,
     publicView ? false : undefined,
+    false,
   );
 
   const { currentApp } = useOdeClient();

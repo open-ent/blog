@@ -1,3 +1,5 @@
+import { useCallback, useEffect } from "react";
+
 import { useToast } from "@edifice-ui/react";
 import {
   useInfiniteQuery,
@@ -14,11 +16,13 @@ import {
   loadBlogCounter,
   loadBlogPublic,
   loadPostsList,
+  loadPostsReactionsSummary,
+  loadPostsViewsCounter,
   sessionHasWorkflowRights,
 } from "../api/blog";
 import usePostsFilter from "~/hooks/usePostsFilter";
 import { Post, PostState } from "~/models/post";
-import { useBlogState } from "~/store";
+import { useBlogState, useStoreUpdaters } from "~/store";
 import { IActionDefinition } from "~/utils/types";
 
 export const blogQueryKeys = {
@@ -47,6 +51,10 @@ export const blogQueryKeys = {
     return queryKey;
   },
   public: (slug: string) => ["public blog", slug],
+  postsViewsCounters: (ressourceIds: string[]) => [
+    "postsViewsCounter",
+    ressourceIds,
+  ],
 };
 
 /** Query blog data */
@@ -72,6 +80,13 @@ export const blogCounterQuery = (blogId: string) => {
   };
 };
 
+export const postsViewsCountersQuery = (resourceIds: string[]) => {
+  return {
+    queryKey: blogQueryKeys.postsViewsCounters(resourceIds),
+    queryFn: () => loadPostsViewsCounter(resourceIds),
+  };
+};
+
 export const postsListQuery = (
   blogId: string,
   pageSize?: number,
@@ -84,6 +99,7 @@ export const postsListQuery = (
     queryKey: blogQueryKeys.postsList(blogId, state, search, isPublic),
     queryFn: ({ pageParam = 0 }) =>
       loadPostsList(blogId, pageParam, state, search, nbComments, isPublic),
+
     initialPageParam: 0,
     getNextPageParam: (lastPage: any, _allPages: any, lastPageParam: any) => {
       if (
@@ -167,14 +183,20 @@ export const useBlogCounter = (blogId?: string) => {
 /**
  * usePostsList query
  * @param blogId the blog id string
+ * @param state filter posts on their state
+ * @param withNbComments fetch comments number
+ * @param withViews fetch views number (implies additional requests to the backend)
  * @returns list of posts
  */
 export const usePostsList = (
   blogId?: string,
   state?: PostState,
   withNbComments: boolean = true,
+  withViews: boolean = false,
 ) => {
   const params = useParams<{ blogId: string; slug: string }>();
+  const { addPostsViewsCounters, addPostsReactionsSummary } =
+    useStoreUpdaters();
   const { postsFilters } = usePostsFilter();
   const { postPageSize } = useBlogState();
 
@@ -187,6 +209,22 @@ export const usePostsList = (
 
   const publicView = !!params.slug;
 
+  // Request the audience for a list of posts id
+  const loadAudience = useCallback(
+    async (resourceIds: string[]) => {
+      if (resourceIds.length > 0) {
+        // Load views counter and reactions summary, then add them to the store.
+        const [counters, summary] = await Promise.all([
+          loadPostsViewsCounter(resourceIds),
+          loadPostsReactionsSummary(resourceIds),
+        ]);
+        addPostsViewsCounters(counters);
+        addPostsReactionsSummary(summary);
+      }
+    },
+    [addPostsViewsCounters, addPostsReactionsSummary],
+  );
+
   const query = useInfiniteQuery(
     postsListQuery(
       blogId!,
@@ -197,6 +235,18 @@ export const usePostsList = (
       publicView,
     ),
   );
+
+  // Wait for the end of above infinite query to load audience.
+  useEffect(() => {
+    const pagesNumber = query.data?.pages.length;
+    if (withViews && typeof pagesNumber === "number" && pagesNumber > 0) {
+      const lastPageIds = query.data?.pages[pagesNumber - 1].map(
+        (post) => post._id,
+      ) as string[];
+      loadAudience(lastPageIds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data?.pages.length, publicView]);
 
   return {
     posts: query.data?.pages.flatMap((page) => page) as Post[],
@@ -227,4 +277,13 @@ export const useDeleteBlog = (blogId: string) => {
       queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) });
     },
   });
+};
+
+export const usePostsViewsCounters = (resourceIds: string[]) => {
+  const query = useQuery(postsViewsCountersQuery(resourceIds));
+
+  return {
+    counters: query.data,
+    query,
+  };
 };
