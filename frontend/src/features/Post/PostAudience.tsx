@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import {
+  ReactionChoice,
   ReactionModal,
   ReactionSummary,
   ViewsCounter,
@@ -102,17 +103,21 @@ export const PostAudience = ({
   };
 
   return (
-    <div className="d-flex justify-content-between mt-32">
-      <div className="d-flex gap-12 small text-gray-700 align-items-center">
+    <div className="d-flex justify-content-between">
+      <div className="d-flex align-items-start align-items-md-center gap-12 small text-gray-700">
         {reactionsSummary && (
           <>
-            <ReactionSummary
-              flexDirection="row"
-              availableReactions={availableReactions}
-              summary={reactionsSummary}
-              onClick={handleReactionOnClick}
-              onChange={handleReactionOnChange}
-            />
+            <div className="d-inline-flex flex-column-reverse flex-md-row align-items-start align-items-md-center gap-12">
+              <ReactionChoice
+                availableReactions={availableReactions}
+                summary={reactionsSummary}
+                onChange={handleReactionOnChange}
+              />
+              <ReactionSummary
+                summary={reactionsSummary}
+                onClick={handleReactionOnClick}
+              />
+            </div>
             <span className="separator d-none d-md-block"></span>
             {isReactionsModalOpen && (
               <ReactionModal

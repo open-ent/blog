@@ -243,9 +243,9 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         )}
       </div>
 
-      <div className="d-flex justify-content-between align-items-center pt-24 pb-8">
+      <div className="d-flex justify-content-between align-items-start align-items-md-center mt-32 pt-24 pb-8">
         {mode === "read" && !!comments && (
-          <div className="mx-md-8 mt-24">
+          <div className="mx-md-8">
             <CommentsHeader comments={comments} />
           </div>
         )}

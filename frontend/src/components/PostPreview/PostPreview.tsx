@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   Image,
+  ReactionChoice,
   ReactionSummary,
   ViewsCounter,
   getThumbnail,
@@ -245,39 +246,43 @@ export const PostPreview = ({
                 ))}
             </div>
             <div className="d-flex justify-content-between">
-              <div className="d-flex gap-12 small text-gray-700 align-items-baseline ">
-                {showReactions && typeof reactions?.summary === "object" ? (
-                  <>
-                    <ReactionSummary
-                      availableReactions={reactions.available}
-                      summary={reactions.summary}
-                    />
-                    <span className="separator d-none d-md-block"></span>
-                  </>
-                ) : null}
-                {showViews && typeof views === "number" ? (
-                  <>
-                    <ViewsCounter viewsCounter={views} />
-                    <span className="separator d-none d-md-block"></span>
-                  </>
-                ) : null}
-
-                {typeof post.nbComments === "number" && (
-                  <div className="d-flex align-items-center gap-8">
-                    <span>{post.nbComments}</span>
-                    <MessageInfo />
-                  </div>
-                )}
-              </div>
               <div>
-                <Button
-                  variant="ghost"
-                  rightIcon={<ArrowRight />}
-                  color="secondary"
-                >
-                  {t("blog.post.preview.readMore")}
-                </Button>
+                <div className="d-flex gap-12 align-items-center ">
+                  {showReactions && typeof reactions?.summary === "object" ? (
+                    <>
+                      <ReactionSummary summary={reactions.summary} />
+                      <span className="separator d-none d-md-block"></span>
+                    </>
+                  ) : null}
+                  {showViews && typeof views === "number" ? (
+                    <>
+                      <ViewsCounter viewsCounter={views} />
+                      <span className="separator d-none d-md-block"></span>
+                    </>
+                  ) : null}
+
+                  {typeof post.nbComments === "number" && (
+                    <div className="text-gray-700 d-flex align-items-center gap-8">
+                      <span>{post.nbComments}</span>
+                      <MessageInfo />
+                    </div>
+                  )}
+                </div>
+                {showReactions && typeof reactions?.summary === "object" ? (
+                  <ReactionChoice
+                    availableReactions={reactions.available}
+                    summary={reactions.summary}
+                  />
+                ) : null}
               </div>
+              <Button
+                variant="ghost"
+                rightIcon={<ArrowRight />}
+                color="secondary"
+                className="align-self-end"
+              >
+                {t("blog.post.preview.readMore")}
+              </Button>
             </div>
           </div>
         </Card.Body>
