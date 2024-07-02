@@ -98,6 +98,12 @@ main {
   overflow-wrap: anywhere;
 }
 
+.post-preview-comment-icon svg {
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+}
+
 .post-content-editor .ProseMirror[contenteditable="true"] {
   min-height: 180px;
 }
