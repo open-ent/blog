@@ -25,25 +25,6 @@ module.exports = {
     "@typescript-eslint/ban-types": "off",
     "no-unused-vars": "off",
     "unused-imports/no-unused-imports": "error",
-    "import/order": [
-      "error",
-      {
-        groups: ["builtin", "external", "internal"],
-        pathGroups: [
-          {
-            pattern: "react",
-            group: "external",
-            position: "before",
-          },
-        ],
-        pathGroupsExcludedImportTypes: ["react"],
-        "newlines-between": "always",
-        alphabetize: {
-          order: "asc",
-          caseInsensitive: true,
-        },
-      },
-    ],
   },
   settings: {
     react: {
