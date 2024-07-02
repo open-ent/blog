@@ -10,6 +10,7 @@ import {
 } from "@edifice-ui/react";
 import { ReactionSummaryData, ViewsDetails } from "edifice-ts-client";
 
+import useReactionModal from "~/hooks/useReactionModal";
 import { Post } from "~/models/post";
 import { loadPostViewsDetails, triggerViewOnPost } from "~/services/api";
 
@@ -37,7 +38,12 @@ export const PostAudience = ({
     loadReactionDetails,
     applyReaction,
   } = useReactions("blog", "post");
-  const [isReactionsModalOpen, setIsReactionsModalOpen] = useState(false);
+
+  const {
+    isReactionsModalOpen,
+    handleReactionOnClick,
+    handleReactionModalClose,
+  } = useReactionModal();
 
   const loadViews = useCallback(async () => {
     const details = await loadPostViewsDetails(post._id);
@@ -93,13 +99,6 @@ export const PostAudience = ({
   };
   const handleViewsModalClose = () => {
     setIsViewsModalOpen(false);
-  };
-
-  const handleReactionOnClick = () => {
-    setIsReactionsModalOpen(true);
-  };
-  const handleReactionModalClose = () => {
-    setIsReactionsModalOpen(false);
   };
 
   return (

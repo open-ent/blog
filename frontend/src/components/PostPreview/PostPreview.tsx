@@ -10,10 +10,12 @@ import {
   Card,
   Image,
   ReactionChoice,
+  ReactionModal,
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
   getThumbnail,
+  useReactions,
   useToggle,
 } from "@edifice-ui/react";
 import clsx from "clsx";
@@ -24,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import { PostPreviewActionBar } from "./PostPreviewActionBar";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { PostDate } from "~/features/Post/PostDate";
+import useReactionModal from "~/hooks/useReactionModal";
 import { Post, PostState } from "~/models/post";
 import { loadPostViewsDetails } from "~/services/api";
 import { useBlog } from "~/services/queries";
@@ -65,6 +68,12 @@ export const PostPreview = ({
   const { contrib, manager, creator } = useActionDefinitions([]);
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
+  const { loadReactionDetails } = useReactions("blog", "post");
+  const {
+    isReactionsModalOpen,
+    handleReactionOnClick,
+    handleReactionModalClose,
+  } = useReactionModal();
 
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -278,8 +287,19 @@ export const PostPreview = ({
                   <div className="d-flex gap-4 align-items-center ">
                     {showReactions && typeof reactions?.summary === "object" ? (
                       <>
-                        <ReactionSummary summary={reactions.summary} />
+                        <ReactionSummary
+                          summary={reactions.summary}
+                          onClick={handleReactionOnClick}
+                        />
                         <span className="separator d-none d-md-block"></span>
+                        {isReactionsModalOpen && (
+                          <ReactionModal
+                            resourceId={post._id}
+                            isOpen={isReactionsModalOpen}
+                            onModalClose={handleReactionModalClose}
+                            reactionDetailsLoader={loadReactionDetails}
+                          />
+                        )}
                       </>
                     ) : null}
                     {showViews && typeof views === "number" ? (
