@@ -1,4 +1,4 @@
-import { Layout } from "@edifice-ui/react";
+import { Layout, LoadingScreen, useOdeClient } from "@edifice-ui/react";
 import { Outlet } from "react-router-dom";
 
 import { redirectBlogHashLocation } from "~/utils/redirectBlogHashLocation";
@@ -9,6 +9,9 @@ export const rootLoader = async () => {
 };
 
 export const Root = () => {
+  const { init } = useOdeClient();
+
+  if (!init) return <LoadingScreen position={false} />;
   return (
     <Layout>
       <Outlet />
