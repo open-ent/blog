@@ -69,8 +69,10 @@ export const PostPreview = ({
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
 
-  const { reactionSummary, loadReactionDetails, handleReactionOnChange } =
-    useReactionSummary(post._id, reactions?.summary);
+  const { loadReactionDetails, handleReactionOnChange } = useReactionSummary(
+    post._id,
+    reactions?.summary,
+  );
   const {
     isReactionsModalOpen,
     handleReactionOnClick,
@@ -328,12 +330,10 @@ export const PostPreview = ({
                       </div>
                     )}
                   </div>
-                  {showReactions &&
-                  reactions &&
-                  typeof reactionSummary === "object" ? (
+                  {showReactions && typeof reactions?.summary === "object" ? (
                     <ReactionChoice
                       availableReactions={reactions.available}
-                      summary={reactionSummary}
+                      summary={reactions.summary}
                       onChange={handleReactionOnChange}
                     />
                   ) : null}

@@ -86,18 +86,20 @@ const BlogPostList = () => {
           />
         </div>
       )}
-      {posts?.map((post, index) => (
-        <PostPreview
-          key={post._id}
-          post={post}
-          index={index}
-          views={postsViewsCounters?.[post._id]}
-          reactions={{
-            available: availableReactions,
-            summary: postsReactionsSummary?.[post._id],
-          }}
-        />
-      ))}
+      {posts?.map((post, index) =>
+        postsReactionsSummary ? (
+          <PostPreview
+            key={post._id}
+            post={post}
+            index={index}
+            views={postsViewsCounters?.[post._id]}
+            reactions={{
+              available: availableReactions,
+              summary: postsReactionsSummary[post._id],
+            }}
+          />
+        ) : null,
+      )}
       {hasNextPage && (
         <div className="d-flex justify-content-center">
           <Button

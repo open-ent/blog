@@ -12,7 +12,7 @@ interface State {
   postPageSize: number;
   actionBarPostId: string | undefined;
   postsViewsCounters: ViewsCounters | undefined;
-  postsReactionsSummary: ReactionsSummary | undefined;
+  postsReactionsSummary: ReactionsSummary;
   updaters: {
     setSidebarHighlightedPost: (sidebarPostSelected?: Post) => void;
     setPostPageSize: (postPageSize: number) => void;
@@ -27,7 +27,7 @@ export const useStoreContext = create<State>()((set, get) => ({
   postPageSize: 0,
   actionBarPostId: undefined,
   postsViewsCounters: undefined,
-  postsReactionsSummary: undefined,
+  postsReactionsSummary: {},
   updaters: {
     setSidebarHighlightedPost: (sidebarPostSelected) =>
       set({ sidebarHighlightedPost: sidebarPostSelected }),
