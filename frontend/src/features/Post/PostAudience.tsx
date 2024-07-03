@@ -7,7 +7,7 @@ import {
   ViewsCounter,
   ViewsModal,
 } from "@edifice-ui/react";
-import { ViewsDetails } from "edifice-ts-client";
+import { ReactionType, ViewsDetails } from "edifice-ts-client";
 
 import useReactionModal from "~/hooks/useReactionModal";
 import useReactionSummary from "~/hooks/useReactionSummary";
@@ -33,7 +33,7 @@ export const PostAudience = ({
     reactionSummary,
     loadReactions,
     loadReactionDetails,
-    handleReactionOnChange,
+    setUserReactionChoice,
   } = useReactionSummary(post._id);
   const {
     isReactionsModalOpen,
@@ -57,6 +57,15 @@ export const PostAudience = ({
     loadReactions();
   }, [withViews, loadViews, loadReactions]);
 
+  const handleReactionChoiceOnChange = useCallback(
+    async (choice?: ReactionType) => {
+      // Update summary
+      await setUserReactionChoice(choice);
+      loadReactions();
+    },
+    [loadReactions, setUserReactionChoice],
+  );
+
   const handleViewsOnClick = () => {
     if (viewsDetails && viewsDetails.viewsCounter > 0)
       setIsViewsModalOpen(true);
@@ -74,7 +83,7 @@ export const PostAudience = ({
               <ReactionChoice
                 availableReactions={availableReactions}
                 summary={reactionSummary}
-                onChange={handleReactionOnChange}
+                onChange={handleReactionChoiceOnChange}
               />
               <ReactionSummary
                 summary={reactionSummary}

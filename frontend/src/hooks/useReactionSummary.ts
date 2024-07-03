@@ -23,7 +23,7 @@ function useReactionSummary(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleReactionOnChange = useCallback(
+  const setUserReactionChoice = useCallback(
     async (newReaction: any) => {
       if (reactionSummary) {
         const oldReaction = reactionSummary.userReaction ?? null;
@@ -54,7 +54,7 @@ function useReactionSummary(
     loadReactions,
     loadReactionSummaries,
     loadReactionDetails,
-    handleReactionOnChange,
+    setUserReactionChoice,
   };
 }
 

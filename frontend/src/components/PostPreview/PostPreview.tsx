@@ -69,7 +69,7 @@ export const PostPreview = ({
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
 
-  const { loadReactionDetails, handleReactionOnChange } = useReactionSummary(
+  const { loadReactionDetails, setUserReactionChoice } = useReactionSummary(
     post._id,
     reactions?.summary,
   );
@@ -334,7 +334,7 @@ export const PostPreview = ({
                     <ReactionChoice
                       availableReactions={reactions.available}
                       summary={reactions.summary}
-                      onChange={handleReactionOnChange}
+                      onChange={setUserReactionChoice}
                     />
                   ) : null}
                 </div>
