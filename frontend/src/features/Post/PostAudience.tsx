@@ -6,11 +6,11 @@ import {
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-  useReactions,
 } from "@edifice-ui/react";
-import { ReactionSummaryData, ViewsDetails } from "edifice-ts-client";
+import { ViewsDetails } from "edifice-ts-client";
 
 import useReactionModal from "~/hooks/useReactionModal";
+import useReactionSummary from "~/hooks/useReactionSummary";
 import { Post } from "~/models/post";
 import { loadPostViewsDetails, triggerViewOnPost } from "~/services/api";
 
@@ -28,17 +28,13 @@ export const PostAudience = ({
   // Variables for read mode
   const [viewsDetails, setViewsDetails] = useState<ViewsDetails | undefined>();
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
-
-  const [reactionsSummary, setReactionsSummary] = useState<
-    ReactionSummaryData | undefined
-  >();
   const {
     availableReactions,
-    loadReactionSummaries,
+    reactionSummary,
+    loadReactions,
     loadReactionDetails,
-    applyReaction,
-  } = useReactions("blog", "post");
-
+    handleReactionOnChange,
+  } = useReactionSummary(post._id);
   const {
     isReactionsModalOpen,
     handleReactionOnClick,
@@ -49,38 +45,6 @@ export const PostAudience = ({
     const details = await loadPostViewsDetails(post._id);
     setViewsDetails(details);
   }, [post._id, setViewsDetails]);
-
-  const loadReactions = useCallback(async () => {
-    const summary = await loadReactionSummaries([post._id]);
-    setReactionsSummary(summary[post._id]);
-  }, [post._id, setReactionsSummary]);
-
-  const handleReactionOnChange = useCallback(
-    async (newReaction: any) => {
-      if (reactionsSummary) {
-        const change = await applyReaction(
-          post._id,
-          newReaction,
-          reactionsSummary.userReaction ?? null,
-        );
-        const newSummary = { ...reactionsSummary };
-        switch (change) {
-          case "-":
-            newSummary.totalReactionsCounter--;
-            newSummary.userReaction = null;
-            break;
-          case "+":
-            newSummary.totalReactionsCounter++;
-            newSummary.userReaction = newReaction;
-            break;
-          case "=":
-            newSummary.userReaction = newReaction;
-        }
-        setReactionsSummary(newSummary);
-      }
-    },
-    [applyReaction, post._id, reactionsSummary],
-  );
 
   useEffect(() => {
     // Trigger a view once
@@ -104,16 +68,16 @@ export const PostAudience = ({
   return (
     <div className="d-flex justify-content-between">
       <div className="d-flex align-items-start align-items-md-center gap-12 small text-gray-700">
-        {reactionsSummary && (
+        {reactionSummary && (
           <>
             <div className="d-inline-flex flex-column-reverse flex-md-row align-items-start align-items-md-center gap-12">
               <ReactionChoice
                 availableReactions={availableReactions}
-                summary={reactionsSummary}
+                summary={reactionSummary}
                 onChange={handleReactionOnChange}
               />
               <ReactionSummary
-                summary={reactionsSummary}
+                summary={reactionSummary}
                 onClick={handleReactionOnClick}
               />
             </div>

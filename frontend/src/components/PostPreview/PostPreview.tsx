@@ -15,7 +15,6 @@ import {
   ViewsCounter,
   ViewsModal,
   getThumbnail,
-  useReactions,
   useToggle,
 } from "@edifice-ui/react";
 import clsx from "clsx";
@@ -27,6 +26,7 @@ import { PostPreviewActionBar } from "./PostPreviewActionBar";
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { PostDate } from "~/features/Post/PostDate";
 import useReactionModal from "~/hooks/useReactionModal";
+import useReactionSummary from "~/hooks/useReactionSummary";
 import { Post, PostState } from "~/models/post";
 import { loadPostViewsDetails } from "~/services/api";
 import { useBlog } from "~/services/queries";
@@ -68,7 +68,9 @@ export const PostPreview = ({
   const { contrib, manager, creator } = useActionDefinitions([]);
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
-  const { loadReactionDetails } = useReactions("blog", "post");
+
+  const { reactionSummary, loadReactionDetails, handleReactionOnChange } =
+    useReactionSummary(post._id, reactions?.summary);
   const {
     isReactionsModalOpen,
     handleReactionOnClick,
@@ -326,10 +328,13 @@ export const PostPreview = ({
                       </div>
                     )}
                   </div>
-                  {showReactions && typeof reactions?.summary === "object" ? (
+                  {showReactions &&
+                  reactions &&
+                  typeof reactionSummary === "object" ? (
                     <ReactionChoice
                       availableReactions={reactions.available}
-                      summary={reactions.summary}
+                      summary={reactionSummary}
+                      onChange={handleReactionOnChange}
                     />
                   ) : null}
                 </div>
