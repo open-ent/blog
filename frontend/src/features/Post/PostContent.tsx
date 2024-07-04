@@ -249,9 +249,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             <CommentsHeader comments={comments} />
           </div>
         )}
-        {withAudience && (
-          <PostAudience blogId={blogId} post={post} withViews={showViews} />
-        )}
+        {withAudience && <PostAudience post={post} withViews={showViews} />}
       </div>
 
       {mode === "read" && !!comments && (

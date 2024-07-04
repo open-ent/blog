@@ -2,36 +2,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Editor, EditorRef } from "@edifice-ui/editor";
-import { ArrowRight, MessageInfo } from "@edifice-ui/icons";
-import {
-  Avatar,
-  Badge,
-  Button,
-  Card,
-  Image,
-  ReactionChoice,
-  ReactionModal,
-  ReactionSummary,
-  ViewsCounter,
-  ViewsModal,
-  getThumbnail,
-  useToggle,
-} from "@edifice-ui/react";
+import { Card, Image, getThumbnail } from "@edifice-ui/react";
 import clsx from "clsx";
-import { ReactionSummaryData, ViewsDetails } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 import { PostPreviewActionBar } from "./PostPreviewActionBar";
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import { PostDate } from "~/features/Post/PostDate";
-import useReactionModal from "~/hooks/useReactionModal";
-import useReactionSummary from "~/hooks/useReactionSummary";
-import { Post, PostState } from "~/models/post";
-import { loadPostViewsDetails } from "~/services/api";
+import { PostPreviewFooter } from "./PostPreviewFooter";
+import { PostPreviewHeader } from "./PostPreviewHeader";
+import { Post } from "~/models/post";
 import { useBlog } from "~/services/queries";
 import { useBlogState, useStoreUpdaters } from "~/store";
-import { getAvatarURL } from "~/utils/PostUtils";
 
 export type PostPreviewProps = {
   /**
@@ -42,42 +23,15 @@ export type PostPreviewProps = {
    * Index of the post in the list
    */
   index: number;
-  /**
-   * (optional) Views counter
-   */
-  views?: number;
-  /**
-   * (optional) Reactions summary
-   */
-  reactions?: {
-    available: Array<"REACTION_1" | "REACTION_2" | "REACTION_3" | "REACTION_4">;
-    summary: ReactionSummaryData | undefined;
-  };
 };
 
-export const PostPreview = ({
-  post,
-  index,
-  views,
-  reactions,
-}: PostPreviewProps) => {
+export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const { t } = useTranslation("blog");
   const navigate = useNavigate();
 
   const { blog, publicView } = useBlog();
-  const { contrib, manager, creator } = useActionDefinitions([]);
   const { setActionBarPostId } = useStoreUpdaters();
   const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
-
-  const { loadReactionDetails, setUserReactionChoice } = useReactionSummary(
-    post._id,
-    reactions?.summary,
-  );
-  const {
-    isReactionsModalOpen,
-    handleReactionOnClick,
-    handleReactionModalClose,
-  } = useReactionModal();
 
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -85,10 +39,6 @@ export const PostPreview = ({
   const [summaryContent, setSummaryContent] = useState<string>("");
   const [summaryContentPlain, setSummaryContentPlain] = useState<string>("");
   const [mediaURLs, setMediaURLs] = useState<string[]>([]);
-
-  // Variables for views modal
-  const [viewsDetails, setViewsDetails] = useState<ViewsDetails | undefined>();
-  const [viewsModalOpen, toggleViewsModalOpen] = useToggle(false);
 
   // Number of media to display on the preview card
   const MAX_NUMBER_MEDIA_DISPLAY = 3;
@@ -105,22 +55,6 @@ export const PostPreview = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionBarPostId]);
-
-  const loadViewsDetails = async () => {
-    const details = await loadPostViewsDetails(post._id);
-    setViewsDetails(details);
-  };
-
-  const handleViewsClick = async () => {
-    if (!viewsDetails) {
-      await loadViewsDetails();
-    }
-    toggleViewsModalOpen(true);
-  };
-
-  const handleViewsModalClose = useCallback(async () => {
-    toggleViewsModalOpen(false);
-  }, [toggleViewsModalOpen]);
 
   useEffect(() => {
     if (sidebarHighlightedPost?._id === post._id) {
@@ -172,9 +106,6 @@ export const PostPreview = ({
     "blog-post-badge-highlight": post._id === sidebarHighlightedPost?._id,
   });
 
-  const showViews = creator || manager;
-  const showReactions = !publicView;
-
   return (
     <>
       <Card
@@ -194,50 +125,7 @@ export const PostPreview = ({
           role="button"
           tabIndex={0}
         >
-          <div className="d-flex gap-12">
-            <div className="blog-post-user-image">
-              <Avatar
-                alt={t("blog.author.avatar")}
-                size="md"
-                src={getAvatarURL(post.author.userId)}
-                variant="circle"
-              />
-            </div>
-            <div className="d-flex flex-column gap-2">
-              <div className="d-flex align-items-center">
-                <h4 className="post-preview-title">{post.title}</h4>
-                {post.state === PostState.DRAFT &&
-                  (creator || manager || contrib) && (
-                    <Badge
-                      className="ms-8"
-                      variant={{
-                        type: "notification",
-                        level: "info",
-                        color: "text",
-                      }}
-                    >
-                      {t("draft")}
-                    </Badge>
-                  )}
-                {post.state === PostState.SUBMITTED && (
-                  <Badge
-                    className="blog-post-badge ms-8"
-                    variant={{
-                      type: "notification",
-                      level: "warning",
-                      color: "text",
-                    }}
-                  >
-                    {t("blog.filters.submitted")}
-                  </Badge>
-                )}
-              </div>
-              <div className="text-gray-700 small column-gap-12 d-flex flex-column flex-md-row align-items-md-center">
-                <span>{post.author.username}</span>
-                <PostDate post={post} shortDisplay={true}></PostDate>
-              </div>
-            </div>
-          </div>
+          <PostPreviewHeader post={post} />
           <Card.Body space="0">
             <div className="d-flex flex-fill flex-column gap-16 pt-16">
               <div className="d-none">
@@ -286,67 +174,7 @@ export const PostPreview = ({
                     </div>
                   ))}
               </div>
-              <div className="d-flex justify-content-between">
-                <div>
-                  <div className="d-flex gap-4 align-items-center ">
-                    {showReactions && typeof reactions?.summary === "object" ? (
-                      <>
-                        <ReactionSummary
-                          summary={reactions.summary}
-                          onClick={handleReactionOnClick}
-                        />
-                        <span className="separator d-none d-md-block"></span>
-                        {isReactionsModalOpen && (
-                          <ReactionModal
-                            resourceId={post._id}
-                            isOpen={isReactionsModalOpen}
-                            onModalClose={handleReactionModalClose}
-                            reactionDetailsLoader={loadReactionDetails}
-                          />
-                        )}
-                      </>
-                    ) : null}
-                    {showViews && typeof views === "number" ? (
-                      <>
-                        <ViewsCounter
-                          viewsCounter={views}
-                          onClick={handleViewsClick}
-                        />
-                        <span className="separator d-none d-md-block"></span>
-                        {viewsModalOpen && (
-                          <ViewsModal
-                            viewsDetails={viewsDetails!}
-                            isOpen={viewsModalOpen}
-                            onModalClose={handleViewsModalClose}
-                          />
-                        )}
-                      </>
-                    ) : null}
-
-                    {typeof post.nbComments === "number" && (
-                      <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon">
-                        <span>{post.nbComments}</span>
-                        <MessageInfo />
-                      </div>
-                    )}
-                  </div>
-                  {showReactions && typeof reactions?.summary === "object" ? (
-                    <ReactionChoice
-                      availableReactions={reactions.available}
-                      summary={reactions.summary}
-                      onChange={setUserReactionChoice}
-                    />
-                  ) : null}
-                </div>
-                <Button
-                  variant="ghost"
-                  rightIcon={<ArrowRight />}
-                  color="secondary"
-                  className="align-self-end"
-                >
-                  {t("blog.post.preview.readMore")}
-                </Button>
-              </div>
+              <PostPreviewFooter post={post} />
             </div>
           </Card.Body>
         </div>

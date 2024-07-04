@@ -11,7 +11,7 @@ interface State {
   sidebarHighlightedPost: Post | undefined;
   postPageSize: number;
   actionBarPostId: string | undefined;
-  postsViewsCounters: ViewsCounters | undefined;
+  postsViewsCounters: ViewsCounters;
   postsReactionsSummary: ReactionsSummary;
   updaters: {
     setSidebarHighlightedPost: (sidebarPostSelected?: Post) => void;
@@ -19,6 +19,10 @@ interface State {
     setActionBarPostId: (actionBarPostId?: string) => void;
     addPostsViewsCounters: (postsViewsCounters: ViewsCounters) => void;
     addPostsReactionsSummary: (summary: ReactionsSummary) => void;
+    addPostReactionSummary: (
+      summary: ReactionSummaryData,
+      postId: string,
+    ) => void;
   };
 }
 
@@ -26,7 +30,7 @@ export const useStoreContext = create<State>()((set, get) => ({
   sidebarHighlightedPost: undefined,
   postPageSize: 0,
   actionBarPostId: undefined,
-  postsViewsCounters: undefined,
+  postsViewsCounters: {},
   postsReactionsSummary: {},
   updaters: {
     setSidebarHighlightedPost: (sidebarPostSelected) =>
@@ -52,6 +56,14 @@ export const useStoreContext = create<State>()((set, get) => ({
           ...postsReactionsSummary,
         },
       }),
+    addPostReactionSummary: (summary: ReactionSummaryData, postId: string) => {
+      set({
+        postsReactionsSummary: {
+          ...get().postsReactionsSummary,
+          [postId]: summary,
+        },
+      });
+    },
   },
 }));
 

@@ -1,9 +1,10 @@
 import { useToast } from "@edifice-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { blogCounterQuery, blogQueryKeys } from "./blog";
 import { commentListQuery } from "./comment";
+import { loadPostsReactionsSummary } from "../api";
 import {
   createPost,
   deletePost,
@@ -201,4 +202,20 @@ export const usePublishPost = (blogId: string) => {
       ]);
     },
   });
+};
+/**
+ *
+ * @param resourceIds the list of post ids
+ * @returns
+ */
+export const useGetPostsReactionSummary = (resourceIds: string[]) => {
+  const query = useQuery({
+    queryKey: ["post-reaction-summary", resourceIds],
+    queryFn: () => loadPostsReactionsSummary(resourceIds),
+  });
+
+  return {
+    counters: query.data,
+    query,
+  };
 };
