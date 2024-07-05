@@ -22,8 +22,19 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (typeof error === "string") {
-        if (error === ERROR_CODE.NOT_LOGGED_IN)
-          window.location.replace("/auth/login");
+        if (error === ERROR_CODE.NOT_LOGGED_IN) {
+          // Dispatch an event and let public pages preventDefault() it
+          // => see `disableLoginPageRedirection` utility function
+          if (
+            rootElement?.dispatchEvent(
+              new CustomEvent<string>(ERROR_CODE.NOT_LOGGED_IN, {
+                cancelable: true,
+              }),
+            )
+          ) {
+            window.location.replace("/auth/login");
+          }
+        }
       }
     },
   }),
