@@ -156,6 +156,7 @@ export const useBlog = (blogId?: string, slug?: string) => {
     blog: query.data,
     query,
     publicView: !!slug,
+    isPublicBlog: !!slug || query.data?.visibility === "PUBLIC",
   };
 };
 

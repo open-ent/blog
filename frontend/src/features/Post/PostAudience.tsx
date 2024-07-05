@@ -71,10 +71,10 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
 
   return (
     <div className="d-flex justify-content-between">
-      <div className="d-flex align-items-start align-items-md-center gap-12 small text-gray-700">
+      <div className="d-flex align-items-start align-items-md-center small text-gray-700">
         {reactionSummary && (
           <>
-            <div className="d-inline-flex flex-column-reverse flex-md-row align-items-start align-items-md-center gap-12">
+            <div className="d-inline-flex flex-row align-items-center gap-12 post-footer-element">
               <ReactionChoice
                 availableReactions={availableReactions}
                 summary={reactionSummary}
@@ -85,7 +85,6 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
                 onClick={handleReactionOnClick}
               />
             </div>
-            <span className="separator d-none d-md-block"></span>
             {isReactionsModalOpen && (
               <ReactionModal
                 resourceId={post._id}
@@ -97,7 +96,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
           </>
         )}
         {withViews && typeof viewsDetails === "object" && (
-          <>
+          <div className="post-footer-element">
             <ViewsCounter
               viewsCounter={viewsDetails.viewsCounter}
               onClick={handleViewsOnClick}
@@ -109,7 +108,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
                 onModalClose={handleViewsModalClose}
               />
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

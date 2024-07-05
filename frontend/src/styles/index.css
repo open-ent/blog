@@ -107,3 +107,11 @@ main {
 .post-content-editor .ProseMirror[contenteditable="true"] {
   min-height: 180px;
 }
+
+.post-footer-element + .post-footer-element:before {
+  content: "";
+  margin: 2px;
+  height: 16px;
+  border: 0;
+  border-left: 1px solid var(--edifice-gray-700);
+}

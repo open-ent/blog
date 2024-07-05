@@ -14,6 +14,7 @@ import {
 } from "@edifice-ui/react";
 import { ViewsDetails } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import useReactionModal from "~/hooks/useReactionModal";
@@ -32,8 +33,9 @@ export type PostPreviewFooterProps = {
 
 export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
   const { t } = useTranslation("blog");
+  const navigate = useNavigate();
 
-  const { publicView } = useBlog();
+  const { isPublicBlog } = useBlog();
   const { availableReactions } = useReactions("blog", "post");
   const { postsViewsCounters, postsReactionsSummary } = useBlogState();
   const { manager, creator } = useActionDefinitions([]);
@@ -71,20 +73,23 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
     toggleViewsModalOpen(false);
   }, [toggleViewsModalOpen]);
 
+  const handleClickGoDetail = () => {
+    navigate(`./post/${post?._id}`);
+  };
+
+  const showAudience = !isPublicBlog;
   const showViews = creator || manager;
-  const showReactions = !publicView;
 
   return (
     <div className="d-flex justify-content-between">
       <div>
-        <div className="d-flex gap-4 align-items-center ">
-          {showReactions && !!postsReactionsSummary?.[post._id] && (
-            <>
+        <div className="d-flex align-items-center pb-8">
+          {showAudience && !!postsReactionsSummary?.[post._id] && (
+            <div className="post-footer-element">
               <ReactionSummary
                 summary={postsReactionsSummary?.[post._id]}
                 onClick={handleReactionOnClick}
               />
-              <span className="separator d-none d-md-block"></span>
               {isReactionsModalOpen && (
                 <ReactionModal
                   resourceId={post._id}
@@ -93,12 +98,11 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
                   reactionDetailsLoader={loadReactionDetails}
                 />
               )}
-            </>
+            </div>
           )}
-          {showViews && !!views && (
-            <>
+          {showAudience && showViews && !!views && (
+            <div className="post-footer-element">
               <ViewsCounter viewsCounter={views} onClick={handleViewsClick} />
-              <span className="separator d-none d-md-block"></span>
               {viewsModalOpen && (
                 <ViewsModal
                   viewsDetails={viewsDetails!}
@@ -106,17 +110,17 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
                   onModalClose={handleViewsModalClose}
                 />
               )}
-            </>
+            </div>
           )}
 
-          {typeof post.nbComments === "number" && (
-            <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon">
+          {!!post.nbComments && (
+            <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon post-footer-element">
               <span>{post.nbComments}</span>
               <MessageInfo />
             </div>
           )}
         </div>
-        {showReactions && (
+        {showAudience && (
           <ReactionChoice
             availableReactions={availableReactions}
             summary={postsReactionsSummary?.[post._id]}
@@ -129,6 +133,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
         rightIcon={<ArrowRight />}
         color="secondary"
         className="align-self-end"
+        onClick={handleClickGoDetail}
       >
         {t("blog.post.preview.readMore")}
       </Button>
