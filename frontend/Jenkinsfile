@@ -6,19 +6,19 @@ pipeline {
     stage('Init') {
       steps {
         checkout scm
-        sh 'cd frontend && ./build.sh clean init'
+        sh 'cd frontend && GIT_BRANCH=develop ./build.sh clean init'
       }
     }
     stage('Build') {
       steps {
-        sh "cd frontend && ./build.sh build"
+        sh "cd frontend && GIT_BRANCH=develop ./build.sh build"
       }
     }
     stage('Publish NPM') {
       steps {
         configFileProvider([configFile(fileId: '.npmrc-infra-front', variable: 'NPMRC')]) {
           sh "cd frontend && cp $NPMRC .npmrc"
-          sh "cd frontend && ./build.sh publishNPM"
+          sh "cd frontend && GIT_BRANCH=develop ./build.sh publishNPM"
         }
       }
     }
