@@ -9,11 +9,13 @@ pipeline {
         sh 'cd frontend && GIT_BRANCH=develop ./build.sh clean init'
       }
     }
+    
     stage('Build') {
       steps {
         sh "cd frontend && GIT_BRANCH=develop ./build.sh build"
       }
     }
+
     stage('Publish NPM') {
       steps {
         configFileProvider([configFile(fileId: '.npmrc-infra-front', variable: 'NPMRC')]) {
