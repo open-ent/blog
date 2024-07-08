@@ -81,62 +81,64 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
   const showViews = creator || manager;
 
   return (
-    <div className="d-flex justify-content-between">
-      <div>
-        <div className="d-flex align-items-center pb-8">
-          {showAudience && !!postsReactionsSummary?.[post._id] && (
-            <div className="post-footer-element">
-              <ReactionSummary
-                summary={postsReactionsSummary?.[post._id]}
-                onClick={handleReactionOnClick}
+    <div>
+      <div className="d-flex  align-items-center pb-4">
+        {showAudience && !!postsReactionsSummary?.[post._id] && (
+          <div className="post-footer-element">
+            <ReactionSummary
+              summary={postsReactionsSummary?.[post._id]}
+              onClick={handleReactionOnClick}
+            />
+            {isReactionsModalOpen && (
+              <ReactionModal
+                resourceId={post._id}
+                isOpen={isReactionsModalOpen}
+                onModalClose={handleReactionModalClose}
+                reactionDetailsLoader={loadReactionDetails}
               />
-              {isReactionsModalOpen && (
-                <ReactionModal
-                  resourceId={post._id}
-                  isOpen={isReactionsModalOpen}
-                  onModalClose={handleReactionModalClose}
-                  reactionDetailsLoader={loadReactionDetails}
-                />
-              )}
-            </div>
-          )}
-          {showAudience && showViews && !!views && (
-            <div className="post-footer-element">
-              <ViewsCounter viewsCounter={views} onClick={handleViewsClick} />
-              {viewsModalOpen && (
-                <ViewsModal
-                  viewsDetails={viewsDetails!}
-                  isOpen={viewsModalOpen}
-                  onModalClose={handleViewsModalClose}
-                />
-              )}
-            </div>
-          )}
+            )}
+          </div>
+        )}
+        {showAudience && showViews && !!views && (
+          <div className="post-footer-element">
+            <ViewsCounter viewsCounter={views} onClick={handleViewsClick} />
+            {viewsModalOpen && (
+              <ViewsModal
+                viewsDetails={viewsDetails!}
+                isOpen={viewsModalOpen}
+                onModalClose={handleViewsModalClose}
+              />
+            )}
+          </div>
+        )}
 
-          {!!post.nbComments && (
-            <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon post-footer-element">
-              <span>{post.nbComments}</span>
-              <MessageInfo />
-            </div>
-          )}
-        </div>
-        {showAudience && (
-          <ReactionChoice
-            availableReactions={availableReactions}
-            summary={postsReactionsSummary?.[post._id]}
-            onChange={setUserReactionChoice}
-          />
+        {!!post.nbComments && (
+          <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon post-footer-element">
+            <span>{post.nbComments}</span>
+            <MessageInfo />
+          </div>
         )}
       </div>
-      <Button
-        variant="ghost"
-        rightIcon={<ArrowRight />}
-        color="secondary"
-        className="align-self-end"
-        onClick={handleClickGoDetail}
-      >
-        {t("blog.post.preview.readMore")}
-      </Button>
+      <div className="d-flex justify-content-between align-items-center">
+        {showAudience && (
+          <div className="pt-4">
+            <ReactionChoice
+              availableReactions={availableReactions}
+              summary={postsReactionsSummary?.[post._id]}
+              onChange={setUserReactionChoice}
+            />
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          rightIcon={<ArrowRight />}
+          color="secondary"
+          className="align-self-end"
+          onClick={handleClickGoDetail}
+        >
+          {t("blog.post.preview.readMore")}
+        </Button>
+      </div>
     </div>
   );
 };
