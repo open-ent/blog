@@ -13,6 +13,7 @@ import useReactionModal from "~/hooks/useReactionModal";
 import useReactionSummary from "~/hooks/useReactionSummary";
 import { Post } from "~/models/post";
 import { loadPostViewsDetails, triggerViewOnPost } from "~/services/api";
+import { useStoreUpdaters } from "~/store";
 
 export interface PostAudienceProps {
   post: Post;
@@ -35,6 +36,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
     handleReactionOnClick,
     handleReactionModalClose,
   } = useReactionModal();
+  const { addPostsViewsCounters } = useStoreUpdaters();
 
   const loadViews = useCallback(async () => {
     const details = await loadPostViewsDetails(post._id);
@@ -44,6 +46,10 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
   useEffect(() => {
     // Trigger a view once
     triggerViewOnPost(post._id);
+    addPostsViewsCounters({
+      [post._id]:
+        (viewsDetails?.viewsCounter ? viewsDetails?.viewsCounter : 0) + 1,
+    });
     loadReactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

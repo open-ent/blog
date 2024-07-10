@@ -50,7 +50,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
   } = useReactionModal();
 
   const views = useMemo(() => {
-    return postsViewsCounters?.[post._id];
+    return postsViewsCounters?.[post._id] | 0;
   }, [post._id, postsViewsCounters]);
 
   // Variables for views modal
