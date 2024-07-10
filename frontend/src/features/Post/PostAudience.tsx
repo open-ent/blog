@@ -41,15 +41,14 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
   const loadViews = useCallback(async () => {
     const details = await loadPostViewsDetails(post._id);
     setViewsDetails(details);
-  }, [post._id]);
+    if (details) {
+      addPostsViewsCounters({ [post._id]: details.viewsCounter });
+    }
+  }, [post._id, addPostsViewsCounters]);
 
   useEffect(() => {
     // Trigger a view once
     triggerViewOnPost(post._id);
-    addPostsViewsCounters({
-      [post._id]:
-        (viewsDetails?.viewsCounter ? viewsDetails?.viewsCounter : 0) + 1,
-    });
     loadReactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
