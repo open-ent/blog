@@ -99,7 +99,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
             )}
           </div>
         )}
-        {showAudience && showViews && !!views && (
+        {showAudience && showViews && views !== undefined && (
           <div className="post-footer-element">
             <ViewsCounter viewsCounter={views} onClick={handleViewsClick} />
             {viewsModalOpen && (
