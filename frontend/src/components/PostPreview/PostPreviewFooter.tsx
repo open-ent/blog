@@ -82,7 +82,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
 
   return (
     <div>
-      <div className="d-flex  align-items-center pb-4">
+      <div className="d-flex align-items-center pb-4">
         {showAudience && !!postsReactionsSummary?.[post._id] && (
           <div className="post-footer-element">
             <ReactionSummary
@@ -125,20 +125,20 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
         )}
       </div>
       <div className="d-flex justify-content-between align-items-center">
-        {showAudience && (
-          <div className="pt-4">
+        <div className="pt-4">
+          {showAudience && (
             <ReactionChoice
               availableReactions={availableReactions}
               summary={postsReactionsSummary?.[post._id]}
               onChange={setUserReactionChoice}
             />
-          </div>
-        )}
+          )}
+        </div>
         <Button
           variant="ghost"
           rightIcon={<ArrowRight />}
           color="secondary"
-          className="align-self-end"
+          className="align-self-end justify-self-end"
           onClick={handleClickGoDetail}
         >
           {t("blog.post.preview.readMore")}
