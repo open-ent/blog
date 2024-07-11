@@ -2,6 +2,7 @@
 
 import { Avatar, Badge } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { PostDate } from "~/features/Post/PostDate";
@@ -17,11 +18,20 @@ export type PostPreviewHeaderProps = {
 
 export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
   const { t } = useTranslation("blog");
+  const navigate = useNavigate();
 
   const { contrib, manager, creator } = useActionDefinitions([]);
+  const handleClickGoDetail = () => {
+    navigate(`./post/${post?._id}`);
+  };
 
   return (
-    <div className="d-flex gap-12">
+    <div
+      className="d-flex gap-12"
+      onClick={handleClickGoDetail}
+      tabIndex={-1}
+      role="button"
+    >
       <div className="blog-post-user-image">
         <Avatar
           alt={t("blog.author.avatar")}

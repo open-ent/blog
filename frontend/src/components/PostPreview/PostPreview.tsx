@@ -5,6 +5,7 @@ import { Editor, EditorRef } from "@edifice-ui/editor";
 import { Card, Image, getThumbnail } from "@edifice-ui/react";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 import { PostPreviewActionBar } from "./PostPreviewActionBar";
 import { PostPreviewFooter } from "./PostPreviewFooter";
@@ -26,6 +27,7 @@ export type PostPreviewProps = {
 
 export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const { t } = useTranslation("blog");
+  const navigate = useNavigate();
 
   const { blog, publicView } = useBlog();
   const { setActionBarPostId } = useStoreUpdaters();
@@ -96,6 +98,10 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
     }
   }, [editorRef, summaryContent]);
 
+  const handleClickGoDetail = () => {
+    navigate(`./post/${post?._id}`);
+  };
+
   const classes = clsx("p-24", {
     "blog-post-badge-highlight": post._id === sidebarHighlightedPost?._id,
   });
@@ -114,7 +120,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
       >
         <PostPreviewHeader post={post} />
         <Card.Body space="0">
-          <div className="d-flex flex-fill flex-column gap-16 pt-16">
+          <div className="d-flex flex-fill flex-column">
             <div className="d-none">
               <Editor
                 ref={editorRef}
@@ -123,10 +129,20 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 variant="ghost"
               />
             </div>
-            <div className="flex-fill text-truncate text-truncate-2 post-preview-content">
+            <div
+              onClick={handleClickGoDetail}
+              tabIndex={-1}
+              role="button"
+              className="flex-fill text-truncate text-truncate-2 post-preview-content py-16"
+            >
               {summaryContentPlain}
             </div>
-            <div className="d-flex align-items-center justify-content-center gap-24 mx-32">
+            <div
+              onClick={handleClickGoDetail}
+              tabIndex={-1}
+              role="button"
+              className="d-flex align-items-center justify-content-center gap-24 mx-32 pb-16"
+            >
               {mediaURLs
                 .slice(0, MAX_NUMBER_MEDIA_DISPLAY)
                 .map((url, index) => (

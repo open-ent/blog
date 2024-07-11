@@ -111,11 +111,16 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
             )}
           </div>
         )}
-
         {!!post.nbComments && (
-          <div className="text-gray-700 d-flex align-items-center gap-8 p-8 post-preview-comment-icon post-footer-element">
-            <span>{post.nbComments}</span>
-            <MessageInfo />
+          <div className="post-footer-element">
+            <Button
+              onClick={handleClickGoDetail}
+              variant="ghost"
+              className="text-gray-700 fw-normal py-4 px-8 btn-icon"
+            >
+              <span>{post.nbComments}</span>
+              <MessageInfo />
+            </Button>
           </div>
         )}
       </div>
