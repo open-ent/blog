@@ -111,7 +111,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
             )}
           </div>
         )}
-        {!!post.nbComments && (
+        {post.nbComments !== undefined && (
           <div className="post-footer-element">
             <Button
               onClick={handleClickGoDetail}
