@@ -81,7 +81,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
   const showViews = creator || manager;
 
   return (
-    <div>
+    <div className="pt-16">
       <div className="d-flex align-items-center pb-4">
         {showAudience && !!postsReactionsSummary?.[post._id] && (
           <div className="post-footer-element">

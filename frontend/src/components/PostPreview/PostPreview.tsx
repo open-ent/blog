@@ -133,7 +133,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
               onClick={handleClickGoDetail}
               tabIndex={-1}
               role="button"
-              className="flex-fill text-truncate text-truncate-2 post-preview-content py-16"
+              className="flex-fill text-truncate text-truncate-2 post-preview-content pt-16"
             >
               {summaryContentPlain}
             </div>
@@ -141,7 +141,7 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
               onClick={handleClickGoDetail}
               tabIndex={-1}
               role="button"
-              className="d-flex align-items-center justify-content-center gap-24 mx-32 pb-16"
+              className="d-flex align-items-center justify-content-center gap-24 px-32 pt-16"
             >
               {mediaURLs
                 .slice(0, MAX_NUMBER_MEDIA_DISPLAY)
