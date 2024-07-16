@@ -3,11 +3,9 @@ import { useEffect } from "react";
 import { Editor } from "@edifice-ui/editor";
 import { LoadingScreen, useTrashedResource } from "@edifice-ui/react";
 import { QueryClient, useQuery } from "@tanstack/react-query";
-import { ACTION } from "edifice-ts-client";
 import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 
 import { postContentActions } from "~/config/postContentActions";
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { PostTitle } from "~/features/Post/PostTitle";
 import { PostMetadata } from "~/models/post";
 import {
@@ -40,15 +38,8 @@ export function Component() {
   const { blogId } = useParams();
   useTrashedResource(blogId);
 
-  const { hasRight } = useActionDefinitions(postContentActions);
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const { data: post } = useQuery(postQuery(blogId!, postMetadata));
-
-  useEffect(() => {
-    if (!hasRight(ACTION.PRINT)) {
-      window.close();
-    }
-  }, [hasRight]);
 
   useEffect(() => {
     if (blogId && post) {

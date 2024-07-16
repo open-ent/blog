@@ -2,10 +2,7 @@ import { useEffect } from "react";
 
 import { Editor } from "@edifice-ui/editor";
 import { LoadingScreen } from "@edifice-ui/react";
-import { ACTION } from "edifice-ts-client";
 
-import { blogActions } from "~/config/blogActions";
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
 import { BlogHeader } from "~/features/Blog/BlogHeader";
 import { PostTitle } from "~/features/Post/PostTitle";
 import { useLoadPostList } from "~/hooks/useLoadPostList";
@@ -15,19 +12,11 @@ import { useBlog, usePostsList } from "~/services/queries";
 export function BlogPrint() {
   const { blog } = useBlog();
 
-  const { hasRight } = useActionDefinitions(blogActions);
-
   const {
     posts,
     query: { hasNextPage, isSuccess },
   } = usePostsList(blog?._id, PostState.PUBLISHED, false, false);
   useLoadPostList(true);
-
-  useEffect(() => {
-    if (!hasRight(ACTION.PRINT)) {
-      window.close();
-    }
-  }, [hasRight]);
 
   useEffect(() => {
     // Load all posts with recurcive fetchNextPage calls.
