@@ -1,11 +1,13 @@
 import { AppParams } from "ode-explorer/lib";
 
+import { BlogResourceService } from "~/services/resource";
 import { workflows } from ".";
 
 export const explorerConfig: AppParams = {
   app: "blog",
   types: ["blog"],
   enableOnboarding: false,
+  service: BlogResourceService,
   filters: [
     { id: "owner", defaultValue: true },
     { id: "public", defaultValue: false },

@@ -4,7 +4,7 @@ import { LoadingScreen, OnboardingModal } from "@edifice-ui/react";
 import { Explorer } from "ode-explorer/lib";
 import { useTranslation } from "react-i18next";
 
-import { explorerConfig } from "~/config/config";
+import { explorerConfig } from "~/config";
 
 export function ExplorerBlog() {
   const { t } = useTranslation();
