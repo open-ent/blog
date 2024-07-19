@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "4.0.10-develop-pedago.202407181400",
+  "version": "4.0.10-develop-pedago.202407191209",
   "description": "Blog tool for ENT Core.",
   "homepage": "https://github.com/opendigitaleducation/blog#readme",
   "bugs": {
@@ -49,9 +49,9 @@
     "@edifice-ui/react": "develop-pedago",
     "@react-spring/web": "9.7.3",
     "@tanstack/react-query": "5.8.4",
-    "clsx": "2.1.0",
     "i18next": "23.8.1",
     "i18next-http-backend": "2.4.2",
+    "clsx": "2.1.0",
     "ode-explorer": "develop-pedago",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -79,7 +79,7 @@
     "eslint-plugin-jsx-a11y": "6.8.0",
     "eslint-plugin-react": "7.33.2",
     "eslint-plugin-react-hooks": "4.6.0",
-    "eslint-plugin-unused-imports": "^3.2.0",
+    "eslint-plugin-unused-imports": "^3.1.0",
     "husky": "8.0.3",
     "lint-staged": "15.2.1",
     "prettier": "3.2.4",
