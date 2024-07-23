@@ -52,7 +52,7 @@
     "i18next": "23.8.1",
     "i18next-http-backend": "2.4.2",
     "clsx": "2.1.0",
-    "ode-explorer": "1.4.13",
+    "ode-explorer": "%packageVersion%",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-error-boundary": "4.0.12",
