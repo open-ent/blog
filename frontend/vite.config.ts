@@ -1,6 +1,27 @@
-import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import { createHash } from "node:crypto";
+import { defineConfig, loadEnv, Plugin } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+
+const hash = createHash("md5")
+  .update(Date.now().toString())
+  .digest("hex")
+  .substring(0, 8);
+
+const queryHashVersion = `v=${hash}`;
+
+function hashEdificeBootstrap(): Plugin {
+  return {
+    name: "vite-plugin-edifice",
+    apply: "build",
+    transformIndexHtml(html) {
+      return html.replace(
+        "/assets/themes/edifice-bootstrap/index.css",
+        `/assets/themes/edifice-bootstrap/index.css?${queryHashVersion}`,
+      );
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }) => {
@@ -58,13 +79,13 @@ export default ({ mode }: { mode: string }) => {
       external: ["edifice-ts-client"],
       output: {
         paths: {
-          "edifice-ts-client": "/assets/js/edifice-ts-client/index.js",
+          "edifice-ts-client": `/assets/js/edifice-ts-client/index.js?${queryHashVersion}`,
         },
       },
     },
   };
 
-  const plugins = [react(), tsconfigPaths()];
+  const plugins = [react(), tsconfigPaths(), hashEdificeBootstrap()];
 
   const server = {
     proxy,
