@@ -46,7 +46,8 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     publish,
     readOnly,
     isMutating,
-    hideSaveDraft,
+    saveButtonI18nKey,
+    hideSaveButton,
     showViews,
   } = postActions;
 
@@ -215,12 +216,12 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           >
             <Button
               type="button"
-              variant={hideSaveDraft ? "outline" : "ghost"}
+              variant={hideSaveButton ? "outline" : "ghost"}
               onClick={handleCancelClick}
             >
               {t("cancel")}
             </Button>
-            {!hideSaveDraft && (
+            {!hideSaveButton && (
               <Button
                 type="button"
                 variant="outline"
@@ -228,7 +229,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
                 disabled={isMutating || (isEmptyContent && title.length == 0)}
                 onClick={handleSaveClick}
               >
-                {t("draft.save")}
+                {t(saveButtonI18nKey)}
               </Button>
             )}
             <Button

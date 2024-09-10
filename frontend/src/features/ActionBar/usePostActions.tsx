@@ -47,8 +47,10 @@ export interface PostActions {
   showBadge: boolean;
   /** Truthy when the views counter should be displayed. */
   showViews: boolean;
-  /** WB-2886 Thruthy when the save (as draft) button should be hidden. */
-  hideSaveDraft: boolean;
+  /** WB-3139 i18n key to save (or save as draft) button. */
+  saveButtonI18nKey: string;
+  /** WB-2886 Truthy when the save (as draft) button should be hidden. */
+  hideSaveButton: boolean;
   /** Truthy if post have editor content */
   emptyContent: boolean;
 }
@@ -112,7 +114,7 @@ export const usePostActions = (
     showBadge: creator || manager || contrib,
     showViews: creator || manager,
     /* WB-3071 */
-    hideSaveDraft:
+    hideSaveButton:
       /* Circuit actif : un contributeur n'a pas le droit de mettre en brouillon
          un billet publié dont il est l’auteur.
          (car il n’a pas le droit de le publier seul),
@@ -138,6 +140,16 @@ export const usePostActions = (
         (manager || creator || contrib) &&
         post.state === PostState.PUBLISHED &&
         post.author.userId !== user?.userId),
+    /* WB-3139 */
+    /* Un billet soumis à validation, modifié par un gestionnaire qui n'en est pas l'auteur, ne change pas d'état.
+       Le bouton doit alors indiquer "Enregistrer" et non pas "Brouillon". */
+    saveButtonI18nKey:
+      isRestraint &&
+      (manager || creator) &&
+      post.state === PostState.SUBMITTED &&
+      post.author.userId !== user?.userId
+        ? "blog.save"
+        : "draft.save",
     save: (withoutNotification) =>
       saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),
