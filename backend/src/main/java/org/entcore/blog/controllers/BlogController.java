@@ -55,6 +55,7 @@ import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.http.request.ActionsUtils;
+import org.entcore.common.http.filter.Trace;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.service.VisibilityFilter;
 import org.entcore.common.share.ShareService;
@@ -541,6 +542,7 @@ public class BlogController extends BaseController {
 		});
 	}
 
+	@Trace(value = "SHARE_RESOURCE", retentionDays = 5, body = true)
 	@Put("/share/resource/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void shareResource(final HttpServerRequest request) {
