@@ -4,7 +4,6 @@ import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
 import { postContentActions } from "~/config/postContentActions";
 import { PostContent } from "~/features/Post/PostContent";
 import { PostHeader } from "~/features/Post/PostHeader";
-import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
 import { PostMetadata } from "~/models/post";
 import {
   availableActionsQuery,
@@ -33,7 +32,6 @@ export const loader =
   };
 
 export function Component() {
-  useBlogErrorToast();
   const { blogId, postId } = useParams();
 
   const postMetadata = useLoaderData() as PostMetadata; // see loader above

@@ -36,6 +36,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
 import org.entcore.blog.Blog;
 import org.entcore.blog.security.BlogResourcesProvider;
+import org.entcore.blog.security.filter.comment.*;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.BlogTimelineService;
 import org.entcore.blog.services.PostService;
@@ -45,6 +46,7 @@ import org.entcore.blog.to.PostProjection;
 import org.entcore.common.events.EventHelper;
 import org.entcore.common.events.EventStore;
 import org.entcore.common.events.EventStoreFactory;
+import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
 import org.entcore.common.user.UserUtils;
@@ -380,6 +382,7 @@ public class PostController extends BaseController {
 
 	@Put("/comment/:blogId/:postId/:commentId")
 	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
+	@ResourceFilter(CommentAuthorFilter.class)
 	public void updateComment(final HttpServerRequest request) {
 		final String postId = request.params().get("postId");
 		final String commentId = request.params().get("commentId");
@@ -406,6 +409,7 @@ public class PostController extends BaseController {
 
 	@Delete("/comment/:blogId/:postId/:commentId")
 	@SecuredAction(value = "blog.comment", type = ActionType.RESOURCE)
+	@ResourceFilter(CommentAuthorOrManagerFilter.class)
 	public void deleteComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String commentId = request.params().get("commentId");
