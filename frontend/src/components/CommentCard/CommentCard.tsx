@@ -15,8 +15,8 @@ import clsx from "clsx";
 import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 
-import { ButtonGroup } from "../ButtonGroup/ButtonGroup";
 import { getAvatarURL } from "~/utils/PostUtils";
+import { ButtonGroup } from "../ButtonGroup/ButtonGroup";
 
 const MAX_COMMENT_LENGTH = 800;
 
@@ -61,9 +61,8 @@ export const CommentCard = ({
     return (
       <Badge
         variant={{
-          type: "profile",
-          //@ts-ignore -- Checked above
-          profile: profile.toLowerCase(),
+          type: "user",
+          profile,
         }}
       >
         {t(profile)}

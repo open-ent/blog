@@ -2,12 +2,12 @@ import { ArrowLeft, Print, TextToSpeech } from "@edifice-ui/icons";
 import { Avatar, Badge, Button, IconButton } from "@edifice-ui/react";
 import { useTranslation } from "react-i18next";
 
-import { PostActionBar } from "./PostActionBar";
-import { PostDate } from "./PostDate";
-import { PostActions } from "../ActionBar/usePostActions";
 import { Post, PostState } from "~/models/post";
 import { useBlog } from "~/services/queries";
 import { getAvatarURL, getUserbookURL } from "~/utils/PostUtils";
+import { PostActions } from "../ActionBar/usePostActions";
+import { PostActionBar } from "./PostActionBar";
+import { PostDate } from "./PostDate";
 
 export interface PostTitleProps {
   post: Post;
@@ -96,9 +96,9 @@ export const PostTitle = ({
             <Badge
               className="ms-16 fs-6"
               variant={{
-                type: "notification",
+                type: "content",
                 level: "info",
-                color: "text",
+                background: true,
               }}
             >
               {t("draft")}
@@ -108,9 +108,9 @@ export const PostTitle = ({
             <Badge
               className="blog-post-badge ms-16 fs-6"
               variant={{
-                type: "notification",
+                type: "content",
                 level: "warning",
-                color: "text",
+                background: true,
               }}
             >
               {t("blog.filters.submitted")}

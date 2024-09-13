@@ -48,9 +48,9 @@ export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
               <Badge
                 className="ms-8"
                 variant={{
-                  type: "notification",
+                  type: "content",
                   level: "info",
-                  color: "text",
+                  background: true,
                 }}
               >
                 {t("draft")}
@@ -60,9 +60,9 @@ export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
             <Badge
               className="blog-post-badge ms-8"
               variant={{
-                type: "notification",
+                type: "content",
                 level: "warning",
-                color: "text",
+                background: true,
               }}
             >
               {t("blog.filters.submitted")}
