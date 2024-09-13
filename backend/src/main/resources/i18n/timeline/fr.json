@@ -1,5 +1,5 @@
 {
-    "blog.publish-comment": "Commentaire d'un billet de blog",
+    "blog.publish-comment": "Commentaire d'un billet de blog (seulement pour l’auteur du billet et les gestionnaires du blog)",
     "blog.publish-post": "Publication d'un billet de blog",
     "blog.share": "Partage d'un blog",
     "blog.submit-post": "Soumission d'un billet de blog",
