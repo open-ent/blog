@@ -20,6 +20,9 @@ export function loadBlog(blogId: string) {
  * @returns counter of the blog (number of posts , published posts, submitted posts, draft posts)
  */
 export function loadBlogCounter(blogId: string) {
+  if (!blogId) {
+    return Promise.resolve(undefined);
+  }
   return checkHttpError<BlogCounter>(
     odeServices.http().get<BlogCounter>(`/blog/counter/${blogId}`),
   );
