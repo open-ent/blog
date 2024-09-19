@@ -127,7 +127,7 @@ export const PostTitle = ({
           <div className="text-gray-700 small d-flex flex-column flex-md-row column-gap-12 align-items-md-center ">
             <a
               href={getUserbookURL(post.author.userId)}
-              className="comment-card-author"
+              className="post-author"
             >
               {post.author.username}
             </a>

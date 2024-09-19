@@ -9,11 +9,12 @@ main {
   top: 0;
 }
 
-.comment-card-author {
+.comment-card-author,
+.post-author {
   color: var(--edifice-gray-800);
 }
 
-.comment-card-author:hover {
+.post-author:hover {
   color: rgba(var(--edifice-link-color-rgb), var(--edifice-link-opacity, 1));
   text-decoration: underline;
 }

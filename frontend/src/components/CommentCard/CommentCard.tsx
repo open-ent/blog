@@ -16,7 +16,7 @@ import { ID, IUserDescription } from "edifice-ts-client";
 import { useTranslation } from "react-i18next";
 
 import { ButtonGroup } from "../ButtonGroup/ButtonGroup";
-import { getAvatarURL, getUserbookURL } from "~/utils/PostUtils";
+import { getAvatarURL } from "~/utils/PostUtils";
 
 const MAX_COMMENT_LENGTH = 800;
 
@@ -151,12 +151,7 @@ export const CommentCard = ({
           ) : (
             <div className="ms-4">
               <div className="mb-8 d-flex flex-column flex-md-row text-gray-700 small column-gap-12 align-items-md-center">
-                <a
-                  href={getUserbookURL(author.userId)}
-                  className="comment-card-author"
-                >
-                  {author.username}
-                </a>
+                <div className="comment-card-author">{author.username}</div>
                 {badge}
                 {created && (
                   <>
