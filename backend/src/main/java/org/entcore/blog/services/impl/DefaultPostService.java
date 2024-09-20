@@ -53,6 +53,7 @@ import org.entcore.blog.to.PostFilter;
 import org.entcore.blog.to.PostProjection;
 import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.audience.to.AudienceCheckRightRequestMessage;
+import org.entcore.common.editor.IContentTransformerEventRecorder;
 import org.entcore.common.explorer.IngestJobState;
 import org.entcore.common.mongodb.MongoDbResult;
 import org.entcore.common.service.impl.MongoDbSearchService;
@@ -89,13 +90,18 @@ public class DefaultPostService implements PostService {
 	private final PostExplorerPlugin plugin;
 	private final IContentTransformerClient contentTransformerClient;
 	private final AudienceHelper audienceHelper;
+	private final IContentTransformerEventRecorder contentTransformerEventRecorder;
 
-	public DefaultPostService(MongoDb mongo, int searchWordMinSize, String listPostAction, final PostExplorerPlugin plugin, IContentTransformerClient contentTransformerClient, AudienceHelper audienceHelper) {
+	public DefaultPostService(MongoDb mongo, int searchWordMinSize, String listPostAction, final PostExplorerPlugin plugin,
+														final IContentTransformerClient contentTransformerClient,
+														final IContentTransformerEventRecorder contentTransformerEventRecorder,
+														final AudienceHelper audienceHelper) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.listPostAction = listPostAction;
 		this.searchWordMinSize = searchWordMinSize;
 		this.contentTransformerClient = contentTransformerClient;
+		this.contentTransformerEventRecorder = contentTransformerEventRecorder;
 		this.audienceHelper = audienceHelper;
 	}
 
@@ -130,8 +136,7 @@ public class DefaultPostService implements PostService {
 							new HashSet<>(Arrays.asList(ContentTransformerFormat.HTML, ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT)),
 							b.getInteger("contentVersion", 0),
 							b.getString("content", ""),
-							null),
-						request);
+							null));
 		} else {
 			contentTransformerResponseFuture = Future.succeededFuture();
 		}
@@ -157,6 +162,9 @@ public class DefaultPostService implements PostService {
 				}
 				//#29106 avoid fetch after save
 				final String id = event.right().getValue().getString("_id");
+				if(transformerResponse.succeeded()) {
+					contentTransformerEventRecorder.recordTransformation(id, "post", transformerResponse.result(), request);
+				}
 				b.put("_id", id);
 				//must set id before notify
 				plugin.notifyUpsert(blogId, author, b).onComplete(e->{
@@ -198,8 +206,7 @@ public class DefaultPostService implements PostService {
 									new HashSet<>(Arrays.asList(ContentTransformerFormat.JSON, ContentTransformerFormat.PLAINTEXT, ContentTransformerFormat.HTML)),
 									validatedPost.getInteger("contentVersion", 0),
 									validatedPost.getString("content"),
-									null),
-						request);
+									null));
 				} else {
 					// No content to transform
 					contentTransformerResponseFuture = Future.succeededFuture();
@@ -226,13 +233,15 @@ public class DefaultPostService implements PostService {
 					if (response.failed()) {
 						log.error("Content transformation failed");
 					} else {
-						if (response.result() == null) {
+						final ContentTransformerResponse transformationResult = response.result();
+						if (transformationResult == null) {
 							log.info("No content transformed");
 						} else {
-							validatedPost.put("contentVersion", response.result().getContentVersion());
-							validatedPost.put("jsonContent", response.result().getJsonContent());
-							validatedPost.put("content", response.result().getCleanHtml());
-							validatedPost.put("contentPlain", response.result().getPlainTextContent());
+							validatedPost.put("contentVersion", transformationResult.getContentVersion());
+							validatedPost.put("jsonContent", transformationResult.getJsonContent());
+							validatedPost.put("content", transformationResult.getCleanHtml());
+							validatedPost.put("contentPlain", transformationResult.getPlainTextContent());
+							contentTransformerEventRecorder.recordTransformation(postId, "post", transformationResult, request);
 						}
 					}
 					MongoUpdateBuilder modifier = new MongoUpdateBuilder();
@@ -332,7 +341,7 @@ public class DefaultPostService implements PostService {
 			desiredFormats.add(ContentTransformerFormat.HTML);
 			desiredFormats.add(ContentTransformerFormat.JSON);
 			final ContentTransformerRequest transformerRequest = new ContentTransformerRequest(desiredFormats, 0, post.getString("content"), null);
-			contentTransformerClient.transform(transformerRequest, request)
+			contentTransformerClient.transform(transformerRequest)
 			.onComplete(response -> {
 				if (response.failed()) {
 					log.error("Content transformation failed", response.cause());
@@ -343,10 +352,14 @@ public class DefaultPostService implements PostService {
 				} else {
 					// contentVersion set to 0 to indicate that content has been transformed for the first time.
 					final ContentTransformerResponse transformedContent = response.result();
+					final String postId = post.getString("_id");
+					contentTransformerEventRecorder.recordTransformation(
+						postId, "post",
+						transformedContent, request);
 					post.put("contentVersion", 0)
 						.put("jsonContent", transformedContent.getJsonContent())
 						.put(TRANSFORMED_CONTENT_DB_FIELD_NAME, transformedContent.getCleanHtml());
-					final QueryBuilder findPost = QueryBuilder.start("_id").is(post.getString("_id"));
+					final QueryBuilder findPost = QueryBuilder.start("_id").is(postId);
 					// Cache the products of the transformation so they can be reused until the manager updates the post
 					final MongoUpdateBuilder updateFields = new MongoUpdateBuilder()
 							.set("jsonContent", transformedContent.getJsonContent())

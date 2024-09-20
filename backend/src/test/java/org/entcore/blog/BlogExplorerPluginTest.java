@@ -23,6 +23,7 @@ import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.blog.to.PostFilter;
 import org.entcore.common.audience.AudienceHelper;
+import org.entcore.common.editor.IContentTransformerEventRecorder;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.share.ShareService;
@@ -82,7 +83,7 @@ public class BlogExplorerPluginTest {
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         postPlugin = blogPlugin.postPlugin();
         audienceHelper = new AudienceHelper(test.vertx());
-        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, new DummyContentTransformerClient(), audienceHelper);
+        postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, new DummyContentTransformerClient(), IContentTransformerEventRecorder.noop, audienceHelper);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }
@@ -425,8 +426,7 @@ public class BlogExplorerPluginTest {
     static class DummyContentTransformerClient implements IContentTransformerClient {
 
         @Override
-        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest,
-                                                            final HttpServerRequest request) {
+        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
             return Future.succeededFuture(new ContentTransformerResponse(1, contentTransformerRequest.getHtmlContent(), null, contentTransformerRequest.getHtmlContent(), "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }
     }

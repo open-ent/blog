@@ -24,6 +24,7 @@
 package org.entcore.blog;
 
 import fr.wseduc.mongodb.MongoDb;
+import fr.wseduc.transformer.ContentTransformerFactoryProvider;
 import fr.wseduc.transformer.IContentTransformerClient;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -41,7 +42,8 @@ import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.audience.AudienceHelper;
-import org.entcore.common.editor.EventStoredContentTransformerFactoryProvider;
+import org.entcore.common.editor.ContentTransformerEventRecorderFactory;
+import org.entcore.common.editor.IContentTransformerEventRecorder;
 import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.explorer.IExplorerPluginClient;
 import org.entcore.common.explorer.impl.ExplorerRepositoryEvents;
@@ -86,15 +88,16 @@ public class Blog extends BaseServer {
         conf.setCollection(BLOGS_COLLECTION);
         conf.setResourceIdLabel("id");
 
-        EventStoredContentTransformerFactoryProvider.init(vertx);
+        ContentTransformerFactoryProvider.init(vertx);
         final JsonObject contentTransformerConfig = getContentTransformerConfig(vertx).orElse(null);
-        IContentTransformerClient contentTransformerClient = EventStoredContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
+        final IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
+        final IContentTransformerEventRecorder contentTransformerEventRecorder = new ContentTransformerEventRecorderFactory("blog", contentTransformerConfig).create();
 
         blogPlugin = BlogExplorerPlugin.create(securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         AudienceHelper audienceHelper = new AudienceHelper(vertx);
-        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, audienceHelper);
+        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, contentTransformerEventRecorder, audienceHelper);
         final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin, audienceHelper);
         addController(new BlogController(mongo, blogService, postService));

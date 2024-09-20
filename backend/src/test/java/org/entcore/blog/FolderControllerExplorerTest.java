@@ -21,6 +21,7 @@ import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.common.audience.AudienceHelper;
+import org.entcore.common.editor.IContentTransformerEventRecorder;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -78,7 +79,7 @@ public class FolderControllerExplorerTest {
         blogPlugin = new BlogExplorerPlugin(communication, mongoClient, securedActions);
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         audienceHelper = new AudienceHelper(test.vertx());
-        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop, audienceHelper);
+        final PostService postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop, IContentTransformerEventRecorder.noop, audienceHelper);
         controllerExplorer = new FoldersControllerExplorer(test.vertx(), blogPlugin);
         blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
     }

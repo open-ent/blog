@@ -29,6 +29,7 @@ import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
 import org.entcore.blog.to.PostFilter;
 import org.entcore.common.audience.AudienceHelper;
+import org.entcore.common.editor.IContentTransformerEventRecorder;
 import org.entcore.common.explorer.IExplorerPluginCommunication;
 import org.entcore.common.mongodb.MongoDbConf;
 import org.entcore.common.user.UserInfos;
@@ -93,7 +94,7 @@ public class PostServiceContentTransformerTest {
         audienceHelper = new AudienceHelper(test.vertx());
         contentTransformerClient = new DummyContentTransformerClient();
         data.put("BLOGID1", "blog-id-1");
-        postService = new DefaultPostService(mongoDb, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, contentTransformerClient, audienceHelper);
+        postService = new DefaultPostService(mongoDb, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, contentTransformerClient, IContentTransformerEventRecorder.noop, audienceHelper);
         blogService = new DefaultBlogService(mongoDb, postService, 20, 3, blogPlugin, audienceHelper);
     }
 
@@ -343,8 +344,7 @@ public class PostServiceContentTransformerTest {
         private int nbCalls = 0;
 
         @Override
-        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest,
-                                                            final HttpServerRequest request) {
+        public Future<ContentTransformerResponse> transform(ContentTransformerRequest contentTransformerRequest) {
             nbCalls++;
             return Future.succeededFuture(new ContentTransformerResponse(1, null, new JsonObject().put("content", contentTransformerRequest.getHtmlContent()).getMap(), "plainTextContent", "<p>clean html</p>"+contentTransformerRequest.getHtmlContent(), null));
         }
