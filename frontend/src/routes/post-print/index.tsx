@@ -43,7 +43,8 @@ export function Component() {
 
   useEffect(() => {
     if (blogId && post) {
-      setTimeout(() => window.print(), 1000);
+      const timer = setTimeout(() => window.print(), 1000);
+      return () => clearTimeout(timer);
     }
   }, [blogId, post]);
 
