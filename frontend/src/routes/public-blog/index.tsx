@@ -39,7 +39,7 @@ export const loader =
 export function Component() {
   return (
     <main className="container-fluid d-flex flex-column bg-white">
-      <Blog></Blog>
+      <Blog />
     </main>
   );
 }

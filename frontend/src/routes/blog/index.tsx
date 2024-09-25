@@ -37,5 +37,5 @@ export const loader =
   };
 
 export function Component() {
-  return <Blog></Blog>;
+  return <Blog />;
 }
