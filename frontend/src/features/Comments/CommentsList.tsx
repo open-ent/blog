@@ -26,7 +26,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
     postId!,
   );
 
-  if (!blogId || !postId || (!canCreate && comments.length <= 0)) return <></>;
+  if (!blogId || !postId || (!canCreate && comments.length <= 0)) return null;
 
   const handlePublishClick = (comment: Comment, newContent: Content) => {
     comment.comment = newContent as string;

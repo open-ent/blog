@@ -24,13 +24,11 @@ export function Component() {
   if (!blog._id || !post) return <LoadingScreen />;
 
   return (
-    <>
-      <div className="rounded border pt-16 bg-white">
-        <PostTitle post={post} mode="print" />
-        <div className="mx-32">
-          <Editor content={post.content} mode="read" variant="ghost" />
-        </div>
+    <div className="rounded border pt-16 bg-white">
+      <PostTitle post={post} mode="print" />
+      <div className="mx-32">
+        <Editor content={post.content} mode="read" variant="ghost" />
       </div>
-    </>
+    </div>
   );
 }

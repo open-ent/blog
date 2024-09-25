@@ -12,7 +12,7 @@ export function Component() {
   const query = useQuery(publicPostQuery(blog._id, postId!));
 
   if (!blog || !postId || !query.data) {
-    return <></>;
+    return null;
   }
 
   return (

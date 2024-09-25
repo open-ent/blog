@@ -11,7 +11,7 @@ export const CommentsCreate = () => {
   const { blogId, postId } = useParams();
   const { canCreate, create } = useComments(blogId!, postId!);
 
-  if (!user?.userId || !blogId || !postId || !canCreate) return <></>;
+  if (!user?.userId || !blogId || !postId || !canCreate) return null;
 
   const userAsAuthor = {
     userId: user?.userId,

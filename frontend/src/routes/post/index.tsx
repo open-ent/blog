@@ -39,7 +39,7 @@ export function Component() {
   const { data: comments } = useQuery(commentListQuery(blogId!, postId!));
 
   if (!blogId || !query.data) {
-    return <></>;
+    return null;
   }
 
   return (

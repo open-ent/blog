@@ -30,7 +30,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const createMutation = useCreatePost(blogId);
   const publishMutation = usePublishPost(blogId);
 
-  if (!blog) return <></>;
+  if (!blog) return null;
 
   const disableButtons = createMutation.isPending || publishMutation.isPending;
 

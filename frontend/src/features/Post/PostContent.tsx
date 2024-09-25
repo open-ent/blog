@@ -177,9 +177,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         >
           {t('post.oldFormat.text')}
         </Alert>
-      ) : (
-        <></>
-      )}
+      ) : null}
       <div className="mx-md-8 post-content-editor">
         {mode === 'edit' && (
           <div className="mt-24">

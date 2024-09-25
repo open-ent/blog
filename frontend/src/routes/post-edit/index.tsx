@@ -32,7 +32,7 @@ export function Component() {
   }, []);
 
   if (!blogId) {
-    return <></>;
+    return null;
   }
 
   return (

@@ -30,22 +30,18 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
   if (post.state === PostState.PUBLISHED && post.firstPublishDate) {
     return (
       <>
-        <>
-          <span className="separator d-none d-md-block"></span>
+        <span className="separator d-none d-md-block"></span>
+        <span>
+          {t('post.dated.published', {
+            date: fromNow(post.firstPublishDate),
+          })}
+        </span>
+        {displayModifiedDate && (
           <span>
-            {t('post.dated.published', {
-              date: fromNow(post.firstPublishDate),
+            {t('post.dated.updated', {
+              date: formatDate(post.modified, 'short'),
             })}
           </span>
-        </>
-        {displayModifiedDate && (
-          <>
-            <span>
-              {t('post.dated.updated', {
-                date: formatDate(post.modified, 'short'),
-              })}
-            </span>
-          </>
         )}
       </>
     );

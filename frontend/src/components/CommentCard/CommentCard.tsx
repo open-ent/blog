@@ -56,7 +56,7 @@ export const CommentCard = ({
   const badge = useMemo(() => {
     const profile = author.profiles?.[0] ?? 'Guest';
     if (['Teacher', 'Student', 'Relative', 'Personnel'].indexOf(profile) < 0)
-      return <></>;
+      return null;
 
     return (
       <Badge
