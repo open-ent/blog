@@ -8,7 +8,7 @@ import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions'
 import usePostsFilter from '~/hooks/usePostsFilter';
 import { PostState } from '~/models/post';
 import { useBlog, useBlogCounter, usePostsList } from '~/services/queries';
-import { useBlogState } from '~/store';
+import { useBlogStore } from '~/store';
 
 const BlogPostList = () => {
   const { t } = useTranslation('blog');
@@ -30,7 +30,9 @@ const BlogPostList = () => {
   const { postsFilters } = usePostsFilter();
   const { counters } = useBlogCounter(blog?._id);
 
-  const { sidebarHighlightedPost } = useBlogState();
+  const sidebarHighlightedPost = useBlogStore(
+    (state) => state.sidebarHighlightedPost,
+  );
 
   useEffect(() => {
     if (sidebarHighlightedPost) {

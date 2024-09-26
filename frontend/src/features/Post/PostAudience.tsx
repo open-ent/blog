@@ -13,7 +13,7 @@ import useReactionModal from '~/hooks/useReactionModal';
 import useReactionSummary from '~/hooks/useReactionSummary';
 import { Post } from '~/models/post';
 import { loadPostViewsDetails, triggerViewOnPost } from '~/services/api';
-import { useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 export interface PostAudienceProps {
   post: Post;
@@ -36,7 +36,9 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
     handleReactionOnClick,
     handleReactionModalClose,
   } = useReactionModal();
-  const { addPostsViewsCounters } = useStoreUpdaters();
+  const addPostsViewsCounters = useBlogStore(
+    (state) => state.addPostsViewsCounters,
+  );
 
   const loadViews = useCallback(async () => {
     const details = await loadPostViewsDetails(post._id);

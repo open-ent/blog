@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SummaryList } from '~/components/SummaryList/SummaryList';
 import { PostState } from '~/models/post';
 import { useBlog, usePostsList } from '~/services/queries';
-import { useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 const BlogSidebar = () => {
   const { t } = useTranslation('blog');
@@ -24,7 +24,9 @@ const BlogSidebar = () => {
 
   const { currentApp } = useOdeClient();
 
-  const { setSidebarHighlightedPost } = useStoreUpdaters();
+  const setSidebarHighlightedPost = useBlogStore(
+    (state) => state.setSidebarHighlightedPost,
+  );
 
   const handleOnClick = (id: string) => {
     setSidebarHighlightedPost(posts?.find((post) => post._id === id));

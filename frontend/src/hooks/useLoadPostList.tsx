@@ -2,12 +2,12 @@ import { useEffect } from 'react';
 
 import { PostState } from '~/models/post';
 import { useBlog, usePostsList } from '~/services/queries';
-import { useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 /** Listen for BlogErrors and trigger toasts to notify the user about them. */
 export const useLoadPostList = (loadFullList: boolean = false) => {
   const { blog, publicView } = useBlog();
-  const { setPostPageSize } = useStoreUpdaters();
+  const setPostPageSize = useBlogStore((state) => state.setPostPageSize);
   // Load all posts with recurcive fetchNextPage calls.
   const {
     query: { fetchNextPage, hasNextPage, isSuccess, data },

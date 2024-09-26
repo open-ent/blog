@@ -2,7 +2,7 @@ import { ReactionChoice, useReactions } from '@edifice-ui/react';
 
 import useReactionSummary from '~/hooks/useReactionSummary';
 import { Post } from '~/models/post';
-import { useBlogState } from '~/store';
+import { useBlogStore } from '~/store';
 
 export type PostPreviewReactionFooterProps = {
   /**
@@ -15,7 +15,9 @@ export const PostPreviewReactionFooter = ({
   post,
 }: PostPreviewReactionFooterProps) => {
   const { availableReactions } = useReactions('blog', 'post');
-  const { postsReactionsSummary } = useBlogState();
+  const postsReactionsSummary = useBlogStore(
+    (state) => state.postsReactionsSummary,
+  );
 
   const { setUserReactionChoice } = useReactionSummary(post._id);
 

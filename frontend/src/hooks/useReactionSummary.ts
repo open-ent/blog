@@ -1,13 +1,22 @@
 import { useCallback, useMemo } from 'react';
 
 import { useReactions } from '@edifice-ui/react';
+import { useShallow } from 'zustand/react/shallow';
 
-import { useBlogState, useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 function useReactionSummary(postId: string) {
-  const { postsReactionsSummary } = useBlogState();
-  const { addPostReactionSummary, addPostsReactionsSummary } =
-    useStoreUpdaters();
+  const {
+    addPostReactionSummary,
+    addPostsReactionsSummary,
+    postsReactionsSummary,
+  } = useBlogStore(
+    useShallow((state) => ({
+      postsReactionsSummary: state.postsReactionsSummary,
+      addPostsReactionsSummary: state.addPostsReactionsSummary,
+      addPostReactionSummary: state.addPostReactionSummary,
+    })),
+  );
 
   const {
     availableReactions,

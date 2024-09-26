@@ -5,13 +5,14 @@ import { Card, Image, getThumbnail } from '@edifice-ui/react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
-import { Post } from '~/models/post';
-import { useBlog } from '~/services/queries';
-import { useBlogState, useStoreUpdaters } from '~/store';
 import { PostPreviewActionBar } from './PostPreviewActionBar';
 import { PostPreviewFooter } from './PostPreviewFooter';
 import { PostPreviewHeader } from './PostPreviewHeader';
+import { Post } from '~/models/post';
+import { useBlog } from '~/services/queries';
+import { useBlogStore } from '~/store';
 
 export type PostPreviewProps = {
   /**
@@ -29,8 +30,14 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const navigate = useNavigate();
 
   const { blog, publicView } = useBlog();
-  const { setActionBarPostId } = useStoreUpdaters();
-  const { sidebarHighlightedPost, actionBarPostId } = useBlogState();
+  const { actionBarPostId, setActionBarPostId, sidebarHighlightedPost } =
+    useBlogStore(
+      useShallow((state) => ({
+        sidebarHighlightedPost: state.sidebarHighlightedPost,
+        actionBarPostId: state.actionBarPostId,
+        setActionBarPostId: state.setActionBarPostId,
+      })),
+    );
 
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);

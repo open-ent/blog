@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ACTION, ActionType } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
 import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
@@ -14,7 +15,7 @@ import { ActionBarContainer } from '~/features/ActionBar/ActionBarContainer';
 import { Blog } from '~/models/blog';
 import { baseUrl } from '~/routes';
 import { blogQuery, useDeleteBlog } from '~/services/queries';
-import { useBlogState, useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -59,8 +60,12 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const { availableActionsForBlog: availableActions, canContrib } =
     useActionDefinitions(blogActions);
-  const { setActionBarPostId } = useStoreUpdaters();
-  const { actionBarPostId } = useBlogState();
+  const { actionBarPostId, setActionBarPostId } = useBlogStore(
+    useShallow((state) => ({
+      actionBarPostId: state.actionBarPostId,
+      setActionBarPostId: state.setActionBarPostId,
+    })),
+  );
 
   const [isBarOpen, setBarOpen] = useState(false);
   const [isUpdateModalOpen, toogleUpdateModalOpen] = useToggle();

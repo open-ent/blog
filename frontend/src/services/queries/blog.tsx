@@ -10,6 +10,7 @@ import {
 import { IAction, odeServices } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
 import {
   loadBlog,
@@ -22,7 +23,7 @@ import {
 } from '../api/blog';
 import usePostsFilter from '~/hooks/usePostsFilter';
 import { Post, PostState } from '~/models/post';
-import { useBlogState, useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 import { IActionDefinition } from '~/utils/types';
 
 export const blogQueryKeys = {
@@ -196,10 +197,15 @@ export const usePostsList = (
   withViews: boolean = false,
 ) => {
   const params = useParams<{ blogId: string; slug: string }>();
-  const { addPostsViewsCounters, addPostsReactionsSummary } =
-    useStoreUpdaters();
   const { postsFilters } = usePostsFilter();
-  const { postPageSize } = useBlogState();
+  const { addPostsViewsCounters, addPostsReactionsSummary, postPageSize } =
+    useBlogStore(
+      useShallow((state) => ({
+        addPostsViewsCounters: state.addPostsViewsCounters,
+        addPostsReactionsSummary: state.addPostsReactionsSummary,
+        postPageSize: state.postPageSize,
+      })),
+    );
 
   if (!blogId) {
     if (!params.blogId) {

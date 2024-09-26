@@ -6,15 +6,16 @@ import {
   ViewsCounter,
   ViewsModal,
   useToggle,
-} from '@edifice-ui/react';
-import { ViewsDetails } from 'edifice-ts-client';
+} from "@edifice-ui/react";
+import { ViewsDetails } from "edifice-ts-client";
+import { useShallow } from "zustand/react/shallow";
 
-import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
-import useReactionModal from '~/hooks/useReactionModal';
-import useReactionSummary from '~/hooks/useReactionSummary';
-import { Post } from '~/models/post';
-import { loadPostViewsDetails } from '~/services/api';
-import { useBlogState } from '~/store';
+import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
+import useReactionModal from "~/hooks/useReactionModal";
+import useReactionSummary from "~/hooks/useReactionSummary";
+import { Post } from "~/models/post";
+import { loadPostViewsDetails } from "~/services/api";
+import { useBlogStore } from "~/store";
 
 export type PostPreviewAudienceFooterProps = {
   /**
@@ -26,7 +27,12 @@ export type PostPreviewAudienceFooterProps = {
 export const PostPreviewAudienceFooter = ({
   post,
 }: PostPreviewAudienceFooterProps) => {
-  const { postsViewsCounters, postsReactionsSummary } = useBlogState();
+  const { postsViewsCounters, postsReactionsSummary } = useBlogStore(
+    useShallow((state) => ({
+      postsViewsCounters: state.postsViewsCounters,
+      postsReactionsSummary: state.postsReactionsSummary,
+    })),
+  );
   const { manager, creator } = useActionDefinitions([]);
 
   const { loadReactionDetails } = useReactionSummary(post._id);

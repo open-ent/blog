@@ -4,6 +4,7 @@ import { Button, useToggle } from '@edifice-ui/react';
 import { ACTION } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 
 import { postContentActions } from '~/config/postContentActions';
 import { ActionBarContainer } from '~/features/ActionBar/ActionBarContainer';
@@ -11,7 +12,7 @@ import { usePostActions } from '~/features/ActionBar/usePostActions';
 import { Blog } from '~/models/blog';
 import { Post, PostState } from '~/models/post';
 import { baseUrl } from '~/routes';
-import { useBlogState, useStoreUpdaters } from '~/store';
+import { useBlogStore } from '~/store';
 
 const ConfirmModal = lazy(
   async () => await import('~/components/ConfirmModal/ConfirmModal'),
@@ -61,8 +62,12 @@ export const PostPreviewActionBar = ({
   const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
   const [isGoUpModalOpen, toggleGoUpModalOpen] = useToggle();
 
-  const { setActionBarPostId } = useStoreUpdaters();
-  const { actionBarPostId } = useBlogState();
+  const { actionBarPostId, setActionBarPostId } = useBlogStore(
+    useShallow((state) => ({
+      actionBarPostId: state.actionBarPostId,
+      setActionBarPostId: state.setActionBarPostId,
+    })),
+  );
 
   const handleEditClick = () => {
     navigate(`/id/${blogId}/post/${post._id}?edit=true`);
