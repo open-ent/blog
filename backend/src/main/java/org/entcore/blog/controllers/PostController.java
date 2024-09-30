@@ -452,8 +452,9 @@ public class PostController extends BaseController {
 		});
 	}
 
-	@Put("/comment/:blogId/:postId/:commentId")
-	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
+//	@Put("/comment/:blogId/:postId/:commentId") /* en conflit avec updateComment */
+//	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
+	@Deprecated
 	public void publishComment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String commentId = request.params().get("commentId");

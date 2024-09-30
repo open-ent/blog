@@ -84,7 +84,6 @@ public class BlogResourcesProvider implements ResourcesProvider {
 			case "publish":
 			case "comments":
 			case "comment":
-			case "publishComment":
 				authorizeBlog(request, user, binding.getServiceMethod(), handler);
 				break;
 			case "update":
