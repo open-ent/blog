@@ -11,13 +11,10 @@ export interface BlogProps {
 export const BlogHeader = ({ blog, readonly = false }: BlogProps) => {
   const { currentApp } = useOdeClient();
   return (
-    <AppHeader>
-      <div className="d-flex flex-column flex-md-row flex-nowrap justify-content-md-between flex-fill gap-12 overflow-hidden">
-        <div className="overflow-hidden">
-          {currentApp && <Breadcrumb app={currentApp} name={blog.title} />}
-        </div>
-        {!readonly && <BlogActionBar blog={blog} />}
-      </div>
+    <AppHeader
+      render={() => (!readonly ? <BlogActionBar blog={blog} /> : null)}
+    >
+      {currentApp && <Breadcrumb app={currentApp} name={blog.title} />}
     </AppHeader>
   );
 };
