@@ -15,7 +15,12 @@ export function BlogPrint() {
   const {
     posts,
     query: { hasNextPage, isSuccess },
-  } = usePostsList(blog?._id, PostState.PUBLISHED, false, false);
+  } = usePostsList({
+    blogId: blog?._id,
+    state: PostState.PUBLISHED,
+    withNbComments: false,
+    withViews: false,
+  });
   useLoadPostList(true);
 
   useEffect(() => {

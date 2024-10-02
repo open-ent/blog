@@ -6,12 +6,17 @@ import { useBlogStore } from '~/store';
 
 /** Listen for BlogErrors and trigger toasts to notify the user about them. */
 export const useLoadPostList = (loadFullList: boolean = false) => {
-  const { blog, publicView } = useBlog();
+  const { blog } = useBlog();
   const setPostPageSize = useBlogStore((state) => state.setPostPageSize);
   // Load all posts with recurcive fetchNextPage calls.
   const {
     query: { fetchNextPage, hasNextPage, isSuccess, data },
-  } = usePostsList(blog?._id, PostState.PUBLISHED, false, !publicView);
+  } = usePostsList({
+    blogId: blog?._id,
+    state: PostState.PUBLISHED,
+    withNbComments: false,
+    withViews: blog?.visibility !== "PUBLIC",
+  });
 
   useEffect(() => {
     // Check if the second page of post is not null to set the page size. (not given by the backend)

@@ -182,6 +182,13 @@ export const useBlogCounter = (blogId?: string) => {
   };
 };
 
+export type usePostsListProps = {
+  blogId?: string;
+  state?: PostState;
+  withNbComments: boolean;
+  withViews: boolean;
+};
+
 /**
  * usePostsList query
  * @param blogId the blog id string
@@ -190,12 +197,12 @@ export const useBlogCounter = (blogId?: string) => {
  * @param withViews fetch views number (implies additional requests to the backend)
  * @returns list of posts
  */
-export const usePostsList = (
-  blogId?: string,
-  state?: PostState,
-  withNbComments: boolean = true,
-  withViews: boolean = false,
-) => {
+export const usePostsList = ({
+  blogId,
+  state,
+  withNbComments = true,
+  withViews = false,
+}: usePostsListProps) => {
   const params = useParams<{ blogId: string; slug: string }>();
   const { postsFilters } = usePostsFilter();
   const { addPostsViewsCounters, addPostsReactionsSummary, postPageSize } =

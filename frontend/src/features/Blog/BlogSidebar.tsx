@@ -15,12 +15,12 @@ const BlogSidebar = () => {
   const {
     posts,
     query: { hasNextPage, isFetching, fetchNextPage },
-  } = usePostsList(
-    blog?._id,
-    publicView ? PostState.PUBLISHED : undefined,
-    publicView ? false : undefined,
-    false,
-  );
+  } = usePostsList({
+    blogId: blog?._id,
+    state: publicView ? PostState.PUBLISHED : undefined,
+    withNbComments: publicView ? false : true,
+    withViews: false,
+  });
 
   const { currentApp } = useOdeClient();
 
