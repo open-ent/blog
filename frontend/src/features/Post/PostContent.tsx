@@ -114,8 +114,9 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Cancel modifications
   const handleCancelClick = () => {
     setMode('read');
-    // Restore previous content
+    // Restore previous content and title
     setContent(post?.content ?? '');
+    setTitle(post?.title ?? '');
   };
 
   // Save modifications
@@ -144,6 +145,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
 
   const handleContentChange = ({ editor }: { editor: any }) => {
     const content = editor?.getJSON();
+    setContent(content);
     const emptyContent = isEmptyEditorContent(content);
     setIsEmptyContent(emptyContent);
   };
