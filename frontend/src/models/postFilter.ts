@@ -1,4 +1,4 @@
-import { PostState } from "./post";
+import { PostState } from './post';
 
 export type PostsFilters = {
   state: PostState;

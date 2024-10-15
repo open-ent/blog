@@ -1,8 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from 'react';
 
-import { useReactions } from "@edifice-ui/react";
+import { useReactions } from '@edifice-ui/react';
 
-import { useBlogState, useStoreUpdaters } from "~/store";
+import { useBlogState, useStoreUpdaters } from '~/store';
 
 function useReactionSummary(postId: string) {
   const { postsReactionsSummary } = useBlogState();
@@ -14,7 +14,7 @@ function useReactionSummary(postId: string) {
     loadReactionSummaries,
     loadReactionDetails,
     applyReaction,
-  } = useReactions("blog", "post");
+  } = useReactions('blog', 'post');
 
   const reactionSummary = useMemo(() => {
     return postsReactionsSummary?.[postId] ?? undefined;
@@ -38,15 +38,15 @@ function useReactionSummary(postId: string) {
         const change = await applyReaction(postId, newReaction, oldReaction);
         const newSummary = { ...reactionSummary };
         switch (change) {
-          case "-":
+          case '-':
             newSummary.totalReactionsCounter--;
             newSummary.userReaction = null;
             break;
-          case "+":
+          case '+':
             newSummary.totalReactionsCounter++;
             newSummary.userReaction = newReaction;
             break;
-          case "=":
+          case '=':
             newSummary.userReaction = newReaction;
         }
         addPostReactionSummary(newSummary, postId);

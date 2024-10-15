@@ -1,7 +1,7 @@
-import { AppHeader, Breadcrumb, useOdeClient } from "@edifice-ui/react";
+import { AppHeader, Breadcrumb, useOdeClient } from '@edifice-ui/react';
 
-import { BlogActionBar } from "./BlogActionBar";
-import { Blog } from "~/models/blog";
+import { BlogActionBar } from './BlogActionBar';
+import { Blog } from '~/models/blog';
 
 export interface BlogProps {
   blog: Blog;

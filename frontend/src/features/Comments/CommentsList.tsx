@@ -1,14 +1,14 @@
-import { useId, useState } from "react";
+import { useId, useState } from 'react';
 
-import { Content } from "@edifice-ui/editor";
-import { EmptyScreen, usePaths } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { Content } from '@edifice-ui/editor';
+import { EmptyScreen, usePaths } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
-import { useComments } from "../../hooks/useComments";
-import { CommentCard } from "~/components/CommentCard/CommentCard";
-import ConfirmModal from "~/components/ConfirmModal/ConfirmModal";
-import { Comment } from "~/models/comment";
+import { CommentCard } from '~/components/CommentCard/CommentCard';
+import ConfirmModal from '~/components/ConfirmModal/ConfirmModal';
+import { Comment } from '~/models/comment';
+import { useComments } from '../../hooks/useComments';
 
 export interface CommentsListProps {
   comments: Comment[];
@@ -19,7 +19,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
   const [commentToDelete, setCommentToDelete] = useState<Comment | null>(null);
   const deleteModalId = useId();
 
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const { blogId, postId } = useParams();
   const { canCreate, canEdit, canRemove, update, remove } = useComments(
     blogId!,
@@ -38,6 +38,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
   };
 
   const handleRemoveConfirmSuccess = () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     commentToDelete && remove(commentToDelete.id);
     setCommentToDelete(null);
   };
@@ -67,7 +68,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
           id={deleteModalId}
           isOpen={commentToDelete !== null}
           header={<></>}
-          body={<p className="body">{t("confirm.remove.comment")}</p>}
+          body={<p className="body">{t('confirm.remove.comment')}</p>}
           onSuccess={handleRemoveConfirmSuccess}
           onCancel={() => setCommentToDelete(null)}
         />
@@ -77,7 +78,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
     <div className="m-auto mt-24">
       <EmptyScreen
         imageSrc={`${imagePath}/emptyscreen/illu-pad.svg`}
-        text={t("blog.comment.emptyscreen.text")}
+        text={t('blog.comment.emptyscreen.text')}
       />
     </div>
   );

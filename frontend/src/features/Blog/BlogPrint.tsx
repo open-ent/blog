@@ -1,13 +1,13 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { Editor } from "@edifice-ui/editor";
-import { LoadingScreen } from "@edifice-ui/react";
+import { Editor } from '@edifice-ui/editor';
+import { LoadingScreen } from '@edifice-ui/react';
 
-import { BlogHeader } from "~/features/Blog/BlogHeader";
-import { PostTitle } from "~/features/Post/PostTitle";
-import { useLoadPostList } from "~/hooks/useLoadPostList";
-import { PostState } from "~/models/post";
-import { useBlog, usePostsList } from "~/services/queries";
+import { BlogHeader } from '~/features/Blog/BlogHeader';
+import { PostTitle } from '~/features/Post/PostTitle';
+import { useLoadPostList } from '~/hooks/useLoadPostList';
+import { PostState } from '~/models/post';
+import { useBlog, usePostsList } from '~/services/queries';
 
 export function BlogPrint() {
   const { blog } = useBlog();

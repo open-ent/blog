@@ -1,7 +1,7 @@
-import { ACTION } from "edifice-ts-client";
+import { ACTION } from 'edifice-ts-client';
 
-import { workflows } from ".";
-import { IActionDefinition } from "~/utils/types";
+import { workflows } from '.';
+import { IActionDefinition } from '~/utils/types';
 
 /**
  * Actions doable on a post for users who can edit it

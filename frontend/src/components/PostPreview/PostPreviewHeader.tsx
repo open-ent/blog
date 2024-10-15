@@ -1,13 +1,11 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
+import { Avatar, Badge } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { Avatar, Badge } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
-
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import { PostDate } from "~/features/Post/PostDate";
-import { Post, PostState } from "~/models/post";
-import { getAvatarURL } from "~/utils/PostUtils";
+import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
+import { PostDate } from '~/features/Post/PostDate';
+import { Post, PostState } from '~/models/post';
+import { getAvatarURL } from '~/utils/PostUtils';
 
 export type PostPreviewHeaderProps = {
   /**
@@ -17,7 +15,7 @@ export type PostPreviewHeaderProps = {
 };
 
 export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const navigate = useNavigate();
 
   const { contrib, manager, creator } = useActionDefinitions([]);
@@ -34,7 +32,7 @@ export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
     >
       <div className="blog-post-user-image">
         <Avatar
-          alt={t("blog.author.avatar")}
+          alt={t('blog.author.avatar')}
           size="md"
           src={getAvatarURL(post.author.userId)}
           variant="circle"
@@ -48,24 +46,24 @@ export const PostPreviewHeader = ({ post }: PostPreviewHeaderProps) => {
               <Badge
                 className="ms-8"
                 variant={{
-                  type: "content",
-                  level: "info",
+                  type: 'content',
+                  level: 'info',
                   background: true,
                 }}
               >
-                {t("draft")}
+                {t('draft')}
               </Badge>
             )}
           {post.state === PostState.SUBMITTED && (
             <Badge
               className="blog-post-badge ms-8"
               variant={{
-                type: "content",
-                level: "warning",
+                type: 'content',
+                level: 'warning',
                 background: true,
               }}
             >
-              {t("blog.filters.submitted")}
+              {t('blog.filters.submitted')}
             </Badge>
           )}
         </div>

@@ -1,7 +1,7 @@
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from 'react-router-dom';
 
-import { PostState } from "~/models/post";
-import { PostsFilters } from "~/models/postFilter";
+import { PostState } from '~/models/post';
+import { PostsFilters } from '~/models/postFilter';
 
 function usePostsFilter(): {
   postsFilters: PostsFilters;
@@ -14,8 +14,8 @@ function usePostsFilter(): {
   const defaultState = location?.state?.defaultFilter ?? PostState.PUBLISHED;
 
   const postsFilters = {
-    state: (searchParams.get("state") as PostState) || defaultState,
-    search: searchParams.get("search") || "",
+    state: (searchParams.get('state') as PostState) || defaultState,
+    search: searchParams.get('search') || '',
   };
 
   const setPostsFilters = (newPostsFilters: PostsFilters) => {

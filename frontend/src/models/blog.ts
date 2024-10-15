@@ -1,31 +1,31 @@
-import { ID } from "edifice-ts-client";
+import { ID } from 'edifice-ts-client';
 
-export type CommentType = "NONE" | "IMMEDIATE" | "RESTRAINT";
-export type PublishType = "IMMEDIATE" | "RESTRAINT";
+export type CommentType = 'NONE' | 'IMMEDIATE' | 'RESTRAINT';
+export type PublishType = 'IMMEDIATE' | 'RESTRAINT';
 
 export type Blog = {
-  _id: ID;
-  title: string;
-  description: string;
-  author: {
+  '_id': ID;
+  'title': string;
+  'description': string;
+  'author': {
     userId: ID;
     username: string;
     login: string;
   };
-  thumbnail: string;
+  'thumbnail': string;
   /** Old shared rights */
-  shared?: [];
+  'shared'?: [];
   /**  Normalized shared rights */
-  rights: string[];
-  "publish-type": PublishType;
-  "comment-type": CommentType;
-  visibility: "OWNER" | "PUBLIC";
-  slug: string;
-  version: number;
-  created: {
+  'rights': string[];
+  'publish-type': PublishType;
+  'comment-type': CommentType;
+  'visibility': 'OWNER' | 'PUBLIC';
+  'slug': string;
+  'version': number;
+  'created': {
     $date: string;
   };
-  modified: {
+  'modified': {
     $date: string;
   };
 };

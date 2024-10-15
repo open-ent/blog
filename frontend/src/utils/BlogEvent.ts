@@ -3,7 +3,7 @@ import {
   LayerName,
   ERROR_CODE,
   odeServices,
-} from "edifice-ts-client";
+} from 'edifice-ts-client';
 
 export interface IBlogError {
   code: ErrorCode;
@@ -11,12 +11,12 @@ export interface IBlogError {
 }
 
 /** Specialize a notification layer dedicated to this application. */
-export const BlogLayer = "blog" as LayerName;
+export const BlogLayer = 'blog' as LayerName;
 
 /** Function to notify a blog error. */
 export function notifyError(error: IBlogError) {
   odeServices.notify().events().publish(BlogLayer, {
-    name: "error",
+    name: 'error',
     data: error,
   });
 }
@@ -27,10 +27,10 @@ export async function checkHttpError<T>(promise: Promise<T>) {
   const result = await promise;
   const isResponseHTML =
     (
-      odeServices.http().latestResponse.headers?.get("Content-Type") as
+      odeServices.http().latestResponse.headers?.get('Content-Type') as
         | string
         | undefined
-    )?.includes?.("html") ?? false;
+    )?.includes?.('html') ?? false;
 
   // Check if request was redirected to login page (content is not JSON) or an error occured
   if (!isResponseHTML && !odeServices.http().isResponseError()) return result;
@@ -40,7 +40,7 @@ export async function checkHttpError<T>(promise: Promise<T>) {
     ? getLatestError()
     : {
         code: ERROR_CODE.NOT_LOGGED_IN,
-        text: "disconnected.warning",
+        text: 'disconnected.warning',
       };
 
   // Display an error toast
@@ -58,23 +58,23 @@ function getLatestError() {
   switch (odeServices.http().latestResponse.status) {
     case 401:
       code = ERROR_CODE.TRANSPORT_ERROR;
-      text = "e401.page";
+      text = 'e401.page';
       break;
     case 403:
       code = ERROR_CODE.MALFORMED_DATA;
-      text = "e403";
+      text = 'e403';
       break;
     case 404:
       code = ERROR_CODE.TRANSPORT_ERROR;
-      text = "e404.page";
+      text = 'e404.page';
       break;
     case 408:
       code = ERROR_CODE.TIME_OUT;
-      text = "e408";
+      text = 'e408';
       break;
     case 500:
       code = ERROR_CODE.UNKNOWN;
-      text = "e500";
+      text = 'e500';
       break;
   }
 

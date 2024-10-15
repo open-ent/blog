@@ -1,9 +1,9 @@
-import { ID } from "edifice-ts-client";
+import { ID } from 'edifice-ts-client';
 
 export enum PostState {
-  PUBLISHED = "PUBLISHED",
-  SUBMITTED = "SUBMITTED",
-  DRAFT = "DRAFT",
+  PUBLISHED = 'PUBLISHED',
+  SUBMITTED = 'SUBMITTED',
+  DRAFT = 'DRAFT',
 }
 
 export type PostMetadata = {

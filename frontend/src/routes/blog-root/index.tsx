@@ -1,9 +1,9 @@
-import { useTrashedResource } from "@edifice-ui/react";
-import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs, Outlet, useParams } from "react-router-dom";
+import { useTrashedResource } from '@edifice-ui/react';
+import { QueryClient } from '@tanstack/react-query';
+import { LoaderFunctionArgs, Outlet, useParams } from 'react-router-dom';
 
-import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
-import { blogQuery } from "~/services/queries";
+import { useBlogErrorToast } from '~/hooks/useBlogErrorToast';
+import { blogQuery } from '~/services/queries';
 
 export const loader =
   (queryClient: QueryClient) =>

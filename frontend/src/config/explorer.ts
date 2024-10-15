@@ -1,90 +1,90 @@
-import { AppParams } from "ode-explorer/lib";
+import { AppParams } from 'ode-explorer/lib';
 
-import { BlogResourceService } from "~/services/resource";
-import { workflows } from ".";
+import { BlogResourceService } from '~/services/resource';
+import { workflows } from '.';
 
 export const explorerConfig: AppParams = {
-  app: "blog",
-  types: ["blog"],
+  app: 'blog',
+  types: ['blog'],
   enableOnboarding: false,
   service: BlogResourceService,
   filters: [
-    { id: "owner", defaultValue: true },
-    { id: "public", defaultValue: false },
-    { id: "shared", defaultValue: true },
+    { id: 'owner', defaultValue: true },
+    { id: 'public', defaultValue: false },
+    { id: 'shared', defaultValue: true },
   ],
   orders: [
-    { id: "name", defaultValue: "asc", i18n: "explorer.sorts.name" },
-    { id: "updatedAt", i18n: "explorer.sorts.updatedat" },
+    { id: 'name', defaultValue: 'asc', i18n: 'explorer.sorts.name' },
+    { id: 'updatedAt', i18n: 'explorer.sorts.updatedat' },
   ],
   actions: [
     {
-      id: "open",
+      id: 'open',
       workflow: workflows.access,
-      target: "actionbar",
-      right: "read",
+      target: 'actionbar',
+      right: 'read',
     },
     {
-      id: "share",
+      id: 'share',
       workflow: workflows.access,
-      target: "actionbar",
-      right: "manager",
+      target: 'actionbar',
+      right: 'manager',
     },
     {
-      id: "edit",
+      id: 'edit',
       workflow: workflows.access,
-      target: "actionbar",
-      right: "manager",
+      target: 'actionbar',
+      right: 'manager',
     },
     {
-      id: "create",
+      id: 'create',
       workflow: workflows.create,
-      target: "tree",
+      target: 'tree',
     },
     {
-      id: "createPublic",
+      id: 'createPublic',
       workflow: workflows.createPublic,
-      target: "tree",
+      target: 'tree',
     },
     {
-      id: "move",
+      id: 'move',
       workflow: workflows.access,
-      target: "actionbar",
-      right: "read",
+      target: 'actionbar',
+      right: 'read',
     },
     {
-      id: "publish",
+      id: 'publish',
       workflow: workflows.publish,
-      target: "actionbar",
-      right: "creator",
+      target: 'actionbar',
+      right: 'creator',
     },
     {
-      id: "print",
+      id: 'print',
       workflow: workflows.print,
-      target: "actionbar",
-      right: "read",
+      target: 'actionbar',
+      right: 'read',
     },
     {
-      id: "delete",
+      id: 'delete',
       workflow: workflows.access,
-      target: "actionbar",
-      right: "read",
+      target: 'actionbar',
+      right: 'read',
     },
   ],
   trashActions: [
     {
-      id: "restore",
+      id: 'restore',
       available: true,
-      target: "actionbar",
-      workflow: "",
-      right: "manager",
+      target: 'actionbar',
+      workflow: '',
+      right: 'manager',
     },
     {
-      id: "delete",
+      id: 'delete',
       available: true,
-      target: "actionbar",
-      workflow: "",
-      right: "manager",
+      target: 'actionbar',
+      workflow: '',
+      right: 'manager',
     },
   ],
 };

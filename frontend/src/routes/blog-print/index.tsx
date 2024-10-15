@@ -1,16 +1,16 @@
-import { useTrashedResource } from "@edifice-ui/react";
-import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs, useParams } from "react-router-dom";
+import { useTrashedResource } from '@edifice-ui/react';
+import { QueryClient } from '@tanstack/react-query';
+import { LoaderFunctionArgs, useParams } from 'react-router-dom';
 
-import { blogActions } from "~/config/blogActions";
-import { BlogPrint } from "~/features/Blog/BlogPrint";
-import { useBlogErrorToast } from "~/hooks/useBlogErrorToast";
-import { PostState } from "~/models/post";
+import { blogActions } from '~/config/blogActions';
+import { BlogPrint } from '~/features/Blog/BlogPrint';
+import { useBlogErrorToast } from '~/hooks/useBlogErrorToast';
+import { PostState } from '~/models/post';
 import {
   availableActionsQuery,
   blogQuery,
   postsListQuery,
-} from "~/services/queries";
+} from '~/services/queries';
 
 export const loader =
   (queryClient: QueryClient) =>

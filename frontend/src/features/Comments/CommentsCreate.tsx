@@ -1,10 +1,10 @@
-import { Content } from "@edifice-ui/editor";
-import { useUser } from "@edifice-ui/react";
-import { UserProfile } from "edifice-ts-client";
-import { useParams } from "react-router-dom";
+import { Content } from '@edifice-ui/editor';
+import { useUser } from '@edifice-ui/react';
+import { UserProfile } from 'edifice-ts-client';
+import { useParams } from 'react-router-dom';
 
-import { CommentCard } from "~/components/CommentCard/CommentCard";
-import { useComments } from "~/hooks/useComments";
+import { CommentCard } from '~/components/CommentCard/CommentCard';
+import { useComments } from '~/hooks/useComments';
 
 export const CommentsCreate = () => {
   const { user } = useUser();

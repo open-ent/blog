@@ -1,17 +1,17 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { Button, EmptyScreen, usePaths } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { Button, EmptyScreen, usePaths } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
-import { PostPreview } from "~/components/PostPreview/PostPreview";
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import usePostsFilter from "~/hooks/usePostsFilter";
-import { PostState } from "~/models/post";
-import { useBlog, useBlogCounter, usePostsList } from "~/services/queries";
-import { useBlogState } from "~/store";
+import { PostPreview } from '~/components/PostPreview/PostPreview';
+import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
+import usePostsFilter from '~/hooks/usePostsFilter';
+import { PostState } from '~/models/post';
+import { useBlog, useBlogCounter, usePostsList } from '~/services/queries';
+import { useBlogState } from '~/store';
 
 const BlogPostList = () => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const [imagePath] = usePaths();
 
   const { blog, publicView } = useBlog();
@@ -35,41 +35,41 @@ const BlogPostList = () => {
   useEffect(() => {
     if (sidebarHighlightedPost) {
       // Scroll to the selected post
-      const selectedPost = document.querySelector(".card.is-selected");
+      const selectedPost = document.querySelector('.card.is-selected');
       selectedPost?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
+        behavior: 'smooth',
+        block: 'center',
       });
     }
   }, [sidebarHighlightedPost]);
 
   const emptyScreenTitle = (): string => {
     if (postsFilters.search) {
-      return t("post.search.internal.empty");
+      return t('post.search.internal.empty');
     }
     if (counters?.countAll === 0) {
-      return t("blog.empty");
+      return t('blog.empty');
     }
     if (postsFilters.state === PostState.DRAFT) {
-      return t("post.state.draft.empty");
+      return t('post.state.draft.empty');
     }
     if (postsFilters.state === PostState.SUBMITTED) {
       if (creator || manager) {
-        return t("post.state.submitted.contrib.empty");
+        return t('post.state.submitted.contrib.empty');
       }
-      return t("post.state.submitted.empty");
+      return t('post.state.submitted.empty');
     }
     if (postsFilters.state === PostState.PUBLISHED) {
-      return t("post.state.published.empty");
+      return t('post.state.published.empty');
     }
-    return "";
+    return '';
   };
 
   const emptyScreenText = (): string => {
     if (counters?.countAll === 0) {
-      return t("blog.empty.text");
+      return t('blog.empty.text');
     }
-    return "";
+    return '';
   };
 
   return (
@@ -94,7 +94,7 @@ const BlogPostList = () => {
             isLoading={isFetching}
             onClick={() => fetchNextPage()}
           >
-            {t("post.see.more")}
+            {t('post.see.more')}
           </Button>
         </div>
       )}

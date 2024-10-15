@@ -1,9 +1,9 @@
-import { ID } from "edifice-ts-client";
+import { ID } from 'edifice-ts-client';
 
 export enum CommentState {
-  PUBLISHED = "PUBLISHED",
-  SUBMITTED = "SUBMITTED",
-  DRAFT = "DRAFT",
+  PUBLISHED = 'PUBLISHED',
+  SUBMITTED = 'SUBMITTED',
+  DRAFT = 'DRAFT',
 }
 
 export type Comment = {

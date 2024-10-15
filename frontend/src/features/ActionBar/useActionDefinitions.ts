@@ -1,12 +1,12 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from 'react';
 
-import { useUser } from "@edifice-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { ACTION, ActionType, IAction, RightRole } from "edifice-ts-client";
+import { useUser } from '@edifice-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import { ACTION, ActionType, IAction, RightRole } from 'edifice-ts-client';
 
-import { Post } from "~/models/post";
-import { availableActionsQuery, useBlog } from "~/services/queries";
-import { IActionDefinition } from "~/utils/types";
+import { Post } from '~/models/post';
+import { availableActionsQuery, useBlog } from '~/services/queries';
+import { IActionDefinition } from '~/utils/types';
 
 type SpecialPostRights = {
   hasPublishPostRight: boolean;
@@ -20,11 +20,11 @@ type SharedRoles = {
   canContrib: boolean;
 };
 type SharedRight = {
-  "org-entcore-blog-controllers-PostController|list": boolean;
-  "org-entcore-blog-controllers-PostController|submit": boolean;
-  "org-entcore-blog-controllers-PostController|publish": boolean;
-  "org-entcore-blog-controllers-BlogController|shareResource": boolean;
-  "org-entcore-blog-controllers-PostController|comment": boolean;
+  'org-entcore-blog-controllers-PostController|list': boolean;
+  'org-entcore-blog-controllers-PostController|submit': boolean;
+  'org-entcore-blog-controllers-PostController|publish': boolean;
+  'org-entcore-blog-controllers-BlogController|shareResource': boolean;
+  'org-entcore-blog-controllers-PostController|comment': boolean;
 };
 
 /**
@@ -45,7 +45,7 @@ export const useActionDefinitions = (
   const { user } = useUser();
   const { blog } = useBlog();
 
-  const isRestraint = blog?.["publish-type"] === "RESTRAINT";
+  const isRestraint = blog?.['publish-type'] === 'RESTRAINT';
 
   const rights = useMemo(() => {
     const defaultRights = {
@@ -82,16 +82,16 @@ export const useActionDefinitions = (
               user?.groupsIds?.indexOf(current.groupId) >= 0)
           ) {
             previous.read ||=
-              current["org-entcore-blog-controllers-PostController|list"];
+              current['org-entcore-blog-controllers-PostController|list'];
             previous.contrib ||=
-              current["org-entcore-blog-controllers-PostController|submit"] ||
-              current["org-entcore-blog-controllers-PostController|publish"];
+              current['org-entcore-blog-controllers-PostController|submit'] ||
+              current['org-entcore-blog-controllers-PostController|publish'];
             previous.manager ||=
               current[
-                "org-entcore-blog-controllers-BlogController|shareResource"
+                'org-entcore-blog-controllers-BlogController|shareResource'
               ];
             previous.canComment ||=
-              current["org-entcore-blog-controllers-PostController|comment"];
+              current['org-entcore-blog-controllers-PostController|comment'];
 
             previous.canContrib ||=
               isBlogAuthor || previous.contrib || previous.manager;
@@ -99,11 +99,11 @@ export const useActionDefinitions = (
             // Also look for the real publish/submit URL to use.
             // If both are acceptable, prefer publish over submit.
             if (
-              current["org-entcore-blog-controllers-PostController|publish"]
+              current['org-entcore-blog-controllers-PostController|publish']
             ) {
               previous.hasPublishPostRight = true;
             }
-            if (current["org-entcore-blog-controllers-PostController|submit"]) {
+            if (current['org-entcore-blog-controllers-PostController|submit']) {
               previous.hasSubmitPostRight = true;
             }
           }
@@ -132,13 +132,13 @@ export const useActionDefinitions = (
       if (!action || !action.available) return false;
 
       const rolesPrecedence = [
-        "creator",
-        "manager",
-        "contrib",
-        "read",
+        'creator',
+        'manager',
+        'contrib',
+        'read',
       ] as RightRole[];
 
-      if (typeof action?.right === "string" && !!rights) {
+      if (typeof action?.right === 'string' && !!rights) {
         for (let i = 0; i < rolesPrecedence.length; i++) {
           const rightRole = rolesPrecedence[i];
           if (rights[rightRole] === true) {
@@ -163,13 +163,13 @@ export const useActionDefinitions = (
       // Managers have all rights
       if (rights.creator || rights.manager) {
         authorized.push(ACTION.OPEN, ACTION.DELETE);
-        if (post.state !== "PUBLISHED") authorized.push(ACTION.PUBLISH);
-        if (post.state === "PUBLISHED") authorized.push(ACTION.MOVE);
+        if (post.state !== 'PUBLISHED') authorized.push(ACTION.PUBLISH);
+        if (post.state === 'PUBLISHED') authorized.push(ACTION.MOVE);
       }
       // Contributors have limited actions rights on their own posts
       else if (rights.contrib && isPostAuthor) {
         authorized.push(ACTION.OPEN, ACTION.DELETE);
-        if (!(post.state in ["PUBLISHED", "SUBMITTED"]))
+        if (!(post.state in ['PUBLISHED', 'SUBMITTED']))
           authorized.push(ACTION.PUBLISH);
       }
 
@@ -191,10 +191,10 @@ export const useActionDefinitions = (
   const getDefaultPublishKeyword = useCallback(
     (postAuthorId: string) => {
       return !isRestraint && postAuthorId === user?.userId
-        ? "submit" // Logic would require "publish", but that would give a 401 Unauthorized :-/
+        ? 'submit' // Logic would require "publish", but that would give a 401 Unauthorized :-/
         : rights.manager || rights.creator || rights.hasPublishPostRight
-          ? "publish"
-          : "submit";
+          ? 'publish'
+          : 'submit';
     },
     [isRestraint, user, rights],
   );

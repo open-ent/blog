@@ -1,7 +1,7 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from 'react';
 
-import { Editor, EditorRef } from "@edifice-ui/editor";
-import { Save, Send } from "@edifice-ui/icons";
+import { Editor, EditorRef } from '@edifice-ui/editor';
+import { Save, Send } from '@edifice-ui/icons';
 import {
   Alert,
   Button,
@@ -9,25 +9,25 @@ import {
   Input,
   Label,
   Loading,
-} from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
-import { useNavigate, useSearchParams } from "react-router-dom";
+} from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { PostAudience } from "./PostAudience";
-import { PostTitle } from "./PostTitle";
-import { usePostActions } from "../ActionBar/usePostActions";
-import { CommentsCreate } from "../Comments/CommentsCreate";
-import { CommentsHeader } from "../Comments/CommentsHeader";
-import { CommentsList } from "../Comments/CommentsList";
-import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
-import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
-import { TTITLE_LENGTH_MAX } from "~/config/init-config";
-import { postContentActions } from "~/config/postContentActions";
-import { Comment } from "~/models/comment";
-import { Post } from "~/models/post";
-import { baseUrl } from "~/routes";
-import { useBlog } from "~/services/queries";
-import { isEmptyEditorContent } from "~/utils/EditorHasContent";
+import { PostAudience } from './PostAudience';
+import { PostTitle } from './PostTitle';
+import { usePostActions } from '../ActionBar/usePostActions';
+import { CommentsCreate } from '../Comments/CommentsCreate';
+import { CommentsHeader } from '../Comments/CommentsHeader';
+import { CommentsList } from '../Comments/CommentsList';
+import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
+import OldFormatModal from '~/components/OldFormatModal/OldFormatModal';
+import { TTITLE_LENGTH_MAX } from '~/config/init-config';
+import { postContentActions } from '~/config/postContentActions';
+import { Comment } from '~/models/comment';
+import { Post } from '~/models/post';
+import { baseUrl } from '~/routes';
+import { useBlog } from '~/services/queries';
+import { isEmptyEditorContent } from '~/utils/EditorHasContent';
 
 export interface PostContentProps {
   post: Post;
@@ -58,25 +58,25 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const titleRef = useRef(null);
 
   // Variables for edit mode
-  const [title, setTitle] = useState(post?.title ?? "");
-  const [content, setContent] = useState(post?.content ?? "");
-  const [mode, setMode] = useState<"read" | "edit">(
-    searchParams.get("edit") && !readOnly ? "edit" : "read",
+  const [title, setTitle] = useState(post?.title ?? '');
+  const [content, setContent] = useState(post?.content ?? '');
+  const [mode, setMode] = useState<'read' | 'edit'>(
+    searchParams.get('edit') && !readOnly ? 'edit' : 'read',
   );
-  const [variant, setVariant] = useState<"ghost" | "outline">("ghost");
+  const [variant, setVariant] = useState<'ghost' | 'outline'>('ghost');
   const [isOldFormatOpen, setIsOldFormat] = useState(false);
   const [isEmptyContent, setIsEmptyContent] = useState<boolean>(false);
 
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
 
   const navigate = useNavigate();
 
   // Changing mode displays another variant of the editor.
   useEffect(() => {
-    if (searchParams.get("edit") && mode !== "edit") {
+    if (searchParams.get('edit') && mode !== 'edit') {
       setSearchParams({}, { replace: true });
     }
-    setVariant(mode === "read" ? "ghost" : "outline");
+    setVariant(mode === 'read' ? 'ghost' : 'outline');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
@@ -84,7 +84,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const postActionsHandlers = {
     onBackward: () => {
       navigate(`../..`, {
-        relative: "path",
+        relative: 'path',
         state: { defaultFilter: post.state },
       });
     },
@@ -93,16 +93,16 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
       navigate(`/id/${blogId}`);
     },
     onEdit: () => {
-      setMode("edit");
+      setMode('edit');
     },
     onPrint: () => {
       if (publicView) {
         window.open(
           `${baseUrl}/pub/${blog?.slug}/print/post/${post._id}`,
-          "_blank",
+          '_blank',
         );
       } else {
-        window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
+        window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, '_blank');
       }
     },
     onPublish: () => {
@@ -113,33 +113,33 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
 
   // Cancel modifications
   const handleCancelClick = () => {
-    setMode("read");
+    setMode('read');
     // Restore previous content
-    setContent(post?.content ?? "");
+    setContent(post?.content ?? '');
   };
 
   // Save modifications
   const handleSaveClick = () => {
-    const contentHtml = editorRef.current?.getContent("html") as string;
-    const contentJson = editorRef.current?.getContent("json") as JSON;
+    const contentHtml = editorRef.current?.getContent('html') as string;
+    const contentJson = editorRef.current?.getContent('json') as JSON;
     if (post && (!isEmptyContent || title.length !== 0)) {
       post.title = title;
       post.content = contentHtml;
       post.jsonContent = contentJson;
       save();
-      setMode("read");
+      setMode('read');
     }
   };
 
   // Publish or submit modifications
   const handlePublishClick = async () => {
-    const contentHtml = editorRef.current?.getContent("html") as string;
+    const contentHtml = editorRef.current?.getContent('html') as string;
     if (!post || !title || title.trim().length == 0 || isEmptyContent) return;
     post.title = title;
     post.content = contentHtml;
     await save(true);
     await publish(true);
-    setMode("read");
+    setMode('read');
   };
 
   const handleContentChange = ({ editor }: { editor: any }) => {
@@ -148,7 +148,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     setIsEmptyContent(emptyContent);
   };
 
-  const withAudience = !isPublicBlog && mode === "read";
+  const withAudience = !isPublicBlog && mode === 'read';
 
   return (
     <div className="post-container mb-48">
@@ -159,7 +159,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         mode={mode}
         {...postActionsHandlers}
       />
-      {post.contentVersion === 0 && mode === "read" ? (
+      {post.contentVersion === 0 && mode === 'read' ? (
         <Alert
           type="warning"
           className="my-24"
@@ -171,32 +171,32 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               className="text-gray-700"
               onClick={() => setIsOldFormat(true)}
             >
-              {t("post.oldFormat.open")}
+              {t('post.oldFormat.open')}
             </Button>
           }
         >
-          {t("post.oldFormat.text")}
+          {t('post.oldFormat.text')}
         </Alert>
       ) : (
         <></>
       )}
       <div className="mx-md-8 post-content-editor">
-        {mode === "edit" && (
+        {mode === 'edit' && (
           <div className="mt-24">
             <FormControl id="postTitle" isRequired>
-              <Label>{t("blog.post.title-helper")}</Label>
+              <Label>{t('blog.post.title-helper')}</Label>
               <Input
                 ref={titleRef}
                 type="text"
                 size="md"
-                placeholder={t("post.title.placeholder")}
+                placeholder={t('post.title.placeholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={TTITLE_LENGTH_MAX}
               ></Input>
             </FormControl>
             <FormControl id="postContent" className="mt-16">
-              <Label>{t("blog.post.content-helper")}</Label>
+              <Label>{t('blog.post.content-helper')}</Label>
             </FormControl>
           </div>
         )}
@@ -206,20 +206,20 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           content={content}
           mode={mode}
           variant={variant}
-          visibility={blog?.visibility === "PUBLIC" ? "public" : "protected"}
+          visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
           onContentChange={handleContentChange}
         ></Editor>
-        {mode === "edit" && (
+        {mode === 'edit' && (
           <ButtonGroup
             className="gap-8 my-8 sticky-bottom py-8 bg-white z-0"
             variant="reverse"
           >
             <Button
               type="button"
-              variant={hideSaveButton ? "outline" : "ghost"}
+              variant={hideSaveButton ? 'outline' : 'ghost'}
               onClick={handleCancelClick}
             >
-              {t("cancel")}
+              {t('cancel')}
             </Button>
             {!hideSaveButton && (
               <Button
@@ -238,14 +238,14 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               disabled={isMutating || title.length == 0 || isEmptyContent}
               onClick={handlePublishClick}
             >
-              {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+              {mustSubmit ? t('blog.submitPost') : t('blog.publish')}
             </Button>
           </ButtonGroup>
         )}
       </div>
 
       <div className="d-flex flex-column-reverse flex-md-row justify-content-between align-items-start align-items-md-center mt-32 pt-24 pb-8 gap-16">
-        {mode === "read" && !!comments && (
+        {mode === 'read' && !!comments && (
           <div className="mx-md-8">
             <CommentsHeader comments={comments} />
           </div>
@@ -253,14 +253,14 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         {withAudience && <PostAudience post={post} withViews={showViews} />}
       </div>
 
-      {mode === "read" && !!comments && (
+      {mode === 'read' && !!comments && (
         <div className="mx-md-8">
           <CommentsCreate />
           <CommentsList comments={comments} />
         </div>
       )}
       <Suspense>
-        {isOldFormatOpen && mode === "read" && (
+        {isOldFormatOpen && mode === 'read' && (
           <OldFormatModal
             blogId={blogId}
             postId={post._id}

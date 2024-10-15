@@ -1,19 +1,19 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { Editor } from "@edifice-ui/editor";
-import { LoadingScreen, useTrashedResource } from "@edifice-ui/react";
-import { QueryClient, useQuery } from "@tanstack/react-query";
-import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
+import { Editor } from '@edifice-ui/editor';
+import { LoadingScreen, useTrashedResource } from '@edifice-ui/react';
+import { QueryClient, useQuery } from '@tanstack/react-query';
+import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
 
-import { postContentActions } from "~/config/postContentActions";
-import { PostTitle } from "~/features/Post/PostTitle";
-import { PostMetadata } from "~/models/post";
+import { postContentActions } from '~/config/postContentActions';
+import { PostTitle } from '~/features/Post/PostTitle';
+import { PostMetadata } from '~/models/post';
 import {
   availableActionsQuery,
   commentListQuery,
   postMetadataQuery,
   postQuery,
-} from "~/services/queries";
+} from '~/services/queries';
 
 /** Load a blog post content + comments to print it*/
 export const loader =

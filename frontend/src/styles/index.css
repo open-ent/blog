@@ -28,7 +28,7 @@ main {
 }
 
 .summary-list-item:before {
-  content: "";
+  content: '';
   position: absolute;
   z-index: 0;
   top: 0;
@@ -46,7 +46,7 @@ main {
 }
 
 .summary-list-item-title:before {
-  content: " ";
+  content: ' ';
   border: 1.5px solid var(--edifice-secondary-300);
   border-radius: 3px;
   background: var(--edifice-white);
@@ -105,12 +105,12 @@ main {
   height: 2rem;
 }
 
-.post-content-editor .ProseMirror[contenteditable="true"] {
+.post-content-editor .ProseMirror[contenteditable='true'] {
   min-height: 180px;
 }
 
 .post-footer-element + .post-footer-element:before {
-  content: "";
+  content: '';
   margin: 2px;
   height: 16px;
   border: 0;

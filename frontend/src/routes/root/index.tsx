@@ -1,7 +1,7 @@
-import { Layout, LoadingScreen, useOdeClient } from "@edifice-ui/react";
-import { Outlet } from "react-router-dom";
+import { Layout, LoadingScreen, useOdeClient } from '@edifice-ui/react';
+import { Outlet } from 'react-router-dom';
 
-import { redirectBlogHashLocation } from "~/utils/redirectBlogHashLocation";
+import { redirectBlogHashLocation } from '~/utils/redirectBlogHashLocation';
 
 /** Check old format URL and redirect if needed */
 export const loader = async () => {

@@ -1,9 +1,9 @@
-import { useId, useState } from "react";
+import { useId, useState } from 'react';
 
-import { Button, LoadingScreen, Modal } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { Button, LoadingScreen, Modal } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
-import { baseUrl } from "~/routes";
+import { baseUrl } from '~/routes';
 
 interface OldFormatModalProps {
   blogId: string;
@@ -19,7 +19,7 @@ export default function OldFormatModal({
   isOpen,
   onCancel = () => ({}),
 }: OldFormatModalProps) {
-  const { t } = useTranslation("common");
+  const { t } = useTranslation('common');
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
@@ -31,7 +31,7 @@ export default function OldFormatModal({
       size="lg"
     >
       <Modal.Header onModalClose={onCancel}>
-        {t("post.oldFormat.title", { ns: "blog" })}
+        {t('post.oldFormat.title', { ns: 'blog' })}
       </Modal.Header>
       <Modal.Body className="d-flex flex-fill align-content-center justify-content-center ">
         {!isLoaded && (
@@ -42,13 +42,13 @@ export default function OldFormatModal({
         <iframe
           className="flex-fill"
           src={`${baseUrl}/oldformat/${blogId}/${postId}`}
-          title={t("post.oldFormat.title", { ns: "blog" })}
+          title={t('post.oldFormat.title', { ns: 'blog' })}
           onLoad={() => setIsLoaded(true)}
         ></iframe>
       </Modal.Body>
       <Modal.Footer>
         <Button color="secondary" onClick={onCancel}>
-          {t("close")}
+          {t('close')}
         </Button>
       </Modal.Footer>
     </Modal>

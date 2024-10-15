@@ -1,14 +1,14 @@
-import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs } from "react-router-dom";
+import { QueryClient } from '@tanstack/react-query';
+import { LoaderFunctionArgs } from 'react-router-dom';
 
-import { blogActions } from "~/config/blogActions";
-import { Blog } from "~/features/Blog/Blog";
-import { PostState } from "~/models/post";
+import { blogActions } from '~/config/blogActions';
+import { Blog } from '~/features/Blog/Blog';
+import { PostState } from '~/models/post';
 import {
   availableActionsQuery,
   blogPublicQuery,
   postsListQuery,
-} from "~/services/queries";
+} from '~/services/queries';
 
 export const loader =
   (queryClient: QueryClient) =>
@@ -16,7 +16,7 @@ export const loader =
     const { slug } = params;
     const queryBlogPublic = blogPublicQuery(slug as string);
     const blog = await queryClient.fetchQuery(queryBlogPublic);
-    if (!blog._id) throw "Unexpected error";
+    if (!blog._id) throw 'Unexpected error';
 
     const actions = availableActionsQuery(blogActions);
     const queryPostsList = postsListQuery(

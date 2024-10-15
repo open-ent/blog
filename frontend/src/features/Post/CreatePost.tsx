@@ -1,16 +1,16 @@
-import { useRef, useState } from "react";
+import { useRef, useState } from 'react';
 
-import { Editor, EditorRef } from "@edifice-ui/editor";
-import { Save, Send } from "@edifice-ui/icons";
-import { Button, FormControl, Input, Label } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Editor, EditorRef } from '@edifice-ui/editor';
+import { Save, Send } from '@edifice-ui/icons';
+import { Button, FormControl, Input, Label } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
-import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
-import { TTITLE_LENGTH_MAX } from "~/config/init-config";
-import { useBlog, useCreatePost, usePublishPost } from "~/services/queries";
-import { isEmptyEditorContent } from "~/utils/EditorHasContent";
+import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
+import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
+import { TTITLE_LENGTH_MAX } from '~/config/init-config';
+import { useBlog, useCreatePost, usePublishPost } from '~/services/queries';
+import { isEmptyEditorContent } from '~/utils/EditorHasContent';
 
 export interface CreatePostProps {
   blogId: string;
@@ -20,9 +20,9 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const { blog } = useBlog(blogId);
   const editorRef = useRef<EditorRef>(null);
   const titleRef = useRef<HTMLInputElement>(null);
-  const [isEmptyTitle, setIsEmptyTitle] = useState<string>("");
+  const [isEmptyTitle, setIsEmptyTitle] = useState<string>('');
   const [isEmptyContent, setIsEmptyContent] = useState<boolean>(false);
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
 
   const navigate = useNavigate();
 
@@ -35,8 +35,8 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   const disableButtons = createMutation.isPending || publishMutation.isPending;
 
   const create = async () => {
-    const content = editorRef.current?.getContent("html") as string;
-    const title = titleRef.current?.value ?? "";
+    const content = editorRef.current?.getContent('html') as string;
+    const title = titleRef.current?.value ?? '';
     if (!content) return;
     return await createMutation.mutateAsync({ title, content });
   };
@@ -75,18 +75,18 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
   return (
     <div className="post-container mt-32">
       <FormControl id="postTitle" isRequired className="mx-md-16">
-        <Label>{t("blog.post.title-helper")}</Label>
+        <Label>{t('blog.post.title-helper')}</Label>
         <Input
           ref={titleRef}
           type="text"
           size="md"
-          placeholder={t("post.title.placeholder")}
+          placeholder={t('post.title.placeholder')}
           maxLength={TTITLE_LENGTH_MAX}
           onChange={(e) => setIsEmptyTitle(e.target.value)}
         ></Input>
       </FormControl>
       <FormControl id="postContent" className="mt-16 mx-md-16">
-        <Label>{t("blog.post.content-helper")}</Label>
+        <Label>{t('blog.post.content-helper')}</Label>
       </FormControl>
       <div className="mx-md-16 post-content-editor">
         <Editor
@@ -94,13 +94,13 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           ref={editorRef}
           content=""
           mode="edit"
-          visibility={blog?.visibility === "PUBLIC" ? "public" : "protected"}
+          visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
           onContentChange={handleContentChange}
         ></Editor>
       </div>
       <ButtonGroup className="gap-8 mt-16 mx-md-16" variant="reverse">
         <Button type="button" variant="ghost" onClick={handleCancelClick}>
-          {t("cancel")}
+          {t('cancel')}
         </Button>
         <Button
           type="button"
@@ -111,7 +111,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           }
           onClick={handleSaveClick}
         >
-          {t("draft.save")}
+          {t('draft.save')}
         </Button>
         <Button
           type="button"
@@ -121,7 +121,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           }
           onClick={handlePublishClick}
         >
-          {mustSubmit ? t("blog.submitPost") : t("blog.publish")}
+          {mustSubmit ? t('blog.submitPost') : t('blog.publish')}
         </Button>
       </ButtonGroup>
     </div>

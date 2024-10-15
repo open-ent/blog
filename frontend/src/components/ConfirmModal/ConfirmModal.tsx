@@ -1,9 +1,9 @@
-import { Modal, Button } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { Modal, Button } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
 const Variant = {
-  YES_NO: "yes/no",
-  OK_CANCEL: "ok/cancel",
+  YES_NO: 'yes/no',
+  OK_CANCEL: 'ok/cancel',
 } as const;
 
 export type ConfirmModalVariant = (typeof Variant)[keyof typeof Variant];
@@ -31,9 +31,9 @@ export default function ConfirmModal({
   onSuccess = () => ({}),
   onCancel = () => ({}),
 }: ConfirmModalProps) {
-  const { t } = useTranslation("common");
-  const ok = { "yes/no": t("yes"), "ok/cancel": t("ok") };
-  const ko = { "yes/no": t("no"), "ok/cancel": t("cancel") };
+  const { t } = useTranslation('common');
+  const ok = { 'yes/no': t('yes'), 'ok/cancel': t('ok') };
+  const ko = { 'yes/no': t('no'), 'ok/cancel': t('cancel') };
 
   return (
     <Modal isOpen={isOpen} onModalClose={onCancel} id={id}>

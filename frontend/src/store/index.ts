@@ -1,7 +1,7 @@
-import { ReactionSummaryData, ViewsCounters } from "edifice-ts-client";
-import { create } from "zustand";
+import { ReactionSummaryData, ViewsCounters } from 'edifice-ts-client';
+import { create } from 'zustand';
 
-import { Post } from "~/models/post";
+import { Post } from '~/models/post';
 
 export type ReactionsSummary = {
   [postId: string]: ReactionSummaryData | undefined;

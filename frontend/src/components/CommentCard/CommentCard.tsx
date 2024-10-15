@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from 'react';
 
-import { Content } from "@edifice-ui/editor";
-import { Send } from "@edifice-ui/icons";
+import { Content } from '@edifice-ui/editor';
+import { Send } from '@edifice-ui/icons';
 import {
   Avatar,
   Badge,
@@ -10,24 +10,24 @@ import {
   FormControl,
   TextArea,
   useDate,
-} from "@edifice-ui/react";
-import clsx from "clsx";
-import { ID, IUserDescription } from "edifice-ts-client";
-import { useTranslation } from "react-i18next";
+} from '@edifice-ui/react';
+import clsx from 'clsx';
+import { ID, IUserDescription } from 'edifice-ts-client';
+import { useTranslation } from 'react-i18next';
 
-import { getAvatarURL } from "~/utils/PostUtils";
-import { ButtonGroup } from "../ButtonGroup/ButtonGroup";
+import { getAvatarURL } from '~/utils/PostUtils';
+import { ButtonGroup } from '../ButtonGroup/ButtonGroup';
 
 const MAX_COMMENT_LENGTH = 800;
 
 export interface CommentProps {
   className?: string;
-  mode: "edit" | "read" | "print";
+  mode: 'edit' | 'read' | 'print';
 
   author: {
     userId: ID;
     username: string;
-    profiles?: IUserDescription["profiles"];
+    profiles?: IUserDescription['profiles'];
   };
 
   created?: CoreDate;
@@ -41,27 +41,27 @@ export interface CommentProps {
 export const CommentCard = ({
   author,
   created,
-  content = "",
+  content = '',
   mode,
   className,
   onPublish,
   onRemove,
 }: CommentProps) => {
-  const [editable, setEditable] = useState(mode === "edit");
+  const [editable, setEditable] = useState(mode === 'edit');
   const [comment, setComment] = useState(content);
   const refTextArea = useRef<HTMLTextAreaElement>(null);
 
-  const { t } = useTranslation("common");
+  const { t } = useTranslation('common');
   const { fromNow } = useDate();
   const badge = useMemo(() => {
-    const profile = author.profiles?.[0] ?? "Guest";
-    if (["Teacher", "Student", "Relative", "Personnel"].indexOf(profile) < 0)
+    const profile = author.profiles?.[0] ?? 'Guest';
+    if (['Teacher', 'Student', 'Relative', 'Personnel'].indexOf(profile) < 0)
       return <></>;
 
     return (
       <Badge
         variant={{
-          type: "user",
+          type: 'user',
           profile,
         }}
       >
@@ -80,27 +80,27 @@ export const CommentCard = ({
   const handlePublishClick = () => {
     onPublish?.(comment);
     if (refTextArea.current) {
-      refTextArea.current.value = "";
+      refTextArea.current.value = '';
     }
-    setEditable(mode === "edit");
+    setEditable(mode === 'edit');
     if (!content.length) {
-      setComment("");
+      setComment('');
     }
   };
 
   const handleCancelClick = () => {
     setComment(content);
-    setEditable(mode === "edit");
+    setEditable(mode === 'edit');
   };
 
-  const cssClasses = clsx("border rounded-3 p-12 pb-8 d-flex", className, {
-    "bg-gray-200": mode === "edit",
+  const cssClasses = clsx('border rounded-3 p-12 pb-8 d-flex', className, {
+    'bg-gray-200': mode === 'edit',
   });
 
   return (
     <div className={cssClasses}>
       <Avatar
-        alt={t("comment.author.avatar")}
+        alt={t('comment.author.avatar')}
         size="sm"
         src={getAvatarURL(author.userId)}
         variant="circle"
@@ -109,7 +109,7 @@ export const CommentCard = ({
         <div className="ms-8 text-break">
           {editable ? (
             <div className="d-flex flex-column flex-fill gap-8">
-              <div>{t("comment.placeholder")}</div>
+              <div>{t('comment.placeholder')}</div>
               <div className="border rounded-3 px-16 pt-12 pb-8 d-flex gap-2 flex-column bg-white">
                 <FormControl id="comment" isRequired>
                   <TextArea
@@ -132,7 +132,7 @@ export const CommentCard = ({
                       size="sm"
                       onClick={handleCancelClick}
                     >
-                      {t("cancel")}
+                      {t('cancel')}
                     </Button>
                   )}
                   <Button
@@ -142,7 +142,7 @@ export const CommentCard = ({
                     onClick={handlePublishClick}
                     disabled={!comment.length}
                   >
-                    {t("comment.post")}
+                    {t('comment.post')}
                   </Button>
                 </ButtonGroup>
               </div>
@@ -156,7 +156,7 @@ export const CommentCard = ({
                   <>
                     <span className="separator d-none d-md-block"></span>
                     <span>
-                      {t("comment.publish.date", { date: fromNow(created) })}
+                      {t('comment.publish.date', { date: fromNow(created) })}
                     </span>
                   </>
                 )}
@@ -166,7 +166,7 @@ export const CommentCard = ({
           )}
         </div>
 
-        {mode !== "print" && !editable && (
+        {mode !== 'print' && !editable && (
           <div className="ms-4">
             {onPublish && (
               <Button
@@ -175,7 +175,7 @@ export const CommentCard = ({
                 size="sm"
                 onClick={handleEditClick}
               >
-                {t("edit")}
+                {t('edit')}
               </Button>
             )}
             {onRemove && (
@@ -185,7 +185,7 @@ export const CommentCard = ({
                 size="sm"
                 onClick={handleRemoveClick}
               >
-                {t("remove")}
+                {t('remove')}
               </Button>
             )}
           </div>

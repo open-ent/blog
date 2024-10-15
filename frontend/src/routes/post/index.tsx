@@ -1,16 +1,16 @@
-import { QueryClient, useQuery } from "@tanstack/react-query";
-import { LoaderFunctionArgs, useLoaderData, useParams } from "react-router-dom";
+import { QueryClient, useQuery } from '@tanstack/react-query';
+import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
 
-import { postContentActions } from "~/config/postContentActions";
-import { PostContent } from "~/features/Post/PostContent";
-import { PostHeader } from "~/features/Post/PostHeader";
-import { PostMetadata } from "~/models/post";
+import { postContentActions } from '~/config/postContentActions';
+import { PostContent } from '~/features/Post/PostContent';
+import { PostHeader } from '~/features/Post/PostHeader';
+import { PostMetadata } from '~/models/post';
 import {
   availableActionsQuery,
   commentListQuery,
   postMetadataQuery,
   postQuery,
-} from "~/services/queries";
+} from '~/services/queries';
 
 /** Load a blog post content + comments */
 export const loader =

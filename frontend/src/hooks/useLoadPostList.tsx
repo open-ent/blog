@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { PostState } from "~/models/post";
-import { useBlog, usePostsList } from "~/services/queries";
-import { useStoreUpdaters } from "~/store";
+import { PostState } from '~/models/post';
+import { useBlog, usePostsList } from '~/services/queries';
+import { useStoreUpdaters } from '~/store';
 
 /** Listen for BlogErrors and trigger toasts to notify the user about them. */
 export const useLoadPostList = (loadFullList: boolean = false) => {

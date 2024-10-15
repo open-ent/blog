@@ -1,14 +1,14 @@
-import { RafterDown } from "@edifice-ui/icons";
-import { AppIcon, IconButton, Image, useOdeClient } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { RafterDown } from '@edifice-ui/icons';
+import { AppIcon, IconButton, Image, useOdeClient } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
-import { SummaryList } from "~/components/SummaryList/SummaryList";
-import { PostState } from "~/models/post";
-import { useBlog, usePostsList } from "~/services/queries";
-import { useStoreUpdaters } from "~/store";
+import { SummaryList } from '~/components/SummaryList/SummaryList';
+import { PostState } from '~/models/post';
+import { useBlog, usePostsList } from '~/services/queries';
+import { useStoreUpdaters } from '~/store';
 
 const BlogSidebar = () => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
 
   const { blog, publicView } = useBlog();
 
@@ -70,7 +70,7 @@ const BlogSidebar = () => {
                 variant="ghost"
                 isLoading={isFetching}
                 onClick={() => fetchNextPage()}
-                aria-label={t("post.see.more")}
+                aria-label={t('post.see.more')}
                 icon={<RafterDown />}
               ></IconButton>
             </div>

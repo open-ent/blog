@@ -1,18 +1,17 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Editor, EditorRef } from "@edifice-ui/editor";
-import { Card, Image, getThumbnail } from "@edifice-ui/react";
-import clsx from "clsx";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Editor, EditorRef } from '@edifice-ui/editor';
+import { Card, Image, getThumbnail } from '@edifice-ui/react';
+import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { PostPreviewActionBar } from "./PostPreviewActionBar";
-import { PostPreviewFooter } from "./PostPreviewFooter";
-import { PostPreviewHeader } from "./PostPreviewHeader";
-import { Post } from "~/models/post";
-import { useBlog } from "~/services/queries";
-import { useBlogState, useStoreUpdaters } from "~/store";
+import { Post } from '~/models/post';
+import { useBlog } from '~/services/queries';
+import { useBlogState, useStoreUpdaters } from '~/store';
+import { PostPreviewActionBar } from './PostPreviewActionBar';
+import { PostPreviewFooter } from './PostPreviewFooter';
+import { PostPreviewHeader } from './PostPreviewHeader';
 
 export type PostPreviewProps = {
   /**
@@ -26,7 +25,7 @@ export type PostPreviewProps = {
 };
 
 export const PostPreview = ({ post, index }: PostPreviewProps) => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const navigate = useNavigate();
 
   const { blog, publicView } = useBlog();
@@ -36,8 +35,8 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [summaryContent, setSummaryContent] = useState<string>("");
-  const [summaryContentPlain, setSummaryContentPlain] = useState<string>("");
+  const [summaryContent, setSummaryContent] = useState<string>('');
+  const [summaryContentPlain, setSummaryContentPlain] = useState<string>('');
   const [mediaURLs, setMediaURLs] = useState<string[]>([]);
 
   // Number of media to display on the preview card
@@ -55,9 +54,9 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   useEffect(() => {
     if (sidebarHighlightedPost?._id === post._id) {
       cardRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center",
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
       });
     }
   }, [sidebarHighlightedPost, post]);
@@ -68,17 +67,17 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
       const getMediaTags = /<(img|video|iframe|audio|embed)[^>]*>(<\/\1>)?/gim;
       const getSrc = /src=(?:"|')([^"|']*)(?:"|')/;
       const mediaTags = contentHTML.match(getMediaTags);
-      contentHTML = contentHTML.replace(getMediaTags, "");
+      contentHTML = contentHTML.replace(getMediaTags, '');
       if (mediaTags?.length) {
         setMediaURLs(
           mediaTags
-            .filter((tag) => tag.includes("img"))
+            .filter((tag) => tag.includes('img'))
             .map((tag) => {
               const srcMatch = getSrc.exec(tag);
               if (srcMatch?.length) {
                 return getThumbnail(srcMatch[1], 0, 300);
               }
-              return "";
+              return '';
             }) || [],
         );
       }
@@ -88,12 +87,12 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   }, [post]);
 
   useEffect(() => {
-    if (editorRef.current?.getContent("plain")) {
+    if (editorRef.current?.getContent('plain')) {
       const plainText =
         editorRef.current
-          ?.getContent("plain")
-          ?.replace(/\u200B/g, "")
-          ?.replace(/((&nbsp;)|\s)((&nbsp;)|\s)+/g, " ") || "";
+          ?.getContent('plain')
+          ?.replace(/\u200B/g, '')
+          ?.replace(/((&nbsp;)|\s)((&nbsp;)|\s)+/g, ' ') || '';
       setSummaryContentPlain(plainText);
     }
   }, [editorRef, summaryContent]);
@@ -102,8 +101,8 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
     navigate(`./post/${post?._id}`);
   };
 
-  const classes = clsx("p-24", {
-    "blog-post-badge-highlight": post._id === sidebarHighlightedPost?._id,
+  const classes = clsx('p-24', {
+    'blog-post-badge-highlight': post._id === sidebarHighlightedPost?._id,
   });
 
   return (
@@ -147,8 +146,8 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                 .slice(0, MAX_NUMBER_MEDIA_DISPLAY)
                 .map((url, index) => (
                   <div
-                    className={clsx("blog-post-image col-12 col-md-4 ", {
-                      "d-none d-md-block": index >= 1,
+                    className={clsx('blog-post-image col-12 col-md-4 ', {
+                      'd-none d-md-block': index >= 1,
                     })}
                     key={url}
                   >
@@ -163,15 +162,15 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
                       mediaURLs.length - (index + 1) > 0 && (
                         <div
                           className={clsx(
-                            "position-absolute top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center rounded text-light bg-dark bg-opacity-50",
+                            'position-absolute top-0 bottom-0 start-0 end-0 d-flex justify-content-center align-items-center rounded text-light bg-dark bg-opacity-50',
                             {
-                              "d-flex d-md-none": index === 0,
-                              "d-none d-md-flex": index === 2,
+                              'd-flex d-md-none': index === 0,
+                              'd-none d-md-flex': index === 2,
                             },
                           )}
                         >
-                          + {mediaURLs.length - (index + 1)}{" "}
-                          {t("post.preview.media")}
+                          + {mediaURLs.length - (index + 1)}{' '}
+                          {t('post.preview.media')}
                         </div>
                       )}
                   </div>

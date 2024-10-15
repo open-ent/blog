@@ -1,15 +1,15 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from 'react';
 
-import { useToast } from "@edifice-ui/react";
+import { useToast } from '@edifice-ui/react';
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
-} from "@tanstack/react-query";
-import { IAction, odeServices } from "edifice-ts-client";
-import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+} from '@tanstack/react-query';
+import { IAction, odeServices } from 'edifice-ts-client';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 
 import {
   loadBlog,
@@ -19,22 +19,22 @@ import {
   loadPostsReactionsSummary,
   loadPostsViewsCounter,
   sessionHasWorkflowRights,
-} from "../api/blog";
-import usePostsFilter from "~/hooks/usePostsFilter";
-import { Post, PostState } from "~/models/post";
-import { useBlogState, useStoreUpdaters } from "~/store";
-import { IActionDefinition } from "~/utils/types";
+} from '../api/blog';
+import usePostsFilter from '~/hooks/usePostsFilter';
+import { Post, PostState } from '~/models/post';
+import { useBlogState, useStoreUpdaters } from '~/store';
+import { IActionDefinition } from '~/utils/types';
 
 export const blogQueryKeys = {
-  all: (blogId: string) => ["blog", blogId],
-  counter: (blogId: string) => [...blogQueryKeys.all(blogId), "counter"],
+  all: (blogId: string) => ['blog', blogId],
+  counter: (blogId: string) => [...blogQueryKeys.all(blogId), 'counter'],
   postsList: (
     blogId: string,
     state?: PostState,
     search?: string,
     isPublic?: boolean,
   ) => {
-    const queryKey = [...blogQueryKeys.all(blogId), "postsList"];
+    const queryKey = [...blogQueryKeys.all(blogId), 'postsList'];
     const queryKeyFilter: any = {};
     if (state || search || isPublic) {
       if (state) {
@@ -50,9 +50,9 @@ export const blogQueryKeys = {
     }
     return queryKey;
   },
-  public: (slug: string) => ["public blog", slug],
+  public: (slug: string) => ['public blog', slug],
   postsViewsCounters: (ressourceIds: string[]) => [
-    "postsViewsCounter",
+    'postsViewsCounter',
     ressourceIds,
   ],
 };
@@ -145,7 +145,7 @@ export const useBlog = (blogId?: string, slug?: string) => {
   let queryOptions = blogQuery(blogId!); // Default options
   if (!blogId) {
     if (!slug) {
-      console.error("no blogId nor slug is defined");
+      console.error('no blogId nor slug is defined');
     } else {
       queryOptions = blogPublicQuery(slug!);
     }
@@ -156,7 +156,7 @@ export const useBlog = (blogId?: string, slug?: string) => {
     blog: query.data,
     query,
     publicView: !!slug,
-    isPublicBlog: !!slug || query.data?.visibility === "PUBLIC",
+    isPublicBlog: !!slug || query.data?.visibility === 'PUBLIC',
   };
 };
 
@@ -169,7 +169,7 @@ export const useBlogCounter = (blogId?: string) => {
   const params = useParams<{ blogId: string }>();
   if (!blogId) {
     if (!params.blogId) {
-      console.error("blogId is not defined");
+      console.error('blogId is not defined');
     }
     blogId = params.blogId;
   }
@@ -203,7 +203,7 @@ export const usePostsList = (
 
   if (!blogId) {
     if (!params.blogId) {
-      console.error("blogId is not defined");
+      console.error('blogId is not defined');
     }
     blogId = params.blogId;
   }
@@ -240,7 +240,7 @@ export const usePostsList = (
   // Wait for the end of above infinite query to load audience.
   useEffect(() => {
     const pagesNumber = query.data?.pages.length;
-    if (withViews && typeof pagesNumber === "number" && pagesNumber > 0) {
+    if (withViews && typeof pagesNumber === 'number' && pagesNumber > 0) {
       const lastPageIds = query.data?.pages[pagesNumber - 1].map(
         (post) => post._id,
       ) as string[];
@@ -263,17 +263,17 @@ export const useDeleteBlog = (blogId: string) => {
 
   return useMutation({
     mutationFn: async () =>
-      await odeServices.resource("blog").trashAll(
+      await odeServices.resource('blog').trashAll(
         {
-          application: "blog",
+          application: 'blog',
           resourceIds: [blogId],
           folderIds: [],
-          resourceType: "blog",
+          resourceType: 'blog',
         },
         true,
       ),
     onSuccess: () => {
-      toast.success(t("explorer.trash.title"));
+      toast.success(t('explorer.trash.title'));
       // Invalidate all queries for this blog.
       queryClient.invalidateQueries({ queryKey: blogQueryKeys.all(blogId) });
     },

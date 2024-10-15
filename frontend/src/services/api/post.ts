@@ -1,7 +1,7 @@
-import { ViewsDetails, odeServices } from "edifice-ts-client";
+import { ViewsDetails, odeServices } from 'edifice-ts-client';
 
-import { Post, PostMetadata } from "~/models/post";
-import { checkHttpError } from "~/utils/BlogEvent";
+import { Post, PostMetadata } from '~/models/post';
+import { checkHttpError } from '~/utils/BlogEvent';
 
 /** Use to get a the state of a post without the content */
 export async function loadPostMetadata(blogId: string, postId: string) {
@@ -81,7 +81,7 @@ export function goUpPost(blogId: string, postId: string) {
 export function publishPost(
   blogId: string,
   post: Post,
-  publishWith: "publish" | "submit",
+  publishWith: 'publish' | 'submit',
   fromEditor?: boolean,
 ) {
   const { _id: postId } = post;
@@ -106,13 +106,13 @@ export function createPost(blogId: string, title: string, content: string) {
 }
 
 export function loadPostViewsDetails(resourceId: string) {
-  const viewService = odeServices.audience("blog", "post").views;
+  const viewService = odeServices.audience('blog', 'post').views;
   return checkHttpError<ViewsDetails | undefined>(
     viewService.getDetails(resourceId),
   );
 }
 
 export function triggerViewOnPost(resourceId: string) {
-  const viewService = odeServices.audience("blog", "post").views;
+  const viewService = odeServices.audience('blog', 'post').views;
   return checkHttpError<void>(viewService.trigger(resourceId));
 }

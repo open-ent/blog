@@ -1,7 +1,7 @@
-import { useDate } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { useDate } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
-import { Post, PostState } from "~/models/post";
+import { Post, PostState } from '~/models/post';
 
 export interface PostDateProps {
   // The post to display the date for
@@ -12,15 +12,15 @@ export interface PostDateProps {
 }
 
 export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const { fromNow, formatDate } = useDate();
 
   const getDatedKey = (state: PostState): string => {
     switch (state) {
-      case "SUBMITTED":
-        return "post.dated.submitted";
+      case 'SUBMITTED':
+        return 'post.dated.submitted';
       default:
-        return "post.dated.draft";
+        return 'post.dated.draft';
     }
   };
 
@@ -33,7 +33,7 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
         <>
           <span className="separator d-none d-md-block"></span>
           <span>
-            {t("post.dated.published", {
+            {t('post.dated.published', {
               date: fromNow(post.firstPublishDate),
             })}
           </span>
@@ -41,8 +41,8 @@ export const PostDate = ({ post, shortDisplay }: PostDateProps) => {
         {displayModifiedDate && (
           <>
             <span>
-              {t("post.dated.updated", {
-                date: formatDate(post.modified, "short"),
+              {t('post.dated.updated', {
+                date: formatDate(post.modified, 'short'),
               })}
             </span>
           </>

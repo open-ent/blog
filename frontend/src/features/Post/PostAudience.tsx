@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   ReactionChoice,
@@ -6,14 +6,14 @@ import {
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-} from "@edifice-ui/react";
-import { ReactionType, ViewsDetails } from "edifice-ts-client";
+} from '@edifice-ui/react';
+import { ReactionType, ViewsDetails } from 'edifice-ts-client';
 
-import useReactionModal from "~/hooks/useReactionModal";
-import useReactionSummary from "~/hooks/useReactionSummary";
-import { Post } from "~/models/post";
-import { loadPostViewsDetails, triggerViewOnPost } from "~/services/api";
-import { useStoreUpdaters } from "~/store";
+import useReactionModal from '~/hooks/useReactionModal';
+import useReactionSummary from '~/hooks/useReactionSummary';
+import { Post } from '~/models/post';
+import { loadPostViewsDetails, triggerViewOnPost } from '~/services/api';
+import { useStoreUpdaters } from '~/store';
 
 export interface PostAudienceProps {
   post: Post;
@@ -54,6 +54,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     withViews && loadViews();
   }, [loadViews, withViews]);
 
@@ -100,7 +101,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
             )}
           </>
         )}
-        {withViews && typeof viewsDetails === "object" && (
+        {withViews && typeof viewsDetails === 'object' && (
           <div className="post-footer-element">
             <ViewsCounter
               viewsCounter={viewsDetails.viewsCounter}

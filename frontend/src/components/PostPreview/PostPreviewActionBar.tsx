@@ -1,20 +1,20 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy } from 'react';
 
-import { Button, useToggle } from "@edifice-ui/react";
-import { ACTION } from "edifice-ts-client";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Button, useToggle } from '@edifice-ui/react';
+import { ACTION } from 'edifice-ts-client';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { postContentActions } from "~/config/postContentActions";
-import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
-import { usePostActions } from "~/features/ActionBar/usePostActions";
-import { Blog } from "~/models/blog";
-import { Post, PostState } from "~/models/post";
-import { baseUrl } from "~/routes";
-import { useBlogState, useStoreUpdaters } from "~/store";
+import { postContentActions } from '~/config/postContentActions';
+import { ActionBarContainer } from '~/features/ActionBar/ActionBarContainer';
+import { usePostActions } from '~/features/ActionBar/usePostActions';
+import { Blog } from '~/models/blog';
+import { Post, PostState } from '~/models/post';
+import { baseUrl } from '~/routes';
+import { useBlogState, useStoreUpdaters } from '~/store';
 
 const ConfirmModal = lazy(
-  async () => await import("~/components/ConfirmModal/ConfirmModal"),
+  async () => await import('~/components/ConfirmModal/ConfirmModal'),
 );
 
 export interface PostPreviewActionBarProps {
@@ -55,7 +55,7 @@ export const PostPreviewActionBar = ({
     emptyContent,
   } = postActions;
 
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const navigate = useNavigate();
 
   const [isDeleteModalOpen, toggleDeleteModalOpen] = useToggle();
@@ -70,9 +70,9 @@ export const PostPreviewActionBar = ({
 
   const handlePrintClick = () => {
     if (publicView) {
-      window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, "_blank");
+      window.open(`${baseUrl}/pub/${slug}/print/post/${post._id}`, '_blank');
     } else {
-      window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, "_blank");
+      window.open(`${baseUrl}/print/${blogId}/post/${post._id}`, '_blank');
     }
   };
 
@@ -109,7 +109,7 @@ export const PostPreviewActionBar = ({
             disabled={isMutating}
             onClick={handleEditClick}
           >
-            {t("blog.edit.post")}
+            {t('blog.edit.post')}
           </Button>
         )}
         {mustSubmit &&
@@ -121,7 +121,7 @@ export const PostPreviewActionBar = ({
               disabled={isMutating}
               onClick={handlePublishClick}
             >
-              {t("blog.submitPost")}
+              {t('blog.submitPost')}
             </Button>
           )}
         {!mustSubmit &&
@@ -133,7 +133,7 @@ export const PostPreviewActionBar = ({
               disabled={isMutating || emptyContent || post.title.length == 0}
               onClick={handlePublishClick}
             >
-              {t("blog.publish")}
+              {t('blog.publish')}
             </Button>
           )}
         {post.state === PostState.PUBLISHED &&
@@ -145,7 +145,7 @@ export const PostPreviewActionBar = ({
               disabled={isMutating}
               onClick={() => toggleGoUpModalOpen()}
             >
-              {t("goUp")}
+              {t('goUp')}
             </Button>
           )}
         <Button
@@ -154,7 +154,7 @@ export const PostPreviewActionBar = ({
           variant="filled"
           onClick={handlePrintClick}
         >
-          {t("blog.print")}
+          {t('blog.print')}
         </Button>
         {!publicView && !readOnly && (
           <Button
@@ -163,7 +163,7 @@ export const PostPreviewActionBar = ({
             variant="filled"
             onClick={() => toggleDeleteModalOpen(true)}
           >
-            {t("blog.delete.post")}
+            {t('blog.delete.post')}
           </Button>
         )}
       </ActionBarContainer>
@@ -173,8 +173,8 @@ export const PostPreviewActionBar = ({
           <ConfirmModal
             id="confirmDeleteModal"
             isOpen={isDeleteModalOpen}
-            header={<>{t("blog.delete.post")}</>}
-            body={<p className="body">{t("confirm.remove.post")}</p>}
+            header={<>{t('blog.delete.post')}</>}
+            body={<p className="body">{t('confirm.remove.post')}</p>}
             onSuccess={handleDeleteSuccess}
             onCancel={handleDeleteClose}
           />
@@ -183,8 +183,8 @@ export const PostPreviewActionBar = ({
           <ConfirmModal
             id="confirmGoUpModal"
             isOpen={isGoUpModalOpen}
-            header={<>{t("goUp")}</>}
-            body={<p className="body">{t("confirm.up.post")}</p>}
+            header={<>{t('goUp')}</>}
+            body={<p className="body">{t('confirm.up.post')}</p>}
             onSuccess={handleGoUpSuccess}
             onCancel={handleGoUpClose}
           />

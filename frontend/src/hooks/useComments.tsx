@@ -1,13 +1,13 @@
-import { useUser } from "@edifice-ui/react";
+import { useUser } from '@edifice-ui/react';
 
-import { useActionDefinitions } from "../features/ActionBar/useActionDefinitions";
-import { postCommentActions } from "~/config/postCommentActions";
-import { Comment } from "~/models/comment";
+import { useActionDefinitions } from '../features/ActionBar/useActionDefinitions';
+import { postCommentActions } from '~/config/postCommentActions';
+import { Comment } from '~/models/comment';
 import {
   useCreateComment,
   useDeleteComment,
   useUpdateComment,
-} from "~/services/queries";
+} from '~/services/queries';
 
 export interface CommentActions {
   /** Truthy if the user can create a new comment. */

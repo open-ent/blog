@@ -1,6 +1,5 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import { CoreDate, useDate } from "@edifice-ui/react";
-import clsx from "clsx";
+import { CoreDate, useDate } from '@edifice-ui/react';
+import clsx from 'clsx';
 
 // TODO Move to edifice-ui (don't forget css) css
 
@@ -26,7 +25,7 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
   const { formatDate } = useDate();
 
   const displayDate = (date: CoreDate) => {
-    return formatDate(date, "long");
+    return formatDate(date, 'long');
   };
 
   const handleOnClick = (item: SummaryListObject) => {
@@ -37,8 +36,8 @@ export const SummaryList = ({ list, onClick }: SummaryListProps) => {
     <>
       {list.map((item, index) => (
         <div
-          className={clsx("pb-8 d-flex summary-list-item flex-column", {
-            "pt-8": index !== 0,
+          className={clsx('pb-8 d-flex summary-list-item flex-column', {
+            'pt-8': index !== 0,
           })}
           key={item.id}
           onClick={() => {

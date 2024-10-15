@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 import {
   Badge,
@@ -6,25 +6,25 @@ import {
   Toolbar,
   ToolbarItem,
   useDebounce,
-} from "@edifice-ui/react";
-import clsx from "clsx";
-import { useTranslation } from "react-i18next";
+} from '@edifice-ui/react';
+import clsx from 'clsx';
+import { useTranslation } from 'react-i18next';
 
-import usePostsFilter from "~/hooks/usePostsFilter";
-import { Blog } from "~/models/blog";
-import { PostState } from "~/models/post";
-import { useBlogCounter } from "~/services/queries";
-import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
+import usePostsFilter from '~/hooks/usePostsFilter';
+import { Blog } from '~/models/blog';
+import { PostState } from '~/models/post';
+import { useBlogCounter } from '~/services/queries';
+import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 
 export interface BlogFilterProps {
   blog: Blog;
 }
 
 export const BlogFilter = ({ blog }: BlogFilterProps) => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const { postsFilters, setPostsFilters } = usePostsFilter();
 
-  const [search, setSearch] = useState<string>(postsFilters.search || "");
+  const [search, setSearch] = useState<string>(postsFilters.search || '');
   const [state, setState] = useState<PostState>(postsFilters.state);
   const debounceSearch = useDebounce(search, 300);
 
@@ -50,15 +50,15 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
 
   const filterToolbar: ToolbarItem[] = [
     {
-      type: "button",
-      name: "published",
+      type: 'button',
+      name: 'published',
       props: {
-        className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold": state === PostState.PUBLISHED,
+        className: clsx('fw-normal h-full py-4 px-8 fs-6', {
+          'bg-secondary-200 fw-bold': state === PostState.PUBLISHED,
         }),
         children: (
           <span>
-            {t("blog.filters.published", { count: counters?.countPublished })}
+            {t('blog.filters.published', { count: counters?.countPublished })}
           </span>
         ),
         onClick: () => {
@@ -67,23 +67,23 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       },
     },
     {
-      type: "button",
-      name: "submitted",
-      visibility: blog["publish-type"] === "RESTRAINT" ? "show" : "hide",
+      type: 'button',
+      name: 'submitted',
+      visibility: blog['publish-type'] === 'RESTRAINT' ? 'show' : 'hide',
       props: {
-        className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold": state === PostState.SUBMITTED,
+        className: clsx('fw-normal h-full py-4 px-8 fs-6', {
+          'bg-secondary-200 fw-bold': state === PostState.SUBMITTED,
         }),
         children: (
           <>
-            <span>{t("blog.filters.submitted")} </span>
+            <span>{t('blog.filters.submitted')} </span>
             {counters?.countSubmitted ? (
               <Badge
                 variant={{
-                  level: "warning",
-                  type: "notification",
+                  level: 'warning',
+                  type: 'notification',
                 }}
-                style={{ height: "auto" }}
+                style={{ height: 'auto' }}
               >
                 {counters.countSubmitted}
               </Badge>
@@ -98,15 +98,15 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
       },
     },
     {
-      type: "button",
-      name: "draft",
+      type: 'button',
+      name: 'draft',
       props: {
-        className: clsx("fw-normal h-full py-4 px-8 fs-6", {
-          "bg-secondary-200 fw-bold": state === PostState.DRAFT,
+        className: clsx('fw-normal h-full py-4 px-8 fs-6', {
+          'bg-secondary-200 fw-bold': state === PostState.DRAFT,
         }),
         children: (
           <span>
-            {t("blog.filters.drafts", { count: counters?.countDraft })}
+            {t('blog.filters.drafts', { count: counters?.countDraft })}
           </span>
         ),
         onClick: () => {
@@ -121,7 +121,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
         isVariant
         className="d-none d-md-flex flex-fill"
         onChange={handlerSearch}
-        placeholder={t("Rechercher un billet ou un auteur")}
+        placeholder={t('Rechercher un billet ou un auteur')}
         size="md"
       />
       {(manager || creator || contrib) && (

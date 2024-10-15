@@ -1,15 +1,15 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useState } from 'react';
 
-import { Edit, Options, Send } from "@edifice-ui/icons";
-import { Button, IconButton, useToggle } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
+import { Edit, Options, Send } from '@edifice-ui/icons';
+import { Button, IconButton, useToggle } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
 
-import { ActionBarContainer } from "../ActionBar/ActionBarContainer";
-import { PostActions } from "../ActionBar/usePostActions";
-import { Post, PostState } from "~/models/post";
+import { ActionBarContainer } from '../ActionBar/ActionBarContainer';
+import { PostActions } from '../ActionBar/usePostActions';
+import { Post, PostState } from '~/models/post';
 
 const ConfirmModal = lazy(
-  async () => await import("~/components/ConfirmModal/ConfirmModal"),
+  async () => await import('~/components/ConfirmModal/ConfirmModal'),
 );
 
 export interface PostActionBarProps {
@@ -32,8 +32,8 @@ export const PostActionBar = ({
   onDelete,
   onTts,
 }: PostActionBarProps) => {
-  const { t } = useTranslation("blog");
-  const { t: common_t } = useTranslation("common");
+  const { t } = useTranslation('blog');
+  const { t: common_t } = useTranslation('common');
   const { mustSubmit, canPublish, isMutating, emptyContent, readOnly } =
     postActions || {};
 
@@ -53,7 +53,7 @@ export const PostActionBar = ({
     <>
       {isMainActionEdit ? (
         <Button leftIcon={<Edit />} disabled={isMutating} onClick={onEdit}>
-          {common_t("edit")}
+          {common_t('edit')}
         </Button>
       ) : (
         <Button
@@ -61,14 +61,14 @@ export const PostActionBar = ({
           disabled={isMutating || emptyContent || post.title.length == 0}
           onClick={onPublish}
         >
-          {t("blog.publish")}
+          {t('blog.publish')}
         </Button>
       )}
 
       <IconButton
         variant="outline"
         icon={<Options />}
-        aria-label={common_t("tiptap.tooltip.plus")}
+        aria-label={common_t('tiptap.tooltip.plus')}
         onClick={toggleBar}
       />
 
@@ -80,7 +80,7 @@ export const PostActionBar = ({
             disabled={isMutating}
             onClick={onPublish}
           >
-            {t("blog.submitPost")}
+            {t('blog.submitPost')}
           </Button>
         )}
         {isMainActionEdit ? (
@@ -91,7 +91,7 @@ export const PostActionBar = ({
               disabled={isMutating || emptyContent || post.title.length == 0}
               onClick={onPublish}
             >
-              {t("blog.publish")}
+              {t('blog.publish')}
             </Button>
           )
         ) : (
@@ -101,7 +101,7 @@ export const PostActionBar = ({
             disabled={isMutating}
             onClick={onEdit}
           >
-            {common_t("edit")}
+            {common_t('edit')}
           </Button>
         )}
         <Button
@@ -110,10 +110,10 @@ export const PostActionBar = ({
           variant="filled"
           onClick={onPrint}
         >
-          {t("blog.print")}
+          {t('blog.print')}
         </Button>
         <Button color="primary" variant="filled" onClick={onTts}>
-          {common_t("tiptap.toolbar.tts")}
+          {common_t('tiptap.toolbar.tts')}
         </Button>
 
         {!readOnly && (
@@ -124,7 +124,7 @@ export const PostActionBar = ({
             disabled={isMutating}
             onClick={() => setConfirmDeleteModal(true)}
           >
-            {t("blog.delete.post")}
+            {t('blog.delete.post')}
           </Button>
         )}
       </ActionBarContainer>
@@ -134,8 +134,8 @@ export const PostActionBar = ({
           <ConfirmModal
             id="confirmDeleteModal"
             isOpen={confirmDeleteModal}
-            header={<>{t("blog.delete.post")}</>}
-            body={<p className="body">{t("confirm.remove.post")}</p>}
+            header={<>{t('blog.delete.post')}</>}
+            body={<p className="body">{t('confirm.remove.post')}</p>}
             onSuccess={onDelete}
             onCancel={() => setConfirmDeleteModal(false)}
           />

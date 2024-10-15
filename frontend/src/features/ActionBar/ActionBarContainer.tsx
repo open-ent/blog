@@ -1,5 +1,5 @@
-import { ActionBar } from "@edifice-ui/react";
-import { useTransition, animated } from "@react-spring/web";
+import { ActionBar } from '@edifice-ui/react';
+import { useTransition, animated } from '@react-spring/web';
 
 export interface ActionBarContainerProps {
   visible: boolean;
@@ -11,9 +11,9 @@ export const ActionBarContainer = ({
   children,
 }: ActionBarContainerProps) => {
   const transition = useTransition(visible, {
-    from: { opacity: 0, transform: "translateY(100%)" },
-    enter: { opacity: 1, transform: "translateY(0)" },
-    leave: { opacity: 0, transform: "translateY(100%)" },
+    from: { opacity: 0, transform: 'translateY(100%)' },
+    enter: { opacity: 1, transform: 'translateY(0)' },
+    leave: { opacity: 0, transform: 'translateY(100%)' },
   });
 
   return (

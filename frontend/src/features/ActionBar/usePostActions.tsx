@@ -1,18 +1,18 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import { useUser } from "@edifice-ui/react";
-import { ACTION, ActionType, IAction } from "edifice-ts-client";
+import { useUser } from '@edifice-ui/react';
+import { ACTION, ActionType, IAction } from 'edifice-ts-client';
 
-import { useActionDefinitions } from "./useActionDefinitions";
-import { Post, PostMetadata, PostState } from "~/models/post";
+import { useActionDefinitions } from './useActionDefinitions';
+import { Post, PostMetadata, PostState } from '~/models/post';
 import {
   useDeletePost,
   useGoUpPost,
   usePublishPost,
   useSavePost,
-} from "~/services/queries";
-import { isEmptyEditorContent } from "~/utils/EditorHasContent";
-import { IActionDefinition } from "~/utils/types";
+} from '~/services/queries';
+import { isEmptyEditorContent } from '~/utils/EditorHasContent';
+import { IActionDefinition } from '~/utils/types';
 
 export interface PostActions {
   /** Available actions, not considering the post's state. */
@@ -81,8 +81,8 @@ export const usePostActions = (
       actions,
 
       publishWith: getDefaultPublishKeyword(post.author.userId) as
-        | "publish"
-        | "submit",
+        | 'publish'
+        | 'submit',
 
       isActionAvailable: (action: ActionType) =>
         !!actions && actions.findIndex((a) => a.id === action) >= 0,

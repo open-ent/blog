@@ -1,9 +1,9 @@
-import { odeServices } from "edifice-ts-client";
+import { odeServices } from 'edifice-ts-client';
 
-import { Blog } from "~/models/blog";
-import { BlogCounter } from "~/models/blogCounter";
-import { Post, PostState } from "~/models/post";
-import { checkHttpError } from "~/utils/BlogEvent";
+import { Blog } from '~/models/blog';
+import { BlogCounter } from '~/models/blogCounter';
+import { Post, PostState } from '~/models/post';
+import { checkHttpError } from '~/utils/BlogEvent';
 
 /**
  * Load a blog
@@ -91,7 +91,7 @@ export function deleteBlog(blogId: string) {
  * @returns views counters
  */
 export function loadPostsViewsCounter(resourceIds: string[]) {
-  const viewService = odeServices.audience("blog", "post").views;
+  const viewService = odeServices.audience('blog', 'post').views;
   return checkHttpError(viewService.getCounters(resourceIds));
 }
 
@@ -101,6 +101,6 @@ export function loadPostsViewsCounter(resourceIds: string[]) {
  * @returns reactions summary
  */
 export function loadPostsReactionsSummary(resourceIds: string[]) {
-  const reactionService = odeServices.audience("blog", "post").reactions;
+  const reactionService = odeServices.audience('blog', 'post').reactions;
   return checkHttpError(reactionService.loadReactionSummaries(resourceIds));
 }

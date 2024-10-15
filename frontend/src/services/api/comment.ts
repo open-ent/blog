@@ -1,7 +1,7 @@
-import { odeServices } from "edifice-ts-client";
+import { odeServices } from 'edifice-ts-client';
 
-import { Comment } from "~/models/comment";
-import { checkHttpError } from "~/utils/BlogEvent";
+import { Comment } from '~/models/comment';
+import { checkHttpError } from '~/utils/BlogEvent';
 
 export async function loadComments(blogId: string, postId: string) {
   const comments = await checkHttpError<Comment[]>(

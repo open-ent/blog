@@ -1,12 +1,12 @@
-import { ArrowRight, MessageInfo } from "@edifice-ui/icons";
-import { Button } from "@edifice-ui/react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { ArrowRight, MessageInfo } from '@edifice-ui/icons';
+import { Button } from '@edifice-ui/react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { PostPreviewAudienceFooter } from "./PostPreviewAudienceFooter";
-import { PostPreviewReactionFooter } from "./PostPreviewReactionFooter";
-import { Post } from "~/models/post";
-import { useBlog } from "~/services/queries";
+import { PostPreviewAudienceFooter } from './PostPreviewAudienceFooter';
+import { PostPreviewReactionFooter } from './PostPreviewReactionFooter';
+import { Post } from '~/models/post';
+import { useBlog } from '~/services/queries';
 
 export type PostPreviewFooterProps = {
   /**
@@ -16,7 +16,7 @@ export type PostPreviewFooterProps = {
 };
 
 export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const navigate = useNavigate();
 
   const { isPublicBlog } = useBlog();
@@ -55,7 +55,7 @@ export const PostPreviewFooter = ({ post }: PostPreviewFooterProps) => {
           className="align-self-end justify-self-end"
           onClick={handleClickGoDetail}
         >
-          {t("blog.post.preview.readMore")}
+          {t('blog.post.preview.readMore')}
         </Button>
       </div>
     </div>

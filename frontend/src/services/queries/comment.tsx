@@ -1,18 +1,18 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { postsListQuery } from ".";
+import { postsListQuery } from '.';
 import {
   createComment,
   deleteComment,
   loadComments,
   updateComment,
-} from "../api";
-import { Comment } from "~/models/comment";
+} from '../api';
+import { Comment } from '~/models/comment';
 
 /** Query comments data. */
 export const commentListQuery = (blogId: string, postId: string) => {
   return {
-    queryKey: ["comments", blogId, postId],
+    queryKey: ['comments', blogId, postId],
     queryFn: () => loadComments(blogId, postId),
   };
 };

@@ -1,52 +1,52 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from 'react';
 
-import { Options, Plus } from "@edifice-ui/icons";
-import { Button, IconButton, useToggle } from "@edifice-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
-import { ACTION, ActionType } from "edifice-ts-client";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Options, Plus } from '@edifice-ui/icons';
+import { Button, IconButton, useToggle } from '@edifice-ui/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { ACTION, ActionType } from 'edifice-ts-client';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { useActionDefinitions } from "../ActionBar/useActionDefinitions";
-import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
-import { blogActions } from "~/config/blogActions";
-import { ActionBarContainer } from "~/features/ActionBar/ActionBarContainer";
-import { Blog } from "~/models/blog";
-import { baseUrl } from "~/routes";
-import { blogQuery, useDeleteBlog } from "~/services/queries";
-import { useBlogState, useStoreUpdaters } from "~/store";
+import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
+import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
+import { blogActions } from '~/config/blogActions';
+import { ActionBarContainer } from '~/features/ActionBar/ActionBarContainer';
+import { Blog } from '~/models/blog';
+import { baseUrl } from '~/routes';
+import { blogQuery, useDeleteBlog } from '~/services/queries';
+import { useBlogState, useStoreUpdaters } from '~/store';
 
 export interface BlogActionBarProps {
   blog: Blog;
 }
 
 const UpdateModal = lazy(
-  async () => await import("~/features/ActionBar/Modal/ResourceModal"),
+  async () => await import('~/features/ActionBar/Modal/ResourceModal'),
 );
 
 const BlogPublic = lazy(
-  async () => await import("~/features/ActionBar/Modal/BlogPublic"),
+  async () => await import('~/features/ActionBar/Modal/BlogPublic'),
 );
 
 const DeleteModal = lazy(
-  async () => await import("~/components/ConfirmModal/ConfirmModal"),
+  async () => await import('~/components/ConfirmModal/ConfirmModal'),
 );
 
 const PublishModal = lazy(
-  async () => await import("~/features/ActionBar/Modal/PublishModal"),
+  async () => await import('~/features/ActionBar/Modal/PublishModal'),
 );
 
 const ShareModal = lazy(
-  async () => await import("~/features/ActionBar/Modal/ShareModal"),
+  async () => await import('~/features/ActionBar/Modal/ShareModal'),
 );
 
 const ShareBlog = lazy(
-  async () => await import("~/features/ActionBar/Modal/ShareBlog"),
+  async () => await import('~/features/ActionBar/Modal/ShareBlog'),
 );
 
 export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
-  const { t } = useTranslation("blog");
-  const { t: common_t } = useTranslation("common");
+  const { t } = useTranslation('blog');
+  const { t: common_t } = useTranslation('common');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -114,7 +114,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
 
   const handleDeleteSuccess = () => {
     deleteMutation.mutateAsync().then(() => {
-      navigate("../..");
+      navigate('../..');
     });
   };
 
@@ -143,11 +143,11 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
   };
 
   const handlePrintClick = () => {
-    if (blog.visibility === "PUBLIC" && blog.slug) {
+    if (blog.visibility === 'PUBLIC' && blog.slug) {
       // Public print
-      window.open(`${baseUrl}/pub/${blog.slug}/print`, "_blank");
+      window.open(`${baseUrl}/pub/${blog.slug}/print`, '_blank');
     } else {
-      window.open(`${baseUrl}/print/${blog._id}`, "_blank");
+      window.open(`${baseUrl}/print/${blog._id}`, '_blank');
     }
     setBarOpen(false);
   };
@@ -165,7 +165,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             onClick={handleAddClick}
             className="text-nowrap"
           >
-            {t("blog.create.post")}
+            {t('blog.create.post')}
           </Button>
         )}
 
@@ -173,7 +173,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           color="primary"
           variant="outline"
           icon={<Options />}
-          aria-label={common_t("tiptap.tooltip.plus")}
+          aria-label={common_t('tiptap.tooltip.plus')}
           onClick={handleOpenMenuClick}
         />
 
@@ -185,7 +185,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleEditClick}
             >
-              {common_t("explorer.actions.edit")}
+              {common_t('explorer.actions.edit')}
             </Button>
           ) : (
             <></>
@@ -197,7 +197,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleShareClick}
             >
-              {common_t("explorer.actions.share")}
+              {common_t('explorer.actions.share')}
             </Button>
           ) : (
             <></>
@@ -209,7 +209,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handlePublishClick}
             >
-              {common_t("explorer.actions.publish")}
+              {common_t('explorer.actions.publish')}
             </Button>
           ) : (
             <></>
@@ -220,7 +220,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             variant="filled"
             onClick={handlePrintClick}
           >
-            {common_t("explorer.actions.print")}
+            {common_t('explorer.actions.print')}
           </Button>
           {isActionAvailable(ACTION.DELETE) ? (
             <Button
@@ -229,7 +229,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
               variant="filled"
               onClick={handleDeleteClick}
             >
-              {common_t("explorer.actions.delete")}
+              {common_t('explorer.actions.delete')}
             </Button>
           ) : (
             <></>
@@ -282,12 +282,12 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
           <DeleteModal
             id="confirmDeleteModal"
             isOpen={isDeleteModalOpen}
-            header={<>{t("blog.delete")}</>}
+            header={<>{t('blog.delete')}</>}
             body={
               <p className="body">
-                <p>{t("confirm.remove.blog")}</p>
-                {blog.visibility === "PUBLIC" &&
-                  t("confirm.remove.blog.public")}
+                <p>{t('confirm.remove.blog')}</p>
+                {blog.visibility === 'PUBLIC' &&
+                  t('confirm.remove.blog.public')}
               </p>
             }
             onSuccess={handleDeleteSuccess}

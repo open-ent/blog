@@ -1,10 +1,10 @@
-import { useToast } from "@edifice-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from "react-i18next";
+import { useToast } from '@edifice-ui/react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
-import { blogCounterQuery, blogQueryKeys } from "./blog";
-import { commentListQuery } from "./comment";
-import { loadPostsReactionsSummary } from "../api";
+import { blogCounterQuery, blogQueryKeys } from './blog';
+import { commentListQuery } from './comment';
+import { loadPostsReactionsSummary } from '../api';
 import {
   createPost,
   deletePost,
@@ -15,27 +15,27 @@ import {
   savePost,
   loadPublicPost,
   loadPostMetadata,
-} from "../api/post";
-import { Post, PostMetadata, PostState } from "~/models/post";
+} from '../api/post';
+import { Post, PostMetadata, PostState } from '~/models/post';
 
 /** Query metadata of a post */
 export const postMetadataQuery = (blogId: string, postId: string) => {
   return {
-    queryKey: ["postMeta", blogId, postId],
+    queryKey: ['postMeta', blogId, postId],
     queryFn: () => loadPostMetadata(blogId, postId),
   };
 };
 /** Query metadata of a post */
 export const postQuery = (blogId: string, post: PostMetadata) => {
   return {
-    queryKey: ["post", blogId, post._id],
+    queryKey: ['post', blogId, post._id],
     queryFn: () => loadPost(blogId, post),
   };
 };
 
 export const originalPostQuery = (blogId: string, post: PostMetadata) => {
   return {
-    queryKey: ["original-post", blogId, post._id],
+    queryKey: ['original-post', blogId, post._id],
     queryFn: () => loadOriginalPost(blogId, post),
   };
 };
@@ -43,14 +43,14 @@ export const originalPostQuery = (blogId: string, post: PostMetadata) => {
 /** Query a public post */
 export const publicPostQuery = (blogId: string, postId: string) => {
   return {
-    queryKey: ["public-post", blogId, postId],
+    queryKey: ['public-post', blogId, postId],
     queryFn: () => loadPublicPost(blogId, postId),
   };
 };
 
 export const useCreatePost = (blogId: string) => {
   const toast = useToast();
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -65,7 +65,7 @@ export const useCreatePost = (blogId: string) => {
       );
       queryClient.setQueryData(commentListQuery(blogId, post._id).queryKey, []);
 
-      toast.success(t("blog.post.create.success"));
+      toast.success(t('blog.post.create.success'));
       return Promise.all([
         // Publishing a post invalidates some queries.
         queryClient.invalidateQueries({
@@ -79,7 +79,7 @@ export const useCreatePost = (blogId: string) => {
 
 export const useSavePost = (blogId: string, post: Post) => {
   const toast = useToast();
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -99,7 +99,7 @@ export const useSavePost = (blogId: string, post: Post) => {
       );
 
       if (!withoutNotification) {
-        toast.success(t("blog.post.save.success"));
+        toast.success(t('blog.post.save.success'));
       }
 
       return Promise.all([
@@ -117,12 +117,12 @@ export const useSavePost = (blogId: string, post: Post) => {
 
 export const useGoUpPost = (blogId: string, postId: string) => {
   const toast = useToast();
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => goUpPost(blogId, postId),
     onSuccess: () => {
-      toast.success(t("blog.post.goup.success"));
+      toast.success(t('blog.post.goup.success'));
       // Publishing a post invalidates some queries.
       return queryClient.invalidateQueries({
         queryKey: blogQueryKeys.postsList(blogId),
@@ -133,12 +133,12 @@ export const useGoUpPost = (blogId: string, postId: string) => {
 
 export const useDeletePost = (blogId: string, postId: string) => {
   const toast = useToast();
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => deletePost(blogId, postId),
     onSuccess: () => {
-      toast.success(t("blog.post.delete.success"));
+      toast.success(t('blog.post.delete.success'));
 
       return Promise.all([
         // Deleting a post invalidates some queries.
@@ -158,16 +158,16 @@ export const useDeletePost = (blogId: string, postId: string) => {
 
 export const usePublishPost = (blogId: string) => {
   const toast = useToast();
-  const { t } = useTranslation("blog");
+  const { t } = useTranslation('blog');
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
       post,
-      publishWith = "publish",
+      publishWith = 'publish',
       fromEditor,
     }: {
       post: Post;
-      publishWith?: "publish" | "submit";
+      publishWith?: 'publish' | 'submit';
       fromEditor?: boolean;
     }) => publishPost(blogId, post, publishWith, fromEditor),
     onSuccess: (result, { post, publishWith }) => {
@@ -177,7 +177,7 @@ export const usePublishPost = (blogId: string) => {
         ...post,
         state:
           result.state ||
-          (publishWith === "publish"
+          (publishWith === 'publish'
             ? PostState.PUBLISHED
             : PostState.SUBMITTED),
       };
@@ -189,7 +189,7 @@ export const usePublishPost = (blogId: string) => {
 
       toast.success(
         t(
-          `blog.post.${result.state === PostState.PUBLISHED ? "publish" : "submit"}.success`,
+          `blog.post.${result.state === PostState.PUBLISHED ? 'publish' : 'submit'}.success`,
         ),
       );
 
@@ -210,7 +210,7 @@ export const usePublishPost = (blogId: string) => {
  */
 export const useGetPostsReactionSummary = (resourceIds: string[]) => {
   const query = useQuery({
-    queryKey: ["post-reaction-summary", resourceIds],
+    queryKey: ['post-reaction-summary', resourceIds],
     queryFn: () => loadPostsReactionsSummary(resourceIds),
   });
 

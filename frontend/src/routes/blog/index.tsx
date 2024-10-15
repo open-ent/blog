@@ -1,14 +1,14 @@
-import { QueryClient } from "@tanstack/react-query";
-import { LoaderFunctionArgs } from "react-router-dom";
+import { QueryClient } from '@tanstack/react-query';
+import { LoaderFunctionArgs } from 'react-router-dom';
 
-import { blogActions } from "~/config/blogActions";
-import { Blog } from "~/features/Blog/Blog";
-import { PostState } from "~/models/post";
+import { blogActions } from '~/config/blogActions';
+import { Blog } from '~/features/Blog/Blog';
+import { PostState } from '~/models/post';
 import {
   availableActionsQuery,
   blogCounterQuery,
   postsListQuery,
-} from "~/services/queries";
+} from '~/services/queries';
 
 export const loader =
   (queryClient: QueryClient) =>
@@ -18,8 +18,8 @@ export const loader =
 
     const url = new URL(request.url);
     const state =
-      (url.searchParams.get("state") as PostState) || PostState.PUBLISHED;
-    const search = url.searchParams.get("search") || "";
+      (url.searchParams.get('state') as PostState) || PostState.PUBLISHED;
+    const search = url.searchParams.get('search') || '';
     const queryPostsList = postsListQuery(
       params.blogId as string,
       0,
