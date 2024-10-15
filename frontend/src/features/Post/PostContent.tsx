@@ -13,21 +13,20 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { PostAudience } from "./PostAudience";
-import { PostTitle } from "./PostTitle";
-import { usePostActions } from "../ActionBar/usePostActions";
-import { CommentsCreate } from "../Comments/CommentsCreate";
-import { CommentsHeader } from "../Comments/CommentsHeader";
-import { CommentsList } from "../Comments/CommentsList";
+import { CommentProvider } from "@edifice-ui/react/comments";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import OldFormatModal from "~/components/OldFormatModal/OldFormatModal";
 import { TTITLE_LENGTH_MAX } from "~/config/init-config";
 import { postContentActions } from "~/config/postContentActions";
+import { useComments } from "~/hooks/useComments";
 import { Comment } from "~/models/comment";
 import { Post } from "~/models/post";
 import { baseUrl } from "~/routes";
 import { useBlog } from "~/services/queries";
 import { isEmptyEditorContent } from "~/utils/EditorHasContent";
+import { usePostActions } from "../ActionBar/usePostActions";
+import { PostAudience } from "./PostAudience";
+import { PostTitle } from "./PostTitle";
 
 export interface PostContentProps {
   post: Post;
@@ -67,6 +66,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const [isEmptyContent, setIsEmptyContent] = useState<boolean>(false);
 
   const { t } = useTranslation("blog");
+  const { create } = useComments(blogId!, post._id);
 
   const navigate = useNavigate();
 
@@ -242,22 +242,33 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
           </ButtonGroup>
         )}
       </div>
-
+      blabla
       <div className="d-flex flex-column-reverse flex-md-row justify-content-between align-items-start align-items-md-center mt-32 pt-24 pb-8 gap-16">
-        {mode === "read" && !!comments && (
+        {/* {mode === "read" && !!comments && (
           <div className="mx-md-8">
             <CommentsHeader comments={comments} />
           </div>
-        )}
+        )} */}
         {withAudience && <PostAudience post={post} withViews={showViews} />}
       </div>
-
-      {mode === "read" && !!comments && (
+      <CommentProvider
+        type="edit"
+        comments={comments}
+        callbacks={{
+          post: async (comment) => {
+            create(comment as string);
+          },
+          put: async ({ comment, commentId }) =>
+            console.log("update", { comment, commentId }),
+          delete: async (commentId) => console.log("delete", commentId),
+        }}
+      />
+      {/* {mode === "read" && !!comments && (
         <div className="mx-md-8">
           <CommentsCreate />
           <CommentsList comments={comments} />
         </div>
-      )}
+      )} */}
       <Suspense>
         {isOldFormatOpen && mode === "read" && (
           <OldFormatModal
