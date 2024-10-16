@@ -14,26 +14,38 @@ export function redirectBlogHashLocation(): Response | null {
     if (isBlogPath) {
       // Redirect to the new format
       const redirectPath = `/id/${isBlogPath?.params.blogId}`;
-      location.replace(
-        location.origin + basename.replace(/\/$/g, '') + redirectPath,
+
+      window.history.replaceState(
+        null,
+        '',
+        basename.replace(/\/$/g, '') + redirectPath,
       );
+      window.location.reload();
     }
     const isViewPostPath = matchPath('/view/:blogId/:postId', hashLocation);
     if (isViewPostPath) {
       // Redirect to the new format
       const redirectPath = `/id/${isViewPostPath?.params.blogId}/post/${isViewPostPath?.params.postId}`;
-      location.replace(
-        location.origin + basename.replace(/\/$/g, '') + redirectPath,
+
+      window.history.replaceState(
+        null,
+        '',
+        basename.replace(/\/$/g, '') + redirectPath,
       );
+      window.location.reload();
     }
 
     const isPostPath = matchPath('/detail/:blogId/:postId', hashLocation);
     if (isPostPath) {
       // Redirect to the new format
       const redirectPath = `/id/${isPostPath?.params.blogId}/post/${isPostPath?.params.postId}`;
-      location.replace(
-        location.origin + basename.replace(/\/$/g, '') + redirectPath,
+
+      window.history.replaceState(
+        null,
+        '',
+        basename.replace(/\/$/g, '') + redirectPath,
       );
+      window.location.reload();
     }
   }
 
