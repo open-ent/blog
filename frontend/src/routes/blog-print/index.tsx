@@ -40,5 +40,5 @@ export function Component() {
   useTrashedResource(blogId);
   useBlogErrorToast();
 
-  return <BlogPrint></BlogPrint>;
+  return <BlogPrint />;
 }
