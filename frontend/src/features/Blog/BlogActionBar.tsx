@@ -183,7 +183,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
         />
 
         <ActionBarContainer visible={isBarOpen}>
-          {isActionAvailable(ACTION.EDIT) ? (
+          {isActionAvailable(ACTION.EDIT) && (
             <Button
               type="button"
               color="primary"
@@ -192,10 +192,8 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             >
               {common_t('explorer.actions.edit')}
             </Button>
-          ) : (
-            <></>
           )}
-          {isActionAvailable(ACTION.SHARE) ? (
+          {isActionAvailable(ACTION.SHARE) && (
             <Button
               type="button"
               color="primary"
@@ -204,10 +202,8 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             >
               {common_t('explorer.actions.share')}
             </Button>
-          ) : (
-            <></>
           )}
-          {isActionAvailable(ACTION.PUBLISH) ? (
+          {isActionAvailable(ACTION.PUBLISH) && (
             <Button
               type="button"
               color="primary"
@@ -216,8 +212,6 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
             >
               {common_t('explorer.actions.publish')}
             </Button>
-          ) : (
-            <></>
           )}
           <Button
             type="button"

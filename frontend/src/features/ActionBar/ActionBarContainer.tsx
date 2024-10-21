@@ -16,19 +16,15 @@ export const ActionBarContainer = ({
     leave: { opacity: 0, transform: 'translateY(100%)' },
   });
 
-  return (
-    <>
-      {transition(
-        (style, visible) =>
-          visible && (
-            <animated.div
-              className="position-fixed bottom-0 start-0 end-0 z-3"
-              style={style}
-            >
-              <ActionBar>{children}</ActionBar>
-            </animated.div>
-          ),
-      )}
-    </>
+  return transition(
+    (style, visible) =>
+      visible && (
+        <animated.div
+          className="position-fixed bottom-0 start-0 end-0 z-3"
+          style={style}
+        >
+          <ActionBar>{children}</ActionBar>
+        </animated.div>
+      ),
   );
 };
