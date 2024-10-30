@@ -59,7 +59,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
 
   // Variables for edit mode
   const [title, setTitle] = useState(post?.title ?? '');
-  const [content, setContent] = useState(post?.content ?? '');
+  const [contentKey, setContentKey] = useState(0);
   const [mode, setMode] = useState<'read' | 'edit'>(
     searchParams.get('edit') && !readOnly ? 'edit' : 'read',
   );
@@ -114,8 +114,11 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   // Cancel modifications
   const handleCancelClick = () => {
     setMode('read');
-    // Restore previous content and title
-    setContent(post?.content ?? '');
+
+    // Force update editor content with default (post.content)
+    setContentKey((prev) => prev + 1);
+
+    // Restore previous and title
     setTitle(post?.title ?? '');
   };
 
@@ -145,7 +148,6 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
 
   const handleContentChange = ({ editor }: { editor: any }) => {
     const content = editor?.getJSON();
-    setContent(content);
     const emptyContent = isEmptyEditorContent(content);
     setIsEmptyContent(emptyContent);
   };
@@ -200,15 +202,17 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             </FormControl>
           </div>
         )}
-        <Editor
-          id="postContent"
-          ref={editorRef}
-          content={content}
-          mode={mode}
-          variant={variant}
-          visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
-          onContentChange={handleContentChange}
-        ></Editor>
+        <div key={contentKey}>
+          <Editor
+            id="postContent"
+            ref={editorRef}
+            content={post?.content ?? ''}
+            mode={mode}
+            variant={variant}
+            visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
+            onContentChange={handleContentChange}
+          />
+        </div>
         {mode === 'edit' && (
           <ButtonGroup
             className="gap-8 my-8 sticky-bottom py-8 bg-white z-0"

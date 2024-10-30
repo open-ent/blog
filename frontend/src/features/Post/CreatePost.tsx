@@ -96,7 +96,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
           mode="edit"
           visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
           onContentChange={handleContentChange}
-        ></Editor>
+        />
       </div>
       <ButtonGroup className="gap-8 mt-16 mx-md-16" variant="reverse">
         <Button type="button" variant="ghost" onClick={handleCancelClick}>
