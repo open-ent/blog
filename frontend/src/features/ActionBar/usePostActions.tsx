@@ -148,8 +148,8 @@ export const usePostActions = (
       (manager || creator) &&
       post.state === PostState.SUBMITTED &&
       post.author.userId !== user?.userId
-        ? "blog.save"
-        : "draft.save",
+        ? 'blog.save'
+        : 'draft.save',
     save: (withoutNotification) =>
       saveMutation.mutateAsync({ withoutNotification }),
     trash: () => deleteMutation.mutateAsync(),

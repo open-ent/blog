@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   ReactionModal,
@@ -6,15 +6,15 @@ import {
   ViewsCounter,
   ViewsModal,
   useToggle,
-} from "@edifice-ui/react";
-import { ViewsDetails } from "edifice-ts-client";
+} from '@edifice-ui/react';
+import { ViewsDetails } from 'edifice-ts-client';
 
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import useReactionModal from "~/hooks/useReactionModal";
-import useReactionSummary from "~/hooks/useReactionSummary";
-import { Post } from "~/models/post";
-import { loadPostViewsDetails } from "~/services/api";
-import { useBlogState } from "~/store";
+import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
+import useReactionModal from '~/hooks/useReactionModal';
+import useReactionSummary from '~/hooks/useReactionSummary';
+import { Post } from '~/models/post';
+import { loadPostViewsDetails } from '~/services/api';
+import { useBlogState } from '~/store';
 
 export type PostPreviewAudienceFooterProps = {
   /**

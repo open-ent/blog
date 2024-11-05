@@ -141,7 +141,7 @@ export const useActionDefinitions = (
       if (typeof action?.right === 'string' && !!rights) {
         for (let i = 0; i < rolesPrecedence.length; i++) {
           const rightRole = rolesPrecedence[i];
-          if (rights[rightRole] === true) {
+          if (rights[rightRole as keyof typeof rights] === true) {
             // The user has a powerful enough right to use this action.
             return true;
           }
