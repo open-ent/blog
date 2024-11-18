@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "4.0-SNAPSHOT",
+  "version": "4.0-%branch%.%generateVersion%",
   "description": "Blog tool for ENT Core.",
   "homepage": "https://github.com/opendigitaleducation/blog#readme",
   "bugs": {
