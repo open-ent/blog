@@ -15,7 +15,7 @@ pipeline {
     stage('Frontend') {
       steps {
         dir('frontend') {
-          sh 'GIT_BRANCH=develop ./build.sh clean init build'
+          sh './build.sh clean init build'
         }
       }
     }
