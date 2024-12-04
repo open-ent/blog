@@ -55,7 +55,7 @@ test () {
 
 function build() {
   echo "Building..."
-  if [ "$NO_DOCKER" = "true" ] ; then
+  if [ "$NO_DOCKER_BACK" = "true" ] ; then
     mvn $MVN_OPTS install -DskipTests
   else
     docker compose run --rm maven mvn $MVN_OPTS install -DskipTests -U
