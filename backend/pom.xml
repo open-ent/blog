@@ -29,7 +29,7 @@
     </repositories>
 
     <properties>
-        <entCoreVersion>6.0-alpha-SNAPSHOT</entCoreVersion>
+        <entCoreVersion>6.0-SNAPSHOT</entCoreVersion>
         <web-utils.version>3.0-SNAPSHOT</web-utils.version>
         <junitVersion>4.13.2</junitVersion>
         <explorerVersion>2.0-SNAPSHOT</explorerVersion>
