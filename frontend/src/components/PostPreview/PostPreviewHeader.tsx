@@ -1,4 +1,4 @@
-import { Avatar, Badge } from '@edifice-ui/react';
+import { Avatar, Badge } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 

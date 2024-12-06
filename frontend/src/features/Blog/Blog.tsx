@@ -1,11 +1,11 @@
-import { LoadingScreen } from '@edifice-ui/react';
+import { LoadingScreen } from '@edifice.io/react';
 
-import { BlogFilter } from './BlogFilter';
 import { BlogHeader } from '~/features/Blog/BlogHeader';
 import BlogPostList from '~/features/Blog/BlogPostList';
 import BlogSidebar from '~/features/Blog/BlogSidebar';
 import { useLoadPostList } from '~/hooks/useLoadPostList';
 import { useBlog, useBlogCounter } from '~/services/queries';
+import { BlogFilter } from './BlogFilter';
 
 // loader : See the public-portal loader
 

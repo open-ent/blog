@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 
-import { Button, LoadingScreen, Modal } from '@edifice-ui/react';
+import { Button, LoadingScreen, Modal } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
 
 import { baseUrl } from '~/routes';

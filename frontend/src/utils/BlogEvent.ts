@@ -1,9 +1,9 @@
 import {
+  ERROR_CODE,
   ErrorCode,
   LayerName,
-  ERROR_CODE,
   odeServices,
-} from 'edifice-ts-client';
+} from '@edifice.io/client';
 
 export interface IBlogError {
   code: ErrorCode;

@@ -1,8 +1,12 @@
 import { Suspense } from 'react';
 
-import { LoadingScreen, OnboardingModal } from '@edifice-ui/react';
+import { LoadingScreen } from '@edifice.io/react';
+import { OnboardingModal } from '@edifice.io/react/modals';
 import { Explorer } from 'ode-explorer/lib';
 import { useTranslation } from 'react-i18next';
+
+import illuBlog from '@images/onboarding/illu-blog.svg';
+import illuEditor from '@images/onboarding/illu-editor.svg';
 
 import { explorerConfig } from '~/config';
 
@@ -17,7 +21,7 @@ export function ExplorerBlog() {
           id="showOnboardingBlog"
           items={[
             {
-              src: 'onboarding/illu-blog.svg',
+              src: illuBlog,
               alt: t('explorer.modal.onboarding.blog.screen1.alt', {
                 ns: 'blog',
               }),
@@ -26,7 +30,7 @@ export function ExplorerBlog() {
               }),
             },
             {
-              src: 'onboarding/illu-editor.svg',
+              src: illuEditor,
               alt: t('explorer.modal.onboarding.blog.screen2.alt', {
                 ns: 'blog',
               }),

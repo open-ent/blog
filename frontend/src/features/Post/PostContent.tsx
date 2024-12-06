@@ -1,7 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 
-import { Editor, EditorRef } from '@edifice-ui/editor';
-import { Save, Send } from '@edifice-ui/icons';
 import {
   Alert,
   Button,
@@ -9,16 +7,12 @@ import {
   Input,
   Label,
   Loading,
-} from '@edifice-ui/react';
+} from '@edifice.io/react';
+import { Editor, EditorRef } from '@edifice.io/react/editor';
+import { IconSave, IconSend } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { PostAudience } from './PostAudience';
-import { PostTitle } from './PostTitle';
-import { usePostActions } from '../ActionBar/usePostActions';
-import { CommentsCreate } from '../Comments/CommentsCreate';
-import { CommentsHeader } from '../Comments/CommentsHeader';
-import { CommentsList } from '../Comments/CommentsList';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import OldFormatModal from '~/components/OldFormatModal/OldFormatModal';
 import { TTITLE_LENGTH_MAX } from '~/config/init-config';
@@ -28,6 +22,12 @@ import { Post } from '~/models/post';
 import { baseUrl } from '~/routes';
 import { useBlog } from '~/services/queries';
 import { isEmptyEditorContent } from '~/utils/EditorHasContent';
+import { usePostActions } from '../ActionBar/usePostActions';
+import { CommentsCreate } from '../Comments/CommentsCreate';
+import { CommentsHeader } from '../Comments/CommentsHeader';
+import { CommentsList } from '../Comments/CommentsList';
+import { PostAudience } from './PostAudience';
+import { PostTitle } from './PostTitle';
 
 export interface PostContentProps {
   post: Post;
@@ -229,7 +229,9 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
               <Button
                 type="button"
                 variant="outline"
-                leftIcon={isMutating ? <Loading isLoading={true} /> : <Save />}
+                leftIcon={
+                  isMutating ? <Loading isLoading={true} /> : <IconSave />
+                }
                 disabled={isMutating || (isEmptyContent && title.length == 0)}
                 onClick={handleSaveClick}
               >
@@ -238,7 +240,9 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             )}
             <Button
               type="button"
-              leftIcon={isMutating ? <Loading isLoading={true} /> : <Send />}
+              leftIcon={
+                isMutating ? <Loading isLoading={true} /> : <IconSend />
+              }
               disabled={isMutating || title.length == 0 || isEmptyContent}
               onClick={handlePublishClick}
             >

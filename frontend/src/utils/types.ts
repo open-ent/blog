@@ -1,4 +1,4 @@
-import { IAction } from 'edifice-ts-client';
+import { IAction } from '@edifice.io/client';
 
 /**
  * Definition of an action the user may accomplish,

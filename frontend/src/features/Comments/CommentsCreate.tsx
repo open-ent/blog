@@ -1,6 +1,6 @@
-import { Content } from '@edifice-ui/editor';
-import { useUser } from '@edifice-ui/react';
-import { UserProfile } from 'edifice-ts-client';
+import { useUser } from '@edifice.io/react';
+//import { Content } from '@edifice.io/react/editor';
+import { UserProfile } from '@edifice.io/client';
 import { useParams } from 'react-router-dom';
 
 import { CommentCard } from '~/components/CommentCard/CommentCard';
@@ -19,7 +19,7 @@ export const CommentsCreate = () => {
     profiles: user?.type as unknown as UserProfile,
   };
 
-  const handlePublish = (content: Content) => {
+  const handlePublish = (content: any) => {
     create(content as string);
   };
 

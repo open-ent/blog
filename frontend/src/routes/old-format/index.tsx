@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useOdeTheme, useTrashedResource } from '@edifice-ui/react';
+import { useEdificeTheme, useTrashedResource } from '@edifice.io/react';
 import { QueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
@@ -30,7 +30,7 @@ export const Component = () => {
   useTrashedResource(blogId);
 
   const post = useLoaderData() as Post | null;
-  const { theme } = useOdeTheme();
+  const { theme } = useEdificeTheme();
   const { t } = useTranslation();
 
   useEffect(() => {

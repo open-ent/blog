@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
 
-import { useUser } from '@edifice-ui/react';
+import { useUser } from '@edifice.io/react';
+import { ACTION, ActionType, IAction, RightRole } from '@edifice.io/client';
 import { useQuery } from '@tanstack/react-query';
-import { ACTION, ActionType, IAction, RightRole } from 'edifice-ts-client';
 
 import { Post } from '~/models/post';
 import { availableActionsQuery, useBlog } from '~/services/queries';

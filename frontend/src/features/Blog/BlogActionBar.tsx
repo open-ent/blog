@@ -1,14 +1,13 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 
-import { Options, Plus } from '@edifice-ui/icons';
-import { Button, IconButton, useToggle } from '@edifice-ui/react';
+import { Button, IconButton, useToggle } from '@edifice.io/react';
+import { IconOptions, IconPlus } from '@edifice.io/react/icons';
+import { ACTION, ActionType } from '@edifice.io/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ACTION, ActionType } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
-import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import { blogActions } from '~/config/blogActions';
 import { ActionBarContainer } from '~/features/ActionBar/ActionBarContainer';
@@ -16,6 +15,7 @@ import { Blog } from '~/models/blog';
 import { baseUrl } from '~/routes';
 import { blogQuery, useDeleteBlog } from '~/services/queries';
 import { useBlogStore } from '~/store';
+import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 
 export interface BlogActionBarProps {
   blog: Blog;
@@ -166,7 +166,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
       <ButtonGroup className="gap-12 align-self-end">
         {canContrib && (
           <Button
-            leftIcon={<Plus />}
+            leftIcon={<IconPlus />}
             onClick={handleAddClick}
             className="text-nowrap"
           >
@@ -177,7 +177,7 @@ export const BlogActionBar = ({ blog }: BlogActionBarProps) => {
         <IconButton
           color="primary"
           variant="outline"
-          icon={<Options />}
+          icon={<IconOptions />}
           aria-label={common_t('tiptap.tooltip.plus')}
           onClick={handleOpenMenuClick}
         />

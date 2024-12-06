@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react';
 
-import { Button, useToggle } from '@edifice-ui/react';
-import { ACTION } from 'edifice-ts-client';
+import { Button, useToggle } from '@edifice.io/react';
+import { ACTION } from '@edifice.io/client';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';

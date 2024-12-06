@@ -6,8 +6,8 @@ import {
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-} from '@edifice-ui/react';
-import { ReactionType, ViewsDetails } from 'edifice-ts-client';
+} from '@edifice.io/react/audience';
+import { ReactionType, ViewsDetails } from '@edifice.io/client';
 
 import useReactionModal from '~/hooks/useReactionModal';
 import useReactionSummary from '~/hooks/useReactionSummary';

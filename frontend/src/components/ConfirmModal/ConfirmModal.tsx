@@ -1,4 +1,4 @@
-import { Modal, Button } from '@edifice-ui/react';
+import { Button, Modal } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
 
 const Variant = {
