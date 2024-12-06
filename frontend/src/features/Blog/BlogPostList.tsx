@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 
-import { Button, EmptyScreen, usePaths } from '@edifice-ui/react';
+import { Button, EmptyScreen } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
 
+import illuBlog from '@images/emptyscreen/illu-blog.svg';
 import { PostPreview } from '~/components/PostPreview/PostPreview';
 import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
 import usePostsFilter from '~/hooks/usePostsFilter';
@@ -12,7 +13,6 @@ import { useBlogStore } from '~/store';
 
 const BlogPostList = () => {
   const { t } = useTranslation('blog');
-  const [imagePath] = usePaths();
 
   const { blog, publicView } = useBlog();
 
@@ -79,7 +79,7 @@ const BlogPostList = () => {
       {posts?.length === 0 && isFetching === false && (
         <div className="m-auto">
           <EmptyScreen
-            imageSrc={`${imagePath}/emptyscreen/illu-blog.svg`}
+            imageSrc={illuBlog}
             title={emptyScreenTitle()}
             text={emptyScreenText()}
           />

@@ -1,4 +1,4 @@
-import { ACTION } from 'edifice-ts-client';
+import { ACTION } from '@edifice.io/client';
 
 import { IActionDefinition } from '~/utils/types';
 import { workflows } from './workflows';

@@ -1,3 +1,3 @@
-import { BlogPublic } from '@edifice-ui/react';
+import { BlogPublic } from '@edifice.io/react/modals';
 
 export default BlogPublic;

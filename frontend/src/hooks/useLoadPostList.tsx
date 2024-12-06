@@ -15,7 +15,7 @@ export const useLoadPostList = (loadFullList: boolean = false) => {
     blogId: blog?._id,
     state: PostState.PUBLISHED,
     withNbComments: false,
-    withViews: blog?.visibility !== "PUBLIC",
+    withViews: blog?.visibility !== 'PUBLIC',
   });
 
   useEffect(() => {

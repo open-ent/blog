@@ -1,12 +1,12 @@
 import { Suspense, lazy, useState } from 'react';
 
-import { Edit, Options, Send } from '@edifice-ui/icons';
-import { Button, IconButton, useToggle } from '@edifice-ui/react';
+import { Button, IconButton, useToggle } from '@edifice.io/react';
+import { IconEdit, IconOptions, IconSend } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 
+import { Post, PostState } from '~/models/post';
 import { ActionBarContainer } from '../ActionBar/ActionBarContainer';
 import { PostActions } from '../ActionBar/usePostActions';
-import { Post, PostState } from '~/models/post';
 
 const ConfirmModal = lazy(
   async () => await import('~/components/ConfirmModal/ConfirmModal'),
@@ -52,12 +52,12 @@ export const PostActionBar = ({
   return (
     <>
       {isMainActionEdit ? (
-        <Button leftIcon={<Edit />} disabled={isMutating} onClick={onEdit}>
+        <Button leftIcon={<IconEdit />} disabled={isMutating} onClick={onEdit}>
           {common_t('edit')}
         </Button>
       ) : (
         <Button
-          leftIcon={<Send />}
+          leftIcon={<IconSend />}
           disabled={isMutating || emptyContent || post.title.length == 0}
           onClick={onPublish}
         >
@@ -67,7 +67,7 @@ export const PostActionBar = ({
 
       <IconButton
         variant="outline"
-        icon={<Options />}
+        icon={<IconOptions />}
         aria-label={common_t('tiptap.tooltip.plus')}
         onClick={toggleBar}
       />

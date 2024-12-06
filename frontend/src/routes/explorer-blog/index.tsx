@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 
-import { LoadingScreen, OnboardingModal } from '@edifice-ui/react';
+import { LoadingScreen } from '@edifice.io/react';
+import { OnboardingModal } from '@edifice.io/react/modals';
 import { Explorer } from 'ode-explorer/lib';
 import { useTranslation } from 'react-i18next';
 
