@@ -57,40 +57,12 @@ done
 
 clean () {
   rm -rf .nx
-  rm -rf node_modules 
+  rm -rf node_modules
   rm -rf dist 
   rm -rf build 
   rm -rf .pnpm-store
-  # rm -f package.json 
+  # rm -f package.json
   rm -f pnpm-lock.yaml
-}
-
-doInit () {
-  echo "[init] Get branch name from jenkins env..."
-
-  if [ ! -z "$FRONT_BRANCH" ]; then
-      echo "[buildNode] Get tag name from jenkins param... $FRONT_BRANCH"
-      BRANCH_NAME="$FRONT_BRANCH"
-  else
-    BRANCH_NAME=`echo $GIT_BRANCH | sed -e "s|origin/||g"`
-    if [ "$BRANCH_NAME" = "" ]; then
-      echo "[init] Get branch name from git..."
-      BRANCH_NAME=`git branch | sed -n -e "s/^\* \(.*\)/\1/p"`
-    fi
-  fi
-
-  echo "[init] Generate package.json from package.json.template..."
-  NPM_VERSION_SUFFIX=`date +"%Y%m%d%H%M"`
-  cp package.json.template package.json
-  sed -i "s/%branch%/${BRANCH_NAME}/" package.json
-  sed -i "s/%generateVersion%/${NPM_VERSION_SUFFIX}/" package.json
-
-  if [ "$1" == "Dev" ]
-  then
-    sed -i "s/%packageVersion%/link:..\/..\/edifice-ts-client\//" package.json
-  else
-    sed -i "s/%packageVersion%/${BRANCH_NAME}/" package.json
-  fi
 }
 
 init() {
@@ -143,7 +115,7 @@ linkDependencies () {
   # Check if ode-explorer exists in package.json using sed
   if [ -n "$(sed -n '/"ode-explorer":/p' package.json)" ]; then
     echo "ode-explorer found in package.json"
-    
+
     # Check if explorer frontend path exists
     if [ -d "$PWD/../../explorer/frontend" ]; then
       echo "explorer/frontend directory exists"
