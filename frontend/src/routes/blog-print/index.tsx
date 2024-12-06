@@ -1,4 +1,4 @@
-import { useTrashedResource } from '@edifice-ui/react';
+import { useTrashedResource } from '@edifice.io/react';
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunctionArgs, useParams } from 'react-router-dom';
 

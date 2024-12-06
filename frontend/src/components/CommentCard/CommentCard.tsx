@@ -1,7 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
 
-import { Content } from '@edifice-ui/editor';
-import { Send } from '@edifice-ui/icons';
 import {
   Avatar,
   Badge,
@@ -10,9 +8,11 @@ import {
   FormControl,
   TextArea,
   useDate,
-} from '@edifice-ui/react';
+} from '@edifice.io/react';
+//import { Content } from '@edifice.io/react/editor';
+import { IconSend } from '@edifice.io/react/icons';
+import { ID, IUserDescription } from '@edifice.io/client';
 import clsx from 'clsx';
-import { ID, IUserDescription } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 
 import { getAvatarURL } from '~/utils/PostUtils';
@@ -35,7 +35,7 @@ export interface CommentProps {
   content?: string;
 
   onRemove?: () => void;
-  onPublish?: (content: Content) => void;
+  onPublish?: (content: any) => void;
 }
 
 export const CommentCard = ({
@@ -136,7 +136,7 @@ export const CommentCard = ({
                     </Button>
                   )}
                   <Button
-                    leftIcon={<Send />}
+                    leftIcon={<IconSend />}
                     variant="ghost"
                     size="sm"
                     onClick={handlePublishClick}

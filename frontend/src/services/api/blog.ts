@@ -1,4 +1,4 @@
-import { odeServices } from 'edifice-ts-client';
+import { odeServices } from '@edifice.io/client';
 
 import { Blog } from '~/models/blog';
 import { BlogCounter } from '~/models/blogCounter';

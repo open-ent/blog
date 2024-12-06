@@ -1,7 +1,7 @@
-import { AppHeader, Breadcrumb, useOdeClient } from '@edifice-ui/react';
+import { AppHeader, Breadcrumb, useEdificeClient } from '@edifice.io/react';
 
-import { BlogActionBar } from './BlogActionBar';
 import { Blog } from '~/models/blog';
+import { BlogActionBar } from './BlogActionBar';
 
 export interface BlogProps {
   blog: Blog;
@@ -9,7 +9,7 @@ export interface BlogProps {
 }
 
 export const BlogHeader = ({ blog, readonly = false }: BlogProps) => {
-  const { currentApp } = useOdeClient();
+  const { currentApp } = useEdificeClient();
   return (
     <AppHeader
       render={() => (!readonly ? <BlogActionBar blog={blog} /> : null)}

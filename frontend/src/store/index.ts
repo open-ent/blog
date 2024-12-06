@@ -1,4 +1,4 @@
-import { ReactionSummaryData, ViewsCounters } from 'edifice-ts-client';
+import { ReactionSummaryData, ViewsCounters } from '@edifice.io/client';
 import { create } from 'zustand';
 
 import { Post } from '~/models/post';

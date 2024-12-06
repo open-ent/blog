@@ -1,16 +1,16 @@
 import { useRef, useState } from 'react';
 
-import { Editor, EditorRef } from '@edifice-ui/editor';
-import { Save, Send } from '@edifice-ui/icons';
-import { Button, FormControl, Input, Label } from '@edifice-ui/react';
+import { Button, FormControl, Input, Label } from '@edifice.io/react';
+import { Editor, EditorRef } from '@edifice.io/react/editor';
+import { IconSave, IconSend } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import { TTITLE_LENGTH_MAX } from '~/config/init-config';
 import { useBlog, useCreatePost, usePublishPost } from '~/services/queries';
 import { isEmptyEditorContent } from '~/utils/EditorHasContent';
+import { useActionDefinitions } from '../ActionBar/useActionDefinitions';
 
 export interface CreatePostProps {
   blogId: string;
@@ -105,7 +105,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
         <Button
           type="button"
           variant="outline"
-          leftIcon={<Save />}
+          leftIcon={<IconSave />}
           disabled={
             disableButtons || (isEmptyContent && isEmptyTitle.length == 0)
           }
@@ -115,7 +115,7 @@ export const CreatePost = ({ blogId }: CreatePostProps) => {
         </Button>
         <Button
           type="button"
-          leftIcon={<Send />}
+          leftIcon={<IconSend />}
           disabled={
             isEmptyTitle.trim().length == 0 || isEmptyContent || disableButtons
           }

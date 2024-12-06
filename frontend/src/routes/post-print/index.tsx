@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
-import { Editor } from '@edifice-ui/editor';
-import { LoadingScreen, useTrashedResource } from '@edifice-ui/react';
+import { LoadingScreen, useTrashedResource } from '@edifice.io/react';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
 
@@ -53,9 +52,9 @@ export function Component() {
   return (
     <div className="rounded border p-16 bg-white">
       <PostTitle post={post} mode="print" />
-      <div className="mx-32">
+      {/* <div className="mx-32">
         <Editor content={post.content} mode="read" variant="ghost" />
-      </div>
+      </div> */}
     </div>
   );
 }

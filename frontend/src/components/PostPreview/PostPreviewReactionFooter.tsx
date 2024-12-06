@@ -1,4 +1,4 @@
-import { ReactionChoice, useReactions } from '@edifice-ui/react';
+import { ReactionChoice, useReactions } from '@edifice.io/react/audience';
 
 import useReactionSummary from '~/hooks/useReactionSummary';
 import { Post } from '~/models/post';

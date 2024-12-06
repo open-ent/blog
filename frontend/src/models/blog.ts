@@ -1,4 +1,4 @@
-import { ID } from 'edifice-ts-client';
+import { ID } from '@edifice.io/client';
 
 export type CommentType = 'NONE' | 'IMMEDIATE' | 'RESTRAINT';
 export type PublishType = 'IMMEDIATE' | 'RESTRAINT';

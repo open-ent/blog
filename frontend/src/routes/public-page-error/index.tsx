@@ -1,4 +1,5 @@
-import { Button, EmptyScreen, usePaths } from '@edifice-ui/react';
+import { Button, EmptyScreen } from '@edifice.io/react';
+import illuError from '@images/emptyscreen/illu-error.svg';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useRouteError } from 'react-router-dom';
 
@@ -8,8 +9,6 @@ export default function PublicPageError() {
 
   const { t } = useTranslation();
 
-  const [imagePath] = usePaths();
-
   const navigate = useNavigate();
   const handleBackClick = () => navigate(-1);
 
@@ -17,7 +16,7 @@ export default function PublicPageError() {
     <main className="container-fluid d-flex flex-column bg-white">
       <div className="d-flex flex-column gap-16 align-items-center mt-64">
         <EmptyScreen
-          imageSrc={`${imagePath}/emptyscreen/illu-error.svg`}
+          imageSrc={illuError}
           imageAlt={t('explorer.emptyScreen.error.alt')}
           title={t('oops')}
           text={t('notfound', {

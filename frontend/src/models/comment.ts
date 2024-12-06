@@ -1,4 +1,4 @@
-import { ID } from 'edifice-ts-client';
+import { ID } from '@edifice.io/client';
 
 export enum CommentState {
   PUBLISHED = 'PUBLISHED',

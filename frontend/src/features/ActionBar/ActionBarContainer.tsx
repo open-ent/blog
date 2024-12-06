@@ -1,5 +1,5 @@
-import { ActionBar } from '@edifice-ui/react';
-import { useTransition, animated } from '@react-spring/web';
+import { ActionBar } from '@edifice.io/react';
+import { animated, useTransition } from '@react-spring/web';
 
 export interface ActionBarContainerProps {
   visible: boolean;

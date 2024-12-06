@@ -1,17 +1,21 @@
 import { useCallback, useEffect } from 'react';
 
-import { useToast } from '@edifice-ui/react';
+import { useToast } from '@edifice.io/react';
+import { IAction, odeServices } from '@edifice.io/client';
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { IAction, odeServices } from 'edifice-ts-client';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
+import usePostsFilter from '~/hooks/usePostsFilter';
+import { Post, PostState } from '~/models/post';
+import { useBlogStore } from '~/store';
+import { IActionDefinition } from '~/utils/types';
 import {
   loadBlog,
   loadBlogCounter,
@@ -21,10 +25,6 @@ import {
   loadPostsViewsCounter,
   sessionHasWorkflowRights,
 } from '../api/blog';
-import usePostsFilter from '~/hooks/usePostsFilter';
-import { Post, PostState } from '~/models/post';
-import { useBlogStore } from '~/store';
-import { IActionDefinition } from '~/utils/types';
 
 export const blogQueryKeys = {
   all: (blogId: string) => ['blog', blogId],
