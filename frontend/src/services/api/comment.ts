@@ -1,4 +1,4 @@
-import { odeServices } from 'edifice-ts-client';
+import { odeServices } from '@edifice.io/client';
 
 import { Comment } from '~/models/comment';
 import { checkHttpError } from '~/utils/BlogEvent';

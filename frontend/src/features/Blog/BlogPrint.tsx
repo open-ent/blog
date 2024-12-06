@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import { Editor } from '@edifice-ui/editor';
-import { LoadingScreen } from '@edifice-ui/react';
+import { LoadingScreen } from '@edifice.io/react';
+import { Editor } from '@edifice.io/react/editor';
 
 import { BlogHeader } from '~/features/Blog/BlogHeader';
 import { PostTitle } from '~/features/Post/PostTitle';
@@ -44,11 +44,7 @@ export function BlogPrint() {
             <div key={post._id} className="rounded border pt-16">
               <PostTitle post={post} mode="print" />
               <div className="mx-32">
-                <Editor
-                  content={post.content}
-                  mode="read"
-                  variant="ghost"
-                ></Editor>
+                <Editor content={post.content} mode="read" variant="ghost" />
               </div>
             </div>
           ))}

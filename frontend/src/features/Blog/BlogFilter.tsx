@@ -6,7 +6,7 @@ import {
   Toolbar,
   ToolbarItem,
   useDebounce,
-} from '@edifice-ui/react';
+} from '@edifice.io/react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 

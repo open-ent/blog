@@ -1,5 +1,10 @@
-import { RafterDown } from '@edifice-ui/icons';
-import { AppIcon, IconButton, Image, useOdeClient } from '@edifice-ui/react';
+import {
+  AppIcon,
+  IconButton,
+  Image,
+  useEdificeClient,
+} from '@edifice.io/react';
+import { IconRafterDown } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 
 import { SummaryList } from '~/components/SummaryList/SummaryList';
@@ -22,7 +27,7 @@ const BlogSidebar = () => {
     withViews: false,
   });
 
-  const { currentApp } = useOdeClient();
+  const { currentApp } = useEdificeClient();
 
   const setSidebarHighlightedPost = useBlogStore(
     (state) => state.setSidebarHighlightedPost,
@@ -73,7 +78,7 @@ const BlogSidebar = () => {
                 isLoading={isFetching}
                 onClick={() => fetchNextPage()}
                 aria-label={t('post.see.more')}
-                icon={<RafterDown />}
+                icon={<IconRafterDown />}
               ></IconButton>
             </div>
           )}

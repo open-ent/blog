@@ -1,22 +1,22 @@
-import { useToast } from '@edifice-ui/react';
+import { useToast } from '@edifice.io/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import { blogCounterQuery, blogQueryKeys } from './blog';
-import { commentListQuery } from './comment';
+import { Post, PostMetadata, PostState } from '~/models/post';
 import { loadPostsReactionsSummary } from '../api';
 import {
   createPost,
   deletePost,
+  goUpPost,
   loadOriginalPost,
   loadPost,
-  goUpPost,
+  loadPostMetadata,
+  loadPublicPost,
   publishPost,
   savePost,
-  loadPublicPost,
-  loadPostMetadata,
 } from '../api/post';
-import { Post, PostMetadata, PostState } from '~/models/post';
+import { blogCounterQuery, blogQueryKeys } from './blog';
+import { commentListQuery } from './comment';
 
 /** Query metadata of a post */
 export const postMetadataQuery = (blogId: string, postId: string) => {

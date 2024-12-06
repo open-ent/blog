@@ -1,21 +1,21 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { useToggle } from '@edifice.io/react';
 import {
   ReactionModal,
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-  useToggle,
-} from "@edifice-ui/react";
-import { ViewsDetails } from "edifice-ts-client";
-import { useShallow } from "zustand/react/shallow";
+} from '@edifice.io/react/audience';
+import { ViewsDetails } from '@edifice.io/client';
+import { useShallow } from 'zustand/react/shallow';
 
-import { useActionDefinitions } from "~/features/ActionBar/useActionDefinitions";
-import useReactionModal from "~/hooks/useReactionModal";
-import useReactionSummary from "~/hooks/useReactionSummary";
-import { Post } from "~/models/post";
-import { loadPostViewsDetails } from "~/services/api";
-import { useBlogStore } from "~/store";
+import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';
+import useReactionModal from '~/hooks/useReactionModal';
+import useReactionSummary from '~/hooks/useReactionSummary';
+import { Post } from '~/models/post';
+import { loadPostViewsDetails } from '~/services/api';
+import { useBlogStore } from '~/store';
 
 export type PostPreviewAudienceFooterProps = {
   /**

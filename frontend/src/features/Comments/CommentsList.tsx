@@ -1,9 +1,11 @@
 import { useId, useState } from 'react';
 
-import { Content } from '@edifice-ui/editor';
-import { EmptyScreen, usePaths } from '@edifice-ui/react';
+//import { Content } from '@edifice.io/react/editor';
+import { EmptyScreen } from '@edifice.io/react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+
+import illuPad from '@images/emptyscreen/illu-pad.svg';
 
 import { CommentCard } from '~/components/CommentCard/CommentCard';
 import ConfirmModal from '~/components/ConfirmModal/ConfirmModal';
@@ -15,7 +17,6 @@ export interface CommentsListProps {
 }
 
 export const CommentsList = ({ comments }: CommentsListProps) => {
-  const [imagePath] = usePaths();
   const [commentToDelete, setCommentToDelete] = useState<Comment | null>(null);
   const deleteModalId = useId();
 
@@ -28,7 +29,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
 
   if (!blogId || !postId || (!canCreate && comments.length <= 0)) return null;
 
-  const handlePublishClick = (comment: Comment, newContent: Content) => {
+  const handlePublishClick = (comment: Comment, newContent: any) => {
     comment.comment = newContent as string;
     update(comment);
   };
@@ -77,7 +78,7 @@ export const CommentsList = ({ comments }: CommentsListProps) => {
   ) : (
     <div className="m-auto mt-24">
       <EmptyScreen
-        imageSrc={`${imagePath}/emptyscreen/illu-pad.svg`}
+        imageSrc={illuPad}
         text={t('blog.comment.emptyscreen.text')}
       />
     </div>

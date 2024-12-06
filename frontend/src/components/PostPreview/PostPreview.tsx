@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Editor, EditorRef } from '@edifice-ui/editor';
-import { Card, Image, getThumbnail } from '@edifice-ui/react';
+import { Card, Image } from '@edifice.io/react';
+import { Editor, EditorRef } from '@edifice.io/react/editor';
+import { getThumbnail } from '@edifice.io/utilities';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 
-import { PostPreviewActionBar } from './PostPreviewActionBar';
-import { PostPreviewFooter } from './PostPreviewFooter';
-import { PostPreviewHeader } from './PostPreviewHeader';
 import { Post } from '~/models/post';
 import { useBlog } from '~/services/queries';
 import { useBlogStore } from '~/store';
+import { PostPreviewActionBar } from './PostPreviewActionBar';
+import { PostPreviewFooter } from './PostPreviewFooter';
+import { PostPreviewHeader } from './PostPreviewHeader';
 
 export type PostPreviewProps = {
   /**

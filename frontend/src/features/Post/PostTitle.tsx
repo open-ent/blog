@@ -1,5 +1,9 @@
-import { ArrowLeft, Print, TextToSpeech } from '@edifice-ui/icons';
-import { Avatar, Badge, Button, IconButton } from '@edifice-ui/react';
+import { Avatar, Badge, Button, IconButton } from '@edifice.io/react';
+import {
+  IconArrowLeft,
+  IconPrint,
+  IconTextToSpeech,
+} from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 
 import { Post, PostState } from '~/models/post';
@@ -49,7 +53,7 @@ export const PostTitle = ({
             type="button"
             color="tertiary"
             variant="ghost"
-            leftIcon={<ArrowLeft />}
+            leftIcon={<IconArrowLeft />}
             onClick={onBackward}
             size="sm"
           >
@@ -59,14 +63,14 @@ export const PostTitle = ({
             {readOnly || publicView ? (
               <>
                 <IconButton
-                  icon={<Print />}
+                  icon={<IconPrint />}
                   color="primary"
                   variant="outline"
                   aria-label={t('print')}
                   onClick={onPrint}
                 />
                 <IconButton
-                  icon={<TextToSpeech />}
+                  icon={<IconTextToSpeech />}
                   color="primary"
                   variant="outline"
                   className={isSpeeching ? 'bg-secondary' : ''}
