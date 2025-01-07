@@ -39,6 +39,7 @@
   "blog.title.placeholder": "Entrez le titre de votre blog",
   "blog.unsetImage.caps": "SUPPRIMER L'IMAGE",
   "blog.post.preview.readMore": "Lire la suite",
+  "blog.search.bar.placeholder": "Rechercher un billet ou un auteur",
   "cancel": "Annuler",
   "comment.placeholder": "Votre commentaire",
   "comments.hide": "Masquer les commentaires ([[post.comments.length()]])",

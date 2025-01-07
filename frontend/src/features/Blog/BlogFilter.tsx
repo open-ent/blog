@@ -121,7 +121,7 @@ export const BlogFilter = ({ blog }: BlogFilterProps) => {
         isVariant
         className="d-none d-md-flex flex-fill"
         onChange={handlerSearch}
-        placeholder={t('Rechercher un billet ou un auteur')}
+        placeholder={t('blog.search.bar.placeholder')}
         size="md"
       />
       {(manager || creator || contrib) && (
