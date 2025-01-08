@@ -13,29 +13,29 @@ import { IconSave, IconSend } from '@edifice.io/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import { CommentProvider } from '@edifice.io/react/comments';
+import { useQuery } from '@tanstack/react-query';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import OldFormatModal from '~/components/OldFormatModal/OldFormatModal';
+import { MAX_COMMENT_LENGTH, MAX_COMMENTS } from '~/config';
 import { TTITLE_LENGTH_MAX } from '~/config/init-config';
 import { postContentActions } from '~/config/postContentActions';
-import { Comment } from '~/models/comment';
+import { useComments } from '~/hooks/useComments';
 import { Post } from '~/models/post';
 import { baseUrl } from '~/routes';
-import { useBlog } from '~/services/queries';
+import { commentListQuery, useBlog } from '~/services/queries';
+import { useUserRights } from '~/store';
 import { isEmptyEditorContent } from '~/utils/EditorHasContent';
 import { usePostActions } from '../ActionBar/usePostActions';
-import { CommentsCreate } from '../Comments/CommentsCreate';
-import { CommentsHeader } from '../Comments/CommentsHeader';
-import { CommentsList } from '../Comments/CommentsList';
 import { PostAudience } from './PostAudience';
 import { PostTitle } from './PostTitle';
 
 export interface PostContentProps {
   post: Post;
   blogId: string;
-  comments?: Comment[];
 }
 
-export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
+export const PostContent = ({ blogId, post }: PostContentProps) => {
   const { blog, publicView, isPublicBlog } = useBlog();
   // Get available actions and requirements for the post.
   const postActions = usePostActions(postContentActions, blogId, post);
@@ -50,6 +50,9 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
     hideSaveButton,
     showViews,
   } = postActions;
+
+  const userRights = useUserRights();
+  const canComment = userRights.comment;
 
   // Get the query parameters in URL to know if the post is in edit mode.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,6 +71,14 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
   const [isEmptyContent, setIsEmptyContent] = useState<boolean>(false);
 
   const { t } = useTranslation('blog');
+
+  const { data: comments } = useQuery(commentListQuery(blogId!, post._id));
+
+  const {
+    create: postComment,
+    update: putComment,
+    remove: deleteComment,
+  } = useComments(blogId, post._id);
 
   const navigate = useNavigate();
 
@@ -195,7 +206,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={TTITLE_LENGTH_MAX}
-              ></Input>
+              />
             </FormControl>
             <FormControl id="postContent" className="mt-16">
               <Label>{t('blog.post.content-helper')}</Label>
@@ -252,21 +263,23 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
         )}
       </div>
 
-      <div className="d-flex flex-column-reverse flex-md-row justify-content-between align-items-start align-items-md-center mt-32 pt-24 pb-8 gap-16">
-        {mode === 'read' && !!comments && (
-          <div className="mx-md-8">
-            <CommentsHeader comments={comments} />
-          </div>
-        )}
-        {withAudience && <PostAudience post={post} withViews={showViews} />}
-      </div>
+      {withAudience && <PostAudience post={post} withViews={showViews} />}
 
-      {mode === 'read' && !!comments && (
-        <div className="mx-md-8">
-          <CommentsCreate />
-          <CommentsList comments={comments} />
-        </div>
-      )}
+      <CommentProvider
+        type={canComment ? 'edit' : 'read'}
+        comments={comments}
+        options={{
+          maxCommentLength: MAX_COMMENT_LENGTH,
+          maxComments: MAX_COMMENTS,
+        }}
+        rights={userRights}
+        callbacks={{
+          post: postComment,
+          put: putComment,
+          delete: deleteComment,
+        }}
+      />
+
       <Suspense>
         {isOldFormatOpen && mode === 'read' && (
           <OldFormatModal
@@ -274,7 +287,7 @@ export const PostContent = ({ blogId, post, comments }: PostContentProps) => {
             postId={post._id}
             isOpen={isOldFormatOpen}
             onCancel={() => setIsOldFormat(false)}
-          ></OldFormatModal>
+          />
         )}
       </Suspense>
     </div>

@@ -1,14 +1,18 @@
 import { odeServices } from '@edifice.io/client';
 
-import { Comment } from '~/models/comment';
+import { CommentDto } from '~/models/comment';
 import { checkHttpError } from '~/utils/BlogEvent';
+import { dtoToComment } from '~/utils/dtoToComment';
 
 export async function loadComments(blogId: string, postId: string) {
-  const comments = await checkHttpError<Comment[]>(
-    odeServices.http().get<Comment[]>(`/blog/comments/${blogId}/${postId}`),
+  const defaultComments = await checkHttpError<CommentDto[]>(
+    odeServices.http().get<CommentDto[]>(`/blog/comments/${blogId}/${postId}`),
   );
+
+  const comments = dtoToComment(defaultComments);
+
   // Default sort order must be reversed and API is not parameterized.
-  return comments && comments.length ? comments.reverse() : [];
+  return comments ?? [];
 }
 
 export function createComment(blogId: string, postId: string, content: string) {
@@ -22,14 +26,14 @@ export function createComment(blogId: string, postId: string, content: string) {
 export function updateComment(
   blogId: string,
   postId: string,
-  comment: Comment,
+  comment: string,
+  commentId: string,
 ) {
-  const { id, comment: content } = comment;
   return checkHttpError(
     odeServices
       .http()
-      .putJson<void>(`/blog/comment/${blogId}/${postId}/${id}`, {
-        comment: content,
+      .putJson<void>(`/blog/comment/${blogId}/${postId}/${commentId}`, {
+        comment,
       }),
   );
 }

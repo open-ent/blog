@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { ReactionType, ViewsDetails } from '@edifice.io/client';
 import {
   ReactionChoice,
   ReactionModal,
@@ -7,7 +8,6 @@ import {
   ViewsCounter,
   ViewsModal,
 } from '@edifice.io/react/audience';
-import { ReactionType, ViewsDetails } from '@edifice.io/client';
 
 import useReactionModal from '~/hooks/useReactionModal';
 import useReactionSummary from '~/hooks/useReactionSummary';
@@ -42,6 +42,7 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
 
   const loadViews = useCallback(async () => {
     const details = await loadPostViewsDetails(post._id);
+    console.log({ details });
     setViewsDetails(details);
     if (details) {
       addPostsViewsCounters({ [post._id]: details.viewsCounter });
@@ -78,46 +79,53 @@ export const PostAudience = ({ post, withViews }: PostAudienceProps) => {
   };
 
   return (
-    <div className="d-flex justify-content-between">
-      <div className="d-flex align-items-start align-items-md-center small text-gray-700">
-        {reactionSummary && (
-          <>
-            <div className="d-inline-flex flex-row align-items-center gap-12 post-footer-element">
-              <ReactionChoice
-                availableReactions={availableReactions}
-                summary={reactionSummary}
-                onChange={handleReactionChoiceOnChange}
+    <div
+      className="d-flex justify-content-end mt-24 align-self-start grid-col-2 g-start-2"
+      style={{
+        gridRowStart: 1,
+      }}
+    >
+      <div className="d-flex justify-content-between">
+        <div className="d-flex align-items-start align-items-md-center small text-gray-700">
+          {reactionSummary && (
+            <>
+              <div className="d-inline-flex flex-row align-items-center gap-12 post-footer-element">
+                <ReactionChoice
+                  availableReactions={availableReactions}
+                  summary={reactionSummary}
+                  onChange={handleReactionChoiceOnChange}
+                />
+                <ReactionSummary
+                  summary={reactionSummary}
+                  onClick={handleReactionOnClick}
+                />
+              </div>
+              {isReactionsModalOpen && (
+                <ReactionModal
+                  resourceId={post._id}
+                  isOpen={isReactionsModalOpen}
+                  onModalClose={handleReactionModalClose}
+                  reactionDetailsLoader={loadReactionDetails}
+                />
+              )}
+            </>
+          )}
+          {withViews && typeof viewsDetails === 'object' && (
+            <div className="post-footer-element">
+              <ViewsCounter
+                viewsCounter={viewsDetails.viewsCounter}
+                onClick={handleViewsOnClick}
               />
-              <ReactionSummary
-                summary={reactionSummary}
-                onClick={handleReactionOnClick}
-              />
+              {isViewsModalOpen && (
+                <ViewsModal
+                  viewsDetails={viewsDetails}
+                  isOpen={isViewsModalOpen}
+                  onModalClose={handleViewsModalClose}
+                />
+              )}
             </div>
-            {isReactionsModalOpen && (
-              <ReactionModal
-                resourceId={post._id}
-                isOpen={isReactionsModalOpen}
-                onModalClose={handleReactionModalClose}
-                reactionDetailsLoader={loadReactionDetails}
-              />
-            )}
-          </>
-        )}
-        {withViews && typeof viewsDetails === 'object' && (
-          <div className="post-footer-element">
-            <ViewsCounter
-              viewsCounter={viewsDetails.viewsCounter}
-              onClick={handleViewsOnClick}
-            />
-            {isViewsModalOpen && (
-              <ViewsModal
-                viewsDetails={viewsDetails}
-                isOpen={isViewsModalOpen}
-                onModalClose={handleViewsModalClose}
-              />
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

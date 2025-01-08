@@ -72,6 +72,7 @@ export default ({ mode }: { mode: string }) => {
         '/xiti': proxyObj,
         '/analyticsConf': proxyObj,
         '/explorer': proxyObj,
+        '/audience': proxyObj,
         '/blog': proxyObj,
       },
       port: 4200,

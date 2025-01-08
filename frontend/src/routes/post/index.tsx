@@ -22,9 +22,7 @@ export const loader =
     await queryClient.fetchQuery(actions);
 
     if (blogId && postId) {
-      const comments = commentListQuery(blogId, postId);
-      await queryClient.fetchQuery(comments);
-
+      await queryClient.fetchQuery(commentListQuery(blogId, postId));
       return await queryClient.fetchQuery(postMetadataQuery(blogId, postId));
     }
 
@@ -32,11 +30,10 @@ export const loader =
   };
 
 export function Component() {
-  const { blogId, postId } = useParams();
+  const { blogId } = useParams();
 
   const postMetadata = useLoaderData() as PostMetadata; // see loader above
   const query = useQuery(postQuery(blogId!, postMetadata));
-  const { data: comments } = useQuery(commentListQuery(blogId!, postId!));
 
   if (!blogId || !query.data) {
     return null;
@@ -45,11 +42,7 @@ export function Component() {
   return (
     <>
       <PostHeader />
-      <PostContent
-        blogId={blogId}
-        post={query.data}
-        comments={comments ?? []}
-      />
+      <PostContent blogId={blogId} post={query.data} />
     </>
   );
 }

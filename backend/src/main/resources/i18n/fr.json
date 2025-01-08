@@ -216,5 +216,11 @@
   "explorer.modal.onboarding.blog.screen1.alt": "Illustration d'un blog",
   "explorer.modal.onboarding.blog.screen1.text": "Votre application Blog est désormais plus simple et intuitive. Les photos et autres contenus multimédias sont mis à l’honneur, la navigation a été améliorée et les interactions facilitées.",
   "explorer.modal.onboarding.blog.screen2.alt": "Illustration du nouvelle éditeur de billet de blog",
-  "explorer.modal.onboarding.blog.screen2.text": "Un éditeur de contenu plus pratique et épuré ! Créez et modifiez vos billets de blog, de façon plus simple, plus mobile et plus accessible."
+  "explorer.modal.onboarding.blog.screen2.text": "Un éditeur de contenu plus pratique et épuré ! Créez et modifiez vos billets de blog, de façon plus simple, plus mobile et plus accessible.",
+  "blog.toast.success.create.comment": "Votre commentaire a été créé avec succès",
+  "blog.toast.error.create.comment": "Votre commentaire n'a pas pu être créé",
+  "blog.toast.success.update.comment": "Votre commentaire a été modifié avec succès",
+  "blog.toast.error.update.comment": "Votre commentaire n'a pas pu être modifié",
+  "blog.toast.success.delete.comment": "Votre commentaire a été supprimé avec succès",
+  "blog.toast.error.delete.comment": "Votre commentaire n'a pas pu être supprimé"
 }

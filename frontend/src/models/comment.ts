@@ -6,7 +6,7 @@ export enum CommentState {
   DRAFT = 'DRAFT',
 }
 
-export type Comment = {
+export type CommentDto = {
   id: ID;
   comment: string;
   created: {
@@ -22,3 +22,12 @@ export type Comment = {
   };
   state: CommentState;
 };
+
+export interface Comment {
+  id: string;
+  comment: string;
+  authorId: string;
+  authorName: string;
+  createdAt: number;
+  updatedAt?: number;
+}
