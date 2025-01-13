@@ -4,6 +4,7 @@ import { LoadingScreen, useTrashedResource } from '@edifice.io/react';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
 
+import { Editor } from '@edifice.io/react/editor';
 import { postContentActions } from '~/config/postContentActions';
 import { PostTitle } from '~/features/Post/PostTitle';
 import { PostMetadata } from '~/models/post';
@@ -52,9 +53,9 @@ export function Component() {
   return (
     <div className="rounded border p-16 bg-white">
       <PostTitle post={post} mode="print" />
-      {/* <div className="mx-32">
+      <div className="mx-32">
         <Editor content={post.content} mode="read" variant="ghost" />
-      </div> */}
+      </div>
     </div>
   );
 }
