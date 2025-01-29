@@ -127,6 +127,7 @@ public class BlogController extends BaseController {
 	@Get("/id/:id/post/:postid")
 	@SecuredAction(value = "", type = ActionType.AUTHENTICATED)
 	public void viewPostById(HttpServerRequest request) {
+		eventHelper.onAccess(request);
 		renderView(request, new JsonObject(), "index.html", null);
 	}
 
