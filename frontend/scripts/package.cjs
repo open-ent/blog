@@ -81,6 +81,10 @@ function generateDeps(content) {
     if (dep.startsWith('@edifice.io/')) {
       deps[dep] = getCorrectVersion(dep);
     }
+
+    if (dep.startsWith('ode-explorer')) {
+      deps[dep] = getCorrectVersion(dep);
+    }
   });
 
   return deps;
@@ -88,7 +92,7 @@ function generateDeps(content) {
 
 function createPackage() {
   fs.readFile(
-    path.resolve(__dirname, '../package.json.template'),
+    path.resolve(__dirname, '../package.json'),
     (err, data) => {
       if (err) {
         console.error(err);
