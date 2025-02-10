@@ -54,15 +54,17 @@ public class CommentAuthorOrManagerFilter extends CommentAuthorFilter {
 
 		final String userId = user.getUserId();
 
+		final String sharedMethod = data.binding.getServiceMethod().replaceAll("\\.", "-");
+
 		final List<Bson> groups = new ArrayList<>();
 		groups.add(and(
 			eq("userId", userId),
-			eq("manager", true)
+			eq(sharedMethod, true)
 		));
 		for (String gpId : user.getGroupsIds()) {
 			groups.add(and(
 				eq("groupId", gpId),
-				eq("manager", true)
+				eq(sharedMethod, true)
 			));
 		}
 		// Check if this user is manager or author of the blog.

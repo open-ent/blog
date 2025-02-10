@@ -912,26 +912,24 @@ public class DefaultPostService implements PostService {
 			final Handler<Either<String, JsonObject>> result) {
 		final Bson query2 = getDefautQueryBuilderForList(blogId, user,false);
 		mongo.count("blogs", MongoQueryBuilder.build(query2), event -> {
-      JsonObject res = event.body();
+			JsonObject res = event.body();
 			Bson tmp = eq("id", commentId);
-      if (res != null && "ok".equals(res.getString("status")) &&
-          1 != res.getInteger("count")) {
-        tmp = and(tmp, eq("author.userId", user.getUserId()));
-      }
+
+			if (res != null && "ok".equals(res.getString("status"))
+					&& 1 != res.getInteger("count")) {
+				tmp = and(tmp, eq("author.userId", user.getUserId()));
+      		}
+
 			final Bson query = and(
 				eq("blog.$id", blogId),
 				elemMatch("comments", tmp)
-      );
-      JsonObject c = new JsonObject().put("id", commentId);
-      MongoUpdateBuilder queryUpdate = new MongoUpdateBuilder().pull("comments", c);
-      mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), queryUpdate.build(),
-          new Handler<Message<JsonObject>>() {
-        @Override
-        public void handle(Message<JsonObject> res) {
-          result.handle(Utils.validResult(res));
-        }
-      });
-    });
+      		);
+
+			JsonObject c = new JsonObject().put("id", commentId);
+			MongoUpdateBuilder queryUpdate = new MongoUpdateBuilder().pull("comments", c);
+			mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), queryUpdate.build(),
+                    res1 -> result.handle(Utils.validResult(res1)));
+    	});
 	}
 
 	@Override
