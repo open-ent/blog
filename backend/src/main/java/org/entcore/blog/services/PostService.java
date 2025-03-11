@@ -96,7 +96,7 @@ public interface PostService extends AudienceRightChecker {
 
 	void unpublish(String postId, Handler<Either<String, JsonObject>> result);
 
-	void addComment(String blogId, String postId, String comment, UserInfos author,
+	void addComment(String blogId, String postId, String comment, String replyTo, UserInfos author,
 			Handler<Either<String, JsonObject>> result);
 
 	void updateComment(String postId, final String commentId, final String comment, final UserInfos coauthor,

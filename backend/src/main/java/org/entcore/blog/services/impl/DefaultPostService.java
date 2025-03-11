@@ -833,52 +833,58 @@ public class DefaultPostService implements PostService {
 	}
 
 	@Override
-	public void addComment(String blogId, String postId, final String comment, final UserInfos author,
-			final Handler<Either<String, JsonObject>> result) {
+	public void addComment(String blogId, String postId, final String comment, final String replyTo,
+						   final UserInfos author, final Handler<Either<String, JsonObject>> result) {
 		if (comment == null || comment.trim().isEmpty()) {
-			result.handle(new Either.Left<String, JsonObject>("Validation error : invalid comment."));
+			result.handle(new Either.Left<>("Validation error : invalid comment."));
 			return;
 		}
+
 		final Bson query = and(eq("_id", postId), eq("blog.$id", blogId));
 		final JsonObject q = MongoQueryBuilder.build(query);
 		JsonObject keys = new JsonObject().put("blog", 1);
 		JsonArray fetch = new JsonArray().add("blog");
-		mongo.findOne(POST_COLLECTION, q, keys, fetch, new Handler<Message<JsonObject>>() {
-			@Override
-			public void handle(Message<JsonObject> event) {
-				if ("ok".equals(event.body().getString("status")) &&
-						event.body().getJsonObject("result", new JsonObject()).size() > 0) {
-					BlogService.CommentType type = Utils.stringToEnum(event.body().getJsonObject("result")
-							.getJsonObject("blog",  new JsonObject()).getString("comment-type"),
-							BlogService.CommentType.RESTRAINT, BlogService.CommentType.class);
-					if (BlogService.CommentType.NONE.equals(type)) {
-						result.handle(new Either.Left<String, JsonObject>("Comments are disabled for this blog."));
-						return;
-					}
-					StateType s = BlogService.CommentType.IMMEDIATE.equals(type) ?
-							StateType.PUBLISHED : StateType.SUBMITTED;
-					JsonObject user = new JsonObject()
-							.put("userId", author.getUserId())
-							.put("username", author.getUsername())
-							.put("login", author.getLogin());
-					JsonObject c = new JsonObject()
-							.put("comment", comment)
-							.put("id", UUID.randomUUID().toString())
-							.put("state", s.name())
-							.put("author", user)
-							.put("created", MongoDb.now());
-					MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().push("comments", c);
-					mongo.update(POST_COLLECTION, q, updateQuery.build(), new Handler<Message<JsonObject>>() {
-						@Override
-						public void handle(Message<JsonObject> res) {
-							result.handle(Utils.validResult(res));
-						}
-					});
-				} else {
-					result.handle(Utils.validResult(event));
+
+		mongo.findOne(POST_COLLECTION, q, keys, fetch, event -> {
+			final JsonObject findPostResult = event.body().getJsonObject("result", new JsonObject());
+
+            if ("ok".equals(event.body().getString("status")) && !findPostResult.isEmpty()) {
+                BlogService.CommentType type = Utils.stringToEnum(
+						findPostResult.getJsonObject("blog",  new JsonObject()).getString("comment-type"),
+                        BlogService.CommentType.RESTRAINT,
+						BlogService.CommentType.class);
+
+                if (BlogService.CommentType.NONE.equals(type)) {
+                    result.handle(new Either.Left<>("Comments are disabled for this blog."));
+                    return;
+                }
+
+                StateType stateType = BlogService.CommentType.IMMEDIATE.equals(type)
+						? StateType.PUBLISHED
+						: StateType.SUBMITTED;
+
+                JsonObject user = new JsonObject()
+                        .put("userId", author.getUserId())
+                        .put("username", author.getUsername())
+                        .put("login", author.getLogin());
+
+                JsonObject newComment = new JsonObject()
+                        .put("comment", comment)
+                        .put("id", UUID.randomUUID().toString())
+                        .put("state", stateType.name())
+                        .put("author", user)
+                        .put("created", MongoDb.now());
+
+				if (replyTo != null && !replyTo.isEmpty()) {
+					newComment.put("replyTo", replyTo);
 				}
-			}
-		});
+
+                MongoUpdateBuilder updateQuery = new MongoUpdateBuilder().push("comments", newComment);
+                mongo.update(POST_COLLECTION, q, updateQuery.build(), res -> result.handle(Utils.validResult(res)));
+            } else {
+                result.handle(Utils.validResult(event));
+            }
+        });
 	}
 
 	@Override

@@ -347,37 +347,36 @@ public class PostController extends BaseController {
 	public void comment(final HttpServerRequest request) {
 		final String blogId = request.params().get("blogId");
 		final String postId = request.params().get("postId");
+
 		if (blogId == null || blogId.trim().isEmpty() || postId == null || postId.trim().isEmpty()) {
 			badRequest(request);
 			return;
 		}
-		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-			public void handle(final JsonObject data) {
-				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-					@Override
-					public void handle(final UserInfos user) {
-						if (user != null) {
-							Handler<Either<String, JsonObject>> notifyHandler = new Handler<Either<String, JsonObject>>() {
-								@Override
-								public void handle(Either<String, JsonObject> event) {
-									if (event.isRight()) {
-										timelineService.notifyPublishComment(request, blogId, postId, user,
-												pathPrefix + "#/view/" + blogId);
-										renderJson(request, event.right().getValue());
-									} else {
-										JsonObject error = new JsonObject().put("error", event.left().getValue());
-										renderJson(request, error, 400);
-									}
-								}
-							};
-							post.addComment(blogId, postId, data.getString("comment"), user, notifyHandler);
+
+		RequestUtils.bodyToJson(request, body -> {
+			// comment is the content of the comment
+			final String comment = body.getString("comment");
+			// replyTo is the ID of the comment to which the new comment is a reply
+			final String replyTo = body.getString("replyTo", null);
+
+			UserUtils.getUserInfos(eb, request, user -> {
+				if (user != null) {
+					post.addComment(blogId, postId, comment, replyTo, user, event -> {
+						if (event.isRight()) {
+							timelineService.notifyPublishComment(request, blogId, postId, user,
+									pathPrefix + "#/view/" + blogId);
+							renderJson(request, event.right().getValue());
 						} else {
-							unauthorized(request);
+							JsonObject error = new JsonObject().put("error", event.left().getValue());
+							renderJson(request, error, 400);
 						}
-					}
-				});
-			}
-		});
+					});
+				} else {
+					unauthorized(request);
+				}
+			});
+		}
+		);
 	}
 
 	@Put("/comment/:blogId/:postId/:commentId")
