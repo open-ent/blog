@@ -931,8 +931,22 @@ public class DefaultPostService implements PostService {
 				elemMatch("comments", tmp)
       		);
 
-			JsonObject c = new JsonObject().put("id", commentId);
-			MongoUpdateBuilder queryUpdate = new MongoUpdateBuilder().pull("comments", c);
+			// feat #WB2-1941
+			// The specification says:
+			// Dans le cas d’un commentaire supprimé une carte de type commentaire est affiché
+			// contenant uniquement l’information suivante : contenu supprimé
+			// Les réponses sont maintenues dans le fil, elles sont toujours visibles
+			// si le gestionnaire ne les a pas supprimées.
+			//
+			// So we unset the comment content and author for RGPD compliance
+			// and keep the comment id and creation date to keep the history
+			// and add a deleted field to indicate that the comment has been deleted
+			MongoUpdateBuilder queryUpdate = new MongoUpdateBuilder();
+			queryUpdate.unset("comments.$.comment");
+			queryUpdate.unset("comments.$.author");
+			queryUpdate.unset("comments.$.state");
+			queryUpdate.set("comments.$.deleted", true);
+
 			mongo.update(POST_COLLECTION, MongoQueryBuilder.build(query), queryUpdate.build(),
                     res1 -> result.handle(Utils.validResult(res1)));
     	});
