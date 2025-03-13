@@ -21,6 +21,7 @@ export type CommentDto = {
     login: string;
   };
   state: CommentState;
+  replyTo?: ID;
 };
 
 export interface Comment {

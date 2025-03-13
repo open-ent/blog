@@ -8,5 +8,6 @@ export const dtoToComment = (comments: CommentDto[]): Comment[] => {
     authorName: comment.author.username,
     createdAt: comment.created.$date,
     updatedAt: comment.modified?.$date,
+    replyTo: comment.replyTo,
   }));
 };

@@ -15,10 +15,16 @@ export async function loadComments(blogId: string, postId: string) {
   return comments ?? [];
 }
 
-export function createComment(blogId: string, postId: string, content: string) {
+export function createComment(
+  blogId: string,
+  postId: string,
+  content: string,
+  replyTo?: string,
+) {
   return checkHttpError(
     odeServices.http().postJson<void>(`/blog/comment/${blogId}/${postId}`, {
       comment: content,
+      replyTo,
     }),
   );
 }

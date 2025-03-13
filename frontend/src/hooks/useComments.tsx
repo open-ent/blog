@@ -25,8 +25,8 @@ export const useComments = (blogId: string, postId: string): CommentActions => {
   const updateMutation = useUpdateComment(blogId, postId);
 
   return {
-    create: async (content: string) =>
-      await createMutation.mutateAsync({ content }),
+    create: async (content: string, replyTo?: string) =>
+      await createMutation.mutateAsync({ content, replyTo }),
     remove: async (commentId: string) =>
       await deleteMutation.mutateAsync({ commentId }),
     update: async ({

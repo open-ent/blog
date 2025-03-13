@@ -26,8 +26,8 @@ export const useCreateComment = (blogId: string, postId: string) => {
   const { t } = useTranslation(appCode);
 
   return useMutation({
-    mutationFn: ({ content }: { content: string }) =>
-      createComment(blogId, postId, content),
+    mutationFn: ({ content, replyTo }: { content: string; replyTo?: string }) =>
+      createComment(blogId, postId, content, replyTo),
     onSuccess: () => {
       Promise.all([
         queryClient.invalidateQueries(commentListQuery(blogId, postId)),
