@@ -21,6 +21,7 @@ export type CommentDto = {
     login: string;
   };
   state: CommentState;
+  deleted?: boolean;
   replyTo?: ID;
 };
 

@@ -959,27 +959,29 @@ public class DefaultPostService implements PostService {
 		JsonObject keys = new JsonObject().put("comments", 1).put("blog", 1);
 		JsonArray fetch = new JsonArray().add("blog");
 		mongo.findOne(POST_COLLECTION, MongoQueryBuilder.build(query), keys, fetch,
-			new Handler<Message<JsonObject>>() {
-				@Override
-				public void handle(Message<JsonObject> event) {
-					JsonArray comments = new JsonArray();
-					if ("ok".equals(event.body().getString("status")) &&
-							event.body().getJsonObject("result", new JsonObject()).size() > 0) {
-						JsonObject res = event.body().getJsonObject("result");
-						boolean userIsManager = userIsManager(user, res.getJsonObject("blog"));
-						for (Object o: res.getJsonArray("comments", new JsonArray())) {
-							if (!(o instanceof JsonObject)) continue;
-							JsonObject j = (JsonObject) o;
-							if (userIsManager || StateType.PUBLISHED.name().equals(j.getString("state")) ||
-									user.getUserId().equals(
-											j.getJsonObject("author", new JsonObject()).getString("userId"))) {
-								comments.add(j);
-							}
-						}
-					}
-					result.handle(new Either.Right<String, JsonArray>(comments));
-				}
-			});
+                event -> {
+                    JsonArray commentsRes = new JsonArray();
+
+                    if ("ok".equals(event.body().getString("status"))
+							&& !event.body().getJsonObject("result", new JsonObject()).isEmpty()) {
+                        JsonObject res = event.body().getJsonObject("result");
+                        boolean userIsManager = userIsManager(user, res.getJsonObject("blog"));
+
+                        for (Object comment: res.getJsonArray("comments", new JsonArray())) {
+                            if (!(comment instanceof JsonObject)) continue;
+
+							JsonObject commentJson = (JsonObject) comment;
+
+							if (userIsManager
+                                    || StateType.PUBLISHED.name().equals(commentJson.getString("state"))
+                                    || Boolean.compare(Boolean.TRUE, commentJson.getBoolean("deleted", false)) == 0
+                                    || user.getUserId().equals(commentJson.getJsonObject("author", new JsonObject()).getString("userId"))) {
+								commentsRes.add(commentJson);
+                            }
+                        }
+                    }
+                    result.handle(new Either.Right<>(commentsRes));
+                });
 	}
 
 	private boolean userIsManager(UserInfos user, JsonObject res) {
