@@ -17,7 +17,14 @@ import { CommentProvider } from '@edifice.io/react/comments';
 import { useQuery } from '@tanstack/react-query';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import OldFormatModal from '~/components/OldFormatModal/OldFormatModal';
-import { MAX_COMMENT_LENGTH, MAX_COMMENTS } from '~/config';
+import {
+  ADDITIONAL_COMMENTS,
+  ADDITIONAL_REPLIES,
+  MAX_COMMENT_LENGTH,
+  MAX_COMMENTS,
+  MAX_REPLIES,
+  MAX_REPLY_LENGTH,
+} from '~/config';
 import { TTITLE_LENGTH_MAX } from '~/config/init-config';
 import { postContentActions } from '~/config/postContentActions';
 import { useComments } from '~/hooks/useComments';
@@ -270,7 +277,11 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
         comments={comments}
         options={{
           maxCommentLength: MAX_COMMENT_LENGTH,
+          maxReplyLength: MAX_REPLY_LENGTH,
           maxComments: MAX_COMMENTS,
+          additionalComments: ADDITIONAL_COMMENTS,
+          maxReplies: MAX_REPLIES,
+          additionalReplies: ADDITIONAL_REPLIES,
         }}
         rights={userRights}
         callbacks={{
