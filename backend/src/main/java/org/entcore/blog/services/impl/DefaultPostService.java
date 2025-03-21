@@ -603,7 +603,12 @@ public class DefaultPostService implements PostService {
 							if(comments == null) {
 								post.put("nbComments", 0);
 							} else {
-								post.put("nbComments", comments.size());
+								int commentsSize = (int) comments
+                                        .stream()
+                                        .map(comment -> (JsonObject) comment)
+                                        .filter(comment -> !comment.getBoolean("deleted", false))
+										.count();
+								post.put("nbComments", commentsSize);
 							}
 							// We don't send comments back if the user just wanted their number
 							if(!postProjection.isWithComments()) {
