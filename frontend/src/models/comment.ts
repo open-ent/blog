@@ -10,10 +10,10 @@ export type CommentDto = {
   id: ID;
   comment: string;
   created: {
-    $date: number;
+    $date: string;
   };
   modified?: {
-    $date: number;
+    $date: string;
   };
   author: {
     userId: ID;

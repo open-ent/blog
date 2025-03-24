@@ -6,8 +6,8 @@ export const dtoToComment = (comments: CommentDto[]): Comment[] => {
     comment: comment.comment,
     authorId: comment.author?.userId,
     authorName: comment.author?.username,
-    createdAt: comment.created.$date,
-    updatedAt: comment.modified?.$date,
+    createdAt: new Date(comment.created.$date)?.getTime(),
+    updatedAt: new Date(comment.modified?.$date ?? '')?.getTime(),
     deleted: comment.deleted,
     replyTo: comment.replyTo,
   }));
