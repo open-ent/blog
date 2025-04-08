@@ -272,24 +272,26 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
 
       {withAudience && <PostAudience post={post} withViews={showViews} />}
 
-      <CommentProvider
-        type={canComment ? 'edit' : 'read'}
-        comments={comments}
-        options={{
-          maxCommentLength: MAX_COMMENT_LENGTH,
-          maxReplyLength: MAX_REPLY_LENGTH,
-          maxComments: MAX_COMMENTS,
-          additionalComments: ADDITIONAL_COMMENTS,
-          maxReplies: MAX_REPLIES,
-          additionalReplies: ADDITIONAL_REPLIES,
-        }}
-        rights={userRights}
-        callbacks={{
-          post: postComment,
-          put: putComment,
-          delete: deleteComment,
-        }}
-      />
+      {!publicView && (
+        <CommentProvider
+          type={canComment ? 'edit' : 'read'}
+          comments={comments}
+          options={{
+            maxCommentLength: MAX_COMMENT_LENGTH,
+            maxReplyLength: MAX_REPLY_LENGTH,
+            maxComments: MAX_COMMENTS,
+            additionalComments: ADDITIONAL_COMMENTS,
+            maxReplies: MAX_REPLIES,
+            additionalReplies: ADDITIONAL_REPLIES,
+          }}
+          rights={userRights}
+          callbacks={{
+            post: postComment,
+            put: putComment,
+            delete: deleteComment,
+          }}
+        />
+      )}
 
       <Suspense>
         {isOldFormatOpen && mode === 'read' && (
