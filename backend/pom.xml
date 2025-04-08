@@ -12,7 +12,7 @@
 
     <groupId>org.entcore</groupId>
     <artifactId>blog</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.1-develop-pedago-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:https://github.com/edificeio/blog.git</connection>
@@ -32,7 +32,7 @@
         <entCoreVersion>6.6-SNAPSHOT</entCoreVersion>
         <web-utils.version>3.1-SNAPSHOT</web-utils.version>
         <junitVersion>4.13.2</junitVersion>
-        <explorerVersion>2.2-SNAPSHOT</explorerVersion>
+        <explorerVersion>2.2-develop-pedago-SNAPSHOT</explorerVersion>
     </properties>
 
     <dependencies>
