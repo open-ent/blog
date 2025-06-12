@@ -16,7 +16,7 @@
   "scripts": {
     "build": "pnpm run typecheck && vite build",
     "dev": "vite",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "lint": "eslint .",
     "pre-commit": "lint-staged",
