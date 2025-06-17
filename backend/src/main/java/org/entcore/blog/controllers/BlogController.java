@@ -96,10 +96,8 @@ public class BlogController extends BaseController {
 		super.init(vertx, config, rm, securedActions);
 		MongoDb mongo = MongoDb.getInstance();
 		this.timelineService = new DefaultBlogTimelineService(vertx, eb, config, new Neo(vertx, eb, log), mongo);
-		final Map<String, List<String>> groupedActions = new HashMap<>();
-		groupedActions.put("manager", loadManagerActions(securedActions.values()));
 		final BlogExplorerPlugin plugin = blog.getPlugin();
-		this.shareService = plugin.createShareService(groupedActions);
+		this.shareService = plugin.createShareService(BlogService.getGroupedActions(securedActions.values()));
 		final EventStore eventStore = EventStoreFactory.getFactory().getEventStore(Blog.class.getSimpleName());
 		eventHelper = new EventHelper(eventStore);
 	}
@@ -572,19 +570,6 @@ public class BlogController extends BaseController {
 				}
 			}
 		});
-	}
-
-	private List<String> loadManagerActions(Collection<fr.wseduc.webutils.security.SecuredAction> actions) {
-		List<String> managerActions = new ArrayList<>();
-		if (actions != null) {
-			for (fr.wseduc.webutils.security.SecuredAction a : actions) {
-				if (a.getName() != null && "RESOURCE".equals(a.getType())
-						&& "blog.manager".equals(a.getDisplayName())) {
-					managerActions.add(a.getName().replaceAll("\\.", "-"));
-				}
-			}
-		}
-		return managerActions;
 	}
 
 	@Get("/blog/availables-workflow-actions")

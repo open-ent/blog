@@ -36,12 +36,15 @@ import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.explorer.PostExplorerPlugin;
+import org.entcore.blog.listeners.ResourceBrokerListenerImpl;
 import org.entcore.blog.security.BlogResourcesProvider;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
 import org.entcore.blog.services.impl.BlogRepositoryEvents;
 import org.entcore.blog.services.impl.DefaultBlogService;
 import org.entcore.blog.services.impl.DefaultPostService;
+import org.entcore.broker.api.utils.AddressParameter;
+import org.entcore.broker.api.utils.BrokerProxyUtils;
 import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.editor.ContentTransformerEventRecorderFactory;
 import org.entcore.common.editor.IContentTransformerEventRecorder;
@@ -50,8 +53,11 @@ import org.entcore.common.explorer.IExplorerPluginClient;
 import org.entcore.common.explorer.impl.ExplorerRepositoryEvents;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
+import org.entcore.common.share.ShareService;
+import org.entcore.common.share.impl.ShareBrokerListenerImpl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -95,6 +101,7 @@ public class Blog extends BaseServer {
         final IContentTransformerEventRecorder contentTransformerEventRecorder = new ContentTransformerEventRecorderFactory("blog", contentTransformerConfig).create();
 
         blogPlugin = BlogExplorerPlugin.create(securedActions);
+
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         AudienceHelper audienceHelper = new AudienceHelper(vertx);
@@ -110,6 +117,11 @@ public class Blog extends BaseServer {
         }
         blogPlugin.start();
         audienceRightChecker = audienceHelper.listenForRightsCheck("blog", "post", postService);
+        // add broker listener for workspace resources
+        BrokerProxyUtils.addBrokerProxy(new ResourceBrokerListenerImpl(), vertx, new AddressParameter("application", "blog"));
+        // add broker listener for share service
+        final ShareService shareService = blogPlugin.createShareService(BlogService.getGroupedActions(securedActions.values()));
+        BrokerProxyUtils.addBrokerProxy(new ShareBrokerListenerImpl(this.securedActions, shareService), vertx, new AddressParameter("application", "blog"));
     }
 
     private Optional<JsonObject> getContentTransformerConfig(final Vertx vertx) {
