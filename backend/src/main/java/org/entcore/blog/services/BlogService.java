@@ -24,15 +24,14 @@ package org.entcore.blog.services;
 
 
 import fr.wseduc.webutils.Either;
+import fr.wseduc.webutils.security.SecuredAction;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.common.user.UserInfos;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public interface BlogService {
 	enum IdType { Slug, Id}
@@ -65,4 +64,20 @@ public interface BlogService {
 
 	void isBlogExists(Optional<String> blogId, String slug, Handler<Boolean> handler);
 
+
+
+	static Map<String, List<String>> getGroupedActions(Collection<SecuredAction> actions) {
+		final List<String> managerActions = new ArrayList<>();
+		if (actions != null) {
+			for (fr.wseduc.webutils.security.SecuredAction a : actions) {
+				if (a.getName() != null && "RESOURCE".equals(a.getType())
+						&& "blog.manager".equals(a.getDisplayName())) {
+					managerActions.add(a.getName().replaceAll("\\.", "-"));
+				}
+			}
+		}
+		final Map<String, List<String>> groupedActions = new HashMap<>();
+		groupedActions.put("manager", managerActions);
+		return groupedActions;
+	}
 }
