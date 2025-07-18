@@ -12,7 +12,7 @@
 
     <groupId>org.entcore</groupId>
     <artifactId>blog</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.1.17</version>
 
     <scm>
         <connection>scm:git:https://github.com/edificeio/blog.git</connection>
@@ -29,10 +29,10 @@
     </repositories>
 
     <properties>
-        <entCoreVersion>6.7-SNAPSHOT</entCoreVersion>
-        <web-utils.version>3.1-SNAPSHOT</web-utils.version>
+        <entCoreVersion>6.7.5</entCoreVersion>
+        <web-utils.version>3.1.3</web-utils.version>
         <junitVersion>4.13.2</junitVersion>
-        <explorerVersion>2.2-SNAPSHOT</explorerVersion>
+        <explorerVersion>2.2.9</explorerVersion>
     </properties>
 
     <dependencies>
