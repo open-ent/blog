@@ -29,7 +29,9 @@ import fr.wseduc.mongodb.MongoQueryBuilder;
 import fr.wseduc.mongodb.MongoUpdateBuilder;
 import fr.wseduc.webutils.Either;
 import fr.wseduc.webutils.Utils;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -40,6 +42,10 @@ import org.entcore.blog.Blog;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
 import org.entcore.blog.services.BlogService;
 import org.entcore.blog.services.PostService;
+import org.entcore.broker.api.dto.resources.ResourcesDeletedDTO;
+import org.entcore.broker.api.publisher.BrokerPublisherFactory;
+import org.entcore.broker.api.utils.AddressParameter;
+import org.entcore.broker.proxy.ResourceBrokerPublisher;
 import org.entcore.common.audience.AudienceHelper;
 import org.entcore.common.explorer.IdAndVersion;
 import org.entcore.common.explorer.IngestJobState;
@@ -64,13 +70,13 @@ public class DefaultBlogService implements BlogService{
 	private final int searchWordMinSize;
 	private final PostService postService;
 	private final BlogExplorerPlugin plugin;
-
 	private final AudienceHelper audienceHelper;
+	private final ResourceBrokerPublisher resourcePublisher;
 
 	private final ShareNormalizer shareNormalizer;
 
-	public DefaultBlogService(MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize,
-														BlogExplorerPlugin plugin, AudienceHelper audienceHelper) {
+	public DefaultBlogService(Vertx vertx, MongoDb mongo, PostService postService, int pagingSize, int searchWordMinSize,
+							  BlogExplorerPlugin plugin, AudienceHelper audienceHelper) {
 		this.mongo = mongo;
 		this.plugin = plugin;
 		this.pagingSize = pagingSize;
@@ -78,6 +84,12 @@ public class DefaultBlogService implements BlogService{
 		this.searchWordMinSize = searchWordMinSize;
 		this.audienceHelper = audienceHelper;
 		this.shareNormalizer = new ShareNormalizer(this.plugin.getSecuredActions());
+		// Initialize resource publisher for deletion notifications
+        this.resourcePublisher = BrokerPublisherFactory.create(
+            ResourceBrokerPublisher.class,
+            vertx,
+            new AddressParameter("application", Blog.APPLICATION)
+        );
 	}
 
 	@Override
@@ -199,12 +211,20 @@ public class DefaultBlogService implements BlogService{
 								log.error("Failed to delete blog: ", either.left().getValue());
 								result.handle(either);
 							}else{
-								plugin.notifyDeleteById(user, new IdAndVersion(blogId, now)).onComplete(e->{
-									if(e.failed()){
-										log.error("Failed to notify delete blog: ", e.cause());
-									}
-									result.handle(either);
-								});
+								// Notify both the explorer plugin and the broker about the deletion
+                                final Future<Void> explorerNotif = plugin.notifyDeleteById(user, new IdAndVersion(blogId, now));
+                                
+								// Notify resource deletion via broker and dont wait for completion
+                                final ResourcesDeletedDTO notification = ResourcesDeletedDTO.forSingleResource(blogId, Blog.BLOG_TYPE);
+                                resourcePublisher.notifyResourcesDeleted(notification);
+                                
+                                // Wait for explorer notifications to complete
+                                explorerNotif.onComplete(e -> {
+                                    if(e.failed()){
+                                        log.error("Failed to notify deletion: ", e.cause());
+                                    }
+                                    result.handle(either);
+                                });
 							}
 						});
 					} else {

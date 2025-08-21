@@ -53,8 +53,10 @@ import org.entcore.common.explorer.IExplorerPluginClient;
 import org.entcore.common.explorer.impl.ExplorerRepositoryEvents;
 import org.entcore.common.http.BaseServer;
 import org.entcore.common.mongodb.MongoDbConf;
+import org.entcore.common.resources.ResourceBrokerRepositoryEvents;
 import org.entcore.common.share.ShareService;
 import org.entcore.common.share.impl.ShareBrokerListenerImpl;
+import org.entcore.common.user.RepositoryEvents;
 
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +87,9 @@ public class Blog extends BaseServer {
         final Map<String, IExplorerPluginClient> pluginClientPerCollection = new HashMap<>();
         pluginClientPerCollection.put(BLOGS_COLLECTION, mainClient);
         pluginClientPerCollection.put(POSTS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, POST_TYPE));
-        setRepositoryEvents(new ExplorerRepositoryEvents(new BlogRepositoryEvents(vertx), pluginClientPerCollection,mainClient));
+        final RepositoryEvents explorerRepository = new ExplorerRepositoryEvents(new BlogRepositoryEvents(vertx), pluginClientPerCollection,mainClient);
+        final RepositoryEvents resourceRepository = new ResourceBrokerRepositoryEvents(explorerRepository, vertx, APPLICATION, BLOG_TYPE);
+        setRepositoryEvents(resourceRepository);
 
         if (config.getBoolean("searching-event", true)) {
             setSearchingEvents(new BlogSearchingEvents());
@@ -106,7 +110,7 @@ public class Blog extends BaseServer {
         final MongoDb mongo = MongoDb.getInstance();
         AudienceHelper audienceHelper = new AudienceHelper(vertx);
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, contentTransformerEventRecorder, audienceHelper);
-        final BlogService blogService = new DefaultBlogService(mongo, postService, config.getInteger("blog-paging-size", 30),
+        final BlogService blogService = new DefaultBlogService(vertx, mongo, postService, config.getInteger("blog-paging-size", 30),
                 config.getInteger("blog-search-word-min-size", 4), blogPlugin, audienceHelper);
         addController(new BlogController(mongo, blogService, postService));
         addController(new PostController(blogService, postService));
