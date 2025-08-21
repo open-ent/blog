@@ -97,7 +97,7 @@ public class PostServiceContentTransformerTest {
         contentTransformerClient = new DummyContentTransformerClient();
         data.put("BLOGID1", "blog-id-1");
         postService = new DefaultPostService(mongoDb, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, contentTransformerClient, IContentTransformerEventRecorder.noop, audienceHelper);
-        blogService = new DefaultBlogService(mongoDb, postService, 20, 3, blogPlugin, audienceHelper);
+        blogService = new DefaultBlogService(test.vertx(), mongoDb, postService, 20, 3, blogPlugin, audienceHelper);
     }
 
 

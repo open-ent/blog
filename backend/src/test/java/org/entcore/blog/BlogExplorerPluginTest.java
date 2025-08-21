@@ -84,7 +84,7 @@ public class BlogExplorerPluginTest {
         postPlugin = blogPlugin.postPlugin();
         audienceHelper = new AudienceHelper(test.vertx());
         postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, new DummyContentTransformerClient(), IContentTransformerEventRecorder.noop, audienceHelper);
-        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
+        blogService = new DefaultBlogService(test.vertx(), mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
         shareService = blogPlugin.createMongoShareService(Blog.BLOGS_COLLECTION, securedActions, new HashMap<>());
     }
 
