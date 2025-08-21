@@ -8,6 +8,10 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.mongo.MongoClient;
 import org.entcore.blog.Blog;
+import org.entcore.broker.api.dto.resources.ResourcesDeletedDTO;
+import org.entcore.broker.api.publisher.BrokerPublisherFactory;
+import org.entcore.broker.api.utils.AddressParameter;
+import org.entcore.broker.proxy.ResourceBrokerPublisher;
 import org.entcore.common.explorer.ExplorerMessage;
 import org.entcore.common.explorer.ExplorerPluginFactory;
 import org.entcore.common.explorer.IExplorerPlugin;
@@ -31,6 +35,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     private final PostExplorerPlugin postPlugin;
     private ShareService shareService;
     private final Map<String, SecuredAction> securedActions;
+    private final ResourceBrokerPublisher resourcePublisher;
 
     public static BlogExplorerPlugin create(final Map<String, SecuredAction> securedActions) throws Exception {
         final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
@@ -47,6 +52,12 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         this.folderPlugin = new BlogFoldersExplorerPlugin(this);
         //init subresource plugin
         this.postPlugin = new PostExplorerPlugin(this);
+        // Initialize resource publisher for deletion notifications
+        this.resourcePublisher = BrokerPublisherFactory.create(
+                ResourceBrokerPublisher.class,
+                communication.vertx(),
+                new AddressParameter("application", Blog.APPLICATION)
+        );
     }
 
     public PostExplorerPlugin postPlugin(){ return postPlugin; }
@@ -136,4 +147,12 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         return Collections.singletonList(postPlugin);
     }
 
+    @Override
+    protected Future<List<Boolean>> doDelete(UserInfos user, List<String> ids) {
+        return super.doDelete(user, ids).onSuccess(result -> {
+            // Notify resource deletion via broker and dont wait for completion
+            final ResourcesDeletedDTO notification = new ResourcesDeletedDTO(ids, Blog.BLOG_TYPE);
+            resourcePublisher.notifyResourcesDeleted(notification);
+        });
+    }
 }
