@@ -84,7 +84,7 @@ public class BlogExplorerPluginClientTest {
         postPlugin = blogPlugin.postPlugin();
         audienceHelper = new AudienceHelper(test.vertx());
         postService = new DefaultPostService(mongo, POST_SEARCH_WORD, PostController.LIST_ACTION, postPlugin, IContentTransformerClient.noop, IContentTransformerEventRecorder.noop, audienceHelper);
-        blogService = new DefaultBlogService(mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
+        blogService = new DefaultBlogService(test.vertx(), mongo, postService, BLOG_PAGING, BLOG_SEARCH_WORD, blogPlugin, audienceHelper);
         blogPlugin.start();
         client = IExplorerPluginClient.withBus(test.vertx(), application, resourceType);
         final Async async = context.async();
