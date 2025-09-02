@@ -26,12 +26,11 @@ package org.entcore.blog;
 import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.transformer.ContentTransformerFactoryProvider;
 import fr.wseduc.transformer.IContentTransformerClient;
+import fr.wseduc.webutils.collections.SharedDataHelper;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.shareddata.LocalMap;
-import static java.util.Optional.empty;
 import org.entcore.blog.controllers.*;
 import org.entcore.blog.events.BlogSearchingEvents;
 import org.entcore.blog.explorer.BlogExplorerPlugin;
@@ -63,6 +62,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.empty;
+
 public class Blog extends BaseServer {
 
     public static final String APPLICATION = "blog";
@@ -75,49 +76,57 @@ public class Blog extends BaseServer {
 
     @Override
     public void start(Promise<Void> startPromise) throws Exception {
-        super.start(startPromise);
-        setDefaultResourceFilter(new BlogResourcesProvider());
+	    final Promise<Void> initBlogPromise = Promise.promise();
+	    super.start(initBlogPromise);
+	    initBlogPromise.future()
+			    .compose(init -> SharedDataHelper.getInstance().<String, Object>getLocalMulti("server", "content-transformer"))
+			    .compose(blogConfigMap -> initBlog(blogConfigMap))
+			    .onComplete(startPromise);
+    }
 
-        MongoDbConf.getInstance().setCollection("blogs");
+	public Future<Void> initBlog(final Map<String, Object> blogConfigMap) {
+    setDefaultResourceFilter(new BlogResourcesProvider());
 
-        EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
-        eventStoreFactory.setVertx(vertx);
+    MongoDbConf.getInstance().setCollection("blogs");
 
-        final IExplorerPluginClient mainClient = IExplorerPluginClient.withBus(vertx, APPLICATION, BLOG_TYPE);
-        final Map<String, IExplorerPluginClient> pluginClientPerCollection = new HashMap<>();
-        pluginClientPerCollection.put(BLOGS_COLLECTION, mainClient);
-        pluginClientPerCollection.put(POSTS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, POST_TYPE));
+    EventStoreFactory eventStoreFactory = EventStoreFactory.getFactory();
+    eventStoreFactory.setVertx(vertx);
+
+    final IExplorerPluginClient mainClient = IExplorerPluginClient.withBus(vertx, APPLICATION, BLOG_TYPE);
+    final Map<String, IExplorerPluginClient> pluginClientPerCollection = new HashMap<>();
+    pluginClientPerCollection.put(BLOGS_COLLECTION, mainClient);
+    pluginClientPerCollection.put(POSTS_COLLECTION, IExplorerPluginClient.withBus(vertx, APPLICATION, POST_TYPE));
         final RepositoryEvents explorerRepository = new ExplorerRepositoryEvents(new BlogRepositoryEvents(vertx), pluginClientPerCollection,mainClient);
         final RepositoryEvents resourceRepository = new ResourceBrokerRepositoryEvents(explorerRepository, vertx, APPLICATION, BLOG_TYPE);
         setRepositoryEvents(resourceRepository);
 
-        if (config.getBoolean("searching-event", true)) {
-            setSearchingEvents(new BlogSearchingEvents());
-        }
+    if (config.getBoolean("searching-event", true)) {
+      setSearchingEvents(new BlogSearchingEvents());
+    }
 
-        final MongoDbConf conf = MongoDbConf.getInstance();
-        conf.setCollection(BLOGS_COLLECTION);
-        conf.setResourceIdLabel("id");
+    final MongoDbConf conf = MongoDbConf.getInstance();
+    conf.setCollection(BLOGS_COLLECTION);
+    conf.setResourceIdLabel("id");
 
-        ContentTransformerFactoryProvider.init(vertx);
-        final JsonObject contentTransformerConfig = getContentTransformerConfig(vertx).orElse(null);
-        final IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
-        final IContentTransformerEventRecorder contentTransformerEventRecorder = new ContentTransformerEventRecorderFactory("blog", contentTransformerConfig).create();
-
-        blogPlugin = BlogExplorerPlugin.create(securedActions);
-
+    ContentTransformerFactoryProvider.init(vertx);
+    final JsonObject contentTransformerConfig = getContentTransformerConfig((String) blogConfigMap.get("content-transformer")).orElse(null);
+    final IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
+    final IContentTransformerEventRecorder contentTransformerEventRecorder = new ContentTransformerEventRecorderFactory("blog", contentTransformerConfig).create();
+    return BlogExplorerPlugin.create(securedActions)
+      .compose(plugin -> {
+        this.blogPlugin = plugin;
         final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         AudienceHelper audienceHelper = new AudienceHelper(vertx);
-        final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, contentTransformerEventRecorder, audienceHelper);
+        final PostService postService = new DefaultPostService(mongo, config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, contentTransformerEventRecorder, audienceHelper);
         final BlogService blogService = new DefaultBlogService(vertx, mongo, postService, config.getInteger("blog-paging-size", 30),
-                config.getInteger("blog-search-word-min-size", 4), blogPlugin, audienceHelper);
+          config.getInteger("blog-search-word-min-size", 4), blogPlugin, audienceHelper);
         addController(new BlogController(mongo, blogService, postService));
         addController(new PostController(blogService, postService));
-        if(config().getBoolean("use-explorer-folder-api", true)){
-            addController(new FoldersControllerProxy(new FoldersControllerExplorer(vertx, blogPlugin)));
-        }else{
-            addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
+        if (config().getBoolean("use-explorer-folder-api", true)) {
+          addController(new FoldersControllerProxy(new FoldersControllerExplorer(vertx, blogPlugin)));
+        } else {
+          addController(new FoldersControllerProxy(new FoldersControllerLegacy("blogsFolders")));
         }
         blogPlugin.start();
         audienceRightChecker = audienceHelper.listenForRightsCheck("blog", "post", postService);
@@ -126,19 +135,19 @@ public class Blog extends BaseServer {
         // add broker listener for share service
         final ShareService shareService = blogPlugin.createShareService(BlogService.getGroupedActions(securedActions.values()));
         BrokerProxyUtils.addBrokerProxy(new ShareBrokerListenerImpl(this.securedActions, shareService), vertx, new AddressParameter("application", "blog"));
-    }
+        return Future.succeededFuture();
+      });
+  }
 
-    private Optional<JsonObject> getContentTransformerConfig(final Vertx vertx) {
-        final LocalMap<Object, Object> server= vertx.sharedData().getLocalMap("server");
-        final String rawConfiguration = (String) server.get("content-transformer");
-        final Optional<JsonObject> contentTransformerConfig;
-        if(rawConfiguration == null) {
-            contentTransformerConfig = empty();
-        } else {
-            contentTransformerConfig = Optional.of(new JsonObject(rawConfiguration));
-        }
-        return contentTransformerConfig;
-    }
+	private Optional<JsonObject> getContentTransformerConfig(final String contentTransformerRawConfig) {
+		final Optional<JsonObject> contentTransformerConfig;
+		if(contentTransformerRawConfig == null) {
+			contentTransformerConfig = empty();
+		} else {
+			contentTransformerConfig = Optional.of(new JsonObject(contentTransformerRawConfig));
+		}
+		return contentTransformerConfig;
+	}
 
     @Override
     public void stop() throws Exception {

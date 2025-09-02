@@ -33,6 +33,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.entcore.common.user.ExportResourceResult;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,7 +52,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 
 	@Override
 	public void exportResources(JsonArray resourcesIds, boolean exportDocuments, boolean exportSharedResources, String exportId, String userId,
-								JsonArray groups, String exportPath, String locale, String host, Handler<Boolean> handler)
+								JsonArray groups, String exportPath, String locale, String host, Handler<ExportResourceResult> handler)
 	{
 		final Bson findByAuthor = eq("author.userId", userId);
 		final Bson findByShared = or(
@@ -118,23 +119,17 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 										{
 											if (path != null)
 											{
-												Handler<Boolean> finish = new Handler<Boolean>()
-												{
-													@Override
-													public void handle(Boolean bool)
-													{
-														exportFiles(results, path, new HashSet<String>(), exported, handler);
-													}
-												};
+												Handler<Boolean> finish = bool -> exportFiles(results, path, new HashSet<>(), exported, e -> handler.handle(new ExportResourceResult(e, path)));
 
-												if(exportDocuments == true)
-													exportDocumentsDependancies(results, path, finish);
-												else
-													finish.handle(Boolean.TRUE);
+												if(exportDocuments) {
+                          exportDocumentsDependancies(results, path, finish);
+                        } else {
+                          finish.handle(exported.get());
+                        }
 											}
 											else
 											{
-												handler.handle(exported.get());
+												handler.handle(new ExportResourceResult(exported.get(), exportPath));
 											}
 										}
 									});
@@ -142,7 +137,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 								else
 								{
 									log.error("Blog : Could not proceed query " + query2.encode(), event2.body().getString("message"));
-									handler.handle(exported.get());
+									handler.handle(new ExportResourceResult(exported.get(), exportPath));
 								}
 							}
 						});
@@ -150,7 +145,7 @@ public class BlogRepositoryEvents extends MongoDbRepositoryEvents {
 					else
 					{
 						log.error("Blog : Could not proceed query " + query.encode(), event.body().getString("message"));
-						handler.handle(exported.get());
+						handler.handle(new ExportResourceResult(exported.get(), exportPath));
 					}
 				}
 			});

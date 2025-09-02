@@ -81,7 +81,7 @@ public class PostServiceContentTransformerTest {
 
     @BeforeClass
     public static void setUp(TestContext context) throws Exception {
-        IngestJobMetricsRecorderFactory.init(test.vertx(), new JsonObject());
+        IngestJobMetricsRecorderFactory.init(null, new JsonObject());
         test.database().initNeo4j(context, neo4jContainer);
         user.setLogin("user");
         explorerTest.start(context);
