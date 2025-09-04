@@ -47,6 +47,12 @@ export const explorerConfig: AppParams = {
       target: 'tree',
     },
     {
+      id: 'copy',
+      workflow: workflows.access,
+      target: 'actionbar',
+      right: 'read',
+    },
+    {
       id: 'move',
       workflow: workflows.access,
       target: 'actionbar',

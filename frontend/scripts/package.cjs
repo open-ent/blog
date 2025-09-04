@@ -91,26 +91,23 @@ function generateDeps(content) {
 }
 
 function createPackage() {
-  fs.readFile(
-    path.resolve(__dirname, '../package.json'),
-    (err, data) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
+  fs.readFile(path.resolve(__dirname, '../package.json'), (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
 
-      let content = JSON.parse(data);
-      let version = content.version;
+    let content = JSON.parse(data);
+    let version = content.version;
 
-      version = version.replace('%branch%', BRANCH);
-      version = version.replace('%generateVersion%', generateVersion());
+    version = version.replace('%branch%', BRANCH);
+    version = version.replace('%generateVersion%', generateVersion());
 
-      content.version = version;
-      content.dependencies = generateDeps(content);
+    content.version = version;
+    content.dependencies = generateDeps(content);
 
-      generatePackage(content);
-    },
-  );
+    generatePackage(content);
+  });
 }
 
 createPackage();
