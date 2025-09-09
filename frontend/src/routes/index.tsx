@@ -1,9 +1,10 @@
 import { QueryClient } from '@tanstack/react-query';
 import { RouteObject, createBrowserRouter } from 'react-router-dom';
 
-import { ExplorerBlog } from './explorer-blog';
 import PageError from './page-error';
 import PublicPageError from './public-page-error';
+import { Explorer } from 'ode-explorer/lib';
+import { explorerConfig } from '~/config';
 
 const routes = (queryClient: QueryClient): RouteObject[] => [
   {
@@ -19,7 +20,7 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
     children: [
       {
         index: true,
-        element: <ExplorerBlog />,
+        element: <Explorer config={explorerConfig} />,
       },
       // This page displays all information about the blog and its list of posts.
       {
