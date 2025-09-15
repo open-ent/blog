@@ -27,6 +27,7 @@ import fr.wseduc.mongodb.MongoDb;
 import fr.wseduc.transformer.ContentTransformerFactoryProvider;
 import fr.wseduc.transformer.IContentTransformerClient;
 import fr.wseduc.webutils.collections.SharedDataHelper;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -69,19 +70,13 @@ public class Blog extends BaseServer {
     public void start(Promise<Void> startPromise) throws Exception {
 	    final Promise<Void> initBlogPromise = Promise.promise();
 	    super.start(initBlogPromise);
-	    initBlogPromise.future().compose(init ->
-			    SharedDataHelper.getInstance().<String, Object>getMulti("server", "content-transformer")
-	    ).onSuccess(serverBlogMap -> {
-		    try {
-			    initBlog(startPromise, serverBlogMap);
-		    } catch (Exception e) {
-			    startPromise.fail(e);
-			    log.error("Error when starting Blog", e);
-		    }
-	    }).onFailure(th -> log.error("Error when starting Blog server super classes", th));
+	    initBlogPromise.future()
+			    .compose(init -> SharedDataHelper.getInstance().<String, Object>getMulti("server", "content-transformer"))
+			    .compose(blogConfigMap -> initBlog(blogConfigMap))
+			    .onComplete(startPromise);
     }
 
-	public void initBlog(final Promise<Void> startPromise, final Map<String, Object> serverBlogMap) throws Exception {
+	public Future<Void> initBlog(final Map<String, Object> blogConfigMap) {
         setDefaultResourceFilter(new BlogResourcesProvider());
 
         MongoDbConf.getInstance().setCollection("blogs");
@@ -104,12 +99,15 @@ public class Blog extends BaseServer {
         conf.setResourceIdLabel("id");
 
         ContentTransformerFactoryProvider.init(vertx);
-        final JsonObject contentTransformerConfig = getContentTransformerConfig((String) serverBlogMap.get("content-transformer")).orElse(null);
+        final JsonObject contentTransformerConfig = getContentTransformerConfig((String) blogConfigMap.get("content-transformer")).orElse(null);
         final IContentTransformerClient contentTransformerClient = ContentTransformerFactoryProvider.getFactory("blog", contentTransformerConfig).create();
         final IContentTransformerEventRecorder contentTransformerEventRecorder = new ContentTransformerEventRecorderFactory("blog", contentTransformerConfig).create();
-
-        blogPlugin = BlogExplorerPlugin.create(securedActions);
-        final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
+		try {
+			blogPlugin = BlogExplorerPlugin.create(securedActions);
+		} catch (Exception e) {
+			return Future.failedFuture(e);
+		}
+		final PostExplorerPlugin postPlugin = blogPlugin.postPlugin();
         final MongoDb mongo = MongoDb.getInstance();
         AudienceHelper audienceHelper = new AudienceHelper(vertx);
         final PostService postService = new DefaultPostService(mongo,config.getInteger("post-search-word-min-size", 4), PostController.LIST_ACTION, postPlugin, contentTransformerClient, contentTransformerEventRecorder, audienceHelper);
@@ -125,7 +123,7 @@ public class Blog extends BaseServer {
         blogPlugin.start();
         audienceRightChecker = audienceHelper.listenForRightsCheck("blog", "post", postService);
 
-		startPromise.complete();
+		return Future.succeededFuture();
     }
 
 	private Optional<JsonObject> getContentTransformerConfig(final String contentTransformerRawConfig) {

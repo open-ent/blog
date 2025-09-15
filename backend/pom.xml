@@ -29,7 +29,7 @@
     </repositories>
 
     <properties>
-        <entCoreVersion>6.6-zookeeper-SNAPSHOT</entCoreVersion>
+        <entCoreVersion>6.8-zookeeper-SNAPSHOT</entCoreVersion>
         <junitVersion>4.13.2</junitVersion>
         <explorerVersion>2.2-SNAPSHOT</explorerVersion>
     </properties>
