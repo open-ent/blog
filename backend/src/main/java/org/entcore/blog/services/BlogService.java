@@ -41,10 +41,10 @@ public interface BlogService {
 	enum PublishType { IMMEDIATE, RESTRAINT };
 
 	List<String> FIELDS = Arrays.asList("author", "title", "description",
-			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type", "visibility", "slug");
+			"thumbnail", "comment-type", "created", "modified", "shared", "publish-type", "visibility", "slug", "allow-replies");
 
 	List<String> UPDATABLE_FIELDS = Arrays.asList("title", "description",
-			"thumbnail", "comment-type", "modified", "publish-type", "trashed", "visibility", "slug");
+			"thumbnail", "comment-type", "modified", "publish-type", "trashed", "visibility", "slug", "allow-replies");
 
 	BlogExplorerPlugin getPlugin();
 
