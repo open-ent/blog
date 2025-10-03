@@ -21,6 +21,7 @@ export type Blog = {
   'comment-type': CommentType;
   'visibility': 'OWNER' | 'PUBLIC';
   'slug': string;
+  'allowReplies'?: boolean;
   'version': number;
   'created': {
     $date: string;

@@ -92,5 +92,6 @@
   "explorer.create.title": "New blog",
   "explorer.label.search": "Search in my blogs",
   "explorer.filters.mine": "My blogs",
-  "explorer.tree.title": "Blogs"
+  "explorer.tree.title": "Blogs",
+  "explorer.comments.allowReplies": "Allow replies to comments"
 }

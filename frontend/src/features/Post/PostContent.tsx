@@ -283,6 +283,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
             additionalComments: ADDITIONAL_COMMENTS,
             maxReplies: MAX_REPLIES,
             additionalReplies: ADDITIONAL_REPLIES,
+            allowReplies: blog?.allowReplies ?? true,
           }}
           rights={userRights}
           callbacks={{
