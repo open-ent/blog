@@ -134,6 +134,7 @@
   "explorer.toaster.btn.create.label": "Créer un blog",
   "explorer.tree.title": "Blogs",
   "explorer.validate.publication": "Billets soumis à validation",
+  "explorer.comments.allowReplies": "Autoriser les réponses aux commentaires",
   "filters.all": "Tous [[display.countAll]]",
   "filters.mine": "Mes blogs",
   "filters.privateBlogs": "Blogs internes",

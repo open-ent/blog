@@ -512,6 +512,13 @@ public class BlogController extends BaseController {
 		return;
 	}
 
+    @Get("/optional-comment-replies")
+    @SecuredAction("blog.optionalCommentReplies")
+    public void optionalCommentReplies(HttpServerRequest request) {
+        // This route is used to create optional comment replies Workflow right, nothing to do
+    }
+
+
 	@Put("/share/remove/:blogId")
 	@SecuredAction(value = "blog.manager", type = ActionType.RESOURCE)
 	public void removeShare(final HttpServerRequest request) {

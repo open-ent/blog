@@ -87,6 +87,7 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
         final Optional<String> creatorId = getCreatorForModel(source).map(e -> e.getUserId());
         final JsonObject custom = new JsonObject().put("slug", source.getString("slug", ""));
         custom.put("publish-type", source.getString("publish-type", ""));
+        custom.put("allowReplies", source.getBoolean("allowReplies", true));
         message.withName(source.getString("title", ""));
         message.withContent(source.getString("description", ""), ExplorerMessage.ExplorerContentType.Html);
         message.withPublic("PUBLIC".equals(source.getString("visibility")));
