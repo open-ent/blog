@@ -21,6 +21,8 @@ import fr.wseduc.mongodb.MongoDb;
 
 import java.util.*;
 
+import static io.vertx.core.Future.failedFuture;
+
 public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     public static final String APPLICATION = Blog.APPLICATION;
     public static final String TYPE = Blog.BLOG_TYPE;
@@ -32,11 +34,14 @@ public class BlogExplorerPlugin extends ExplorerPluginResourceMongo {
     private ShareService shareService;
     private final Map<String, SecuredAction> securedActions;
 
-    public static BlogExplorerPlugin create(final Map<String, SecuredAction> securedActions) throws Exception {
-        final IExplorerPlugin plugin = ExplorerPluginFactory.createMongoPlugin((params)->{
-            return new BlogExplorerPlugin(params.getCommunication(), params.getDb(), securedActions);
-        });
-        return (BlogExplorerPlugin) plugin;
+    public static Future<BlogExplorerPlugin> create(final Map<String, SecuredAction> securedActions) {
+      try {
+        return ExplorerPluginFactory
+          .createMongoPlugin((params)-> new BlogExplorerPlugin(params.getCommunication(), params.getDb(), securedActions))
+          .map(plugin -> (BlogExplorerPlugin) plugin);
+      } catch (Exception e) {
+        return failedFuture(e);
+      }
     }
 
     public BlogExplorerPlugin(final IExplorerPluginCommunication communication, final MongoClient mongoClient, final Map<String, SecuredAction> securedActions) {
