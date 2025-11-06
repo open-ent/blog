@@ -12,7 +12,7 @@
 
     <groupId>org.entcore</groupId>
     <artifactId>blog</artifactId>
-    <version>5.2-develop-pedago-SNAPSHOT</version>
+    <version>5.2-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:https://github.com/edificeio/blog.git</connection>
