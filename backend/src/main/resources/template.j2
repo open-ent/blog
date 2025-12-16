@@ -1,0 +1,20 @@
+{
+  "name": "org.entcore~blog",
+  "config": {
+    "main": "org.entcore.blog.Blog",
+    "csrf-token": {{ csrfToken | default('true') }},
+    "port": 8018,
+    "auto-redeploy": false,
+    "ssl": true,
+    "blog-search-word-min-size" : {{ blogSearchWordMinSize | default('3') }},
+    "app-name": "Blog",
+    "app-address": "/blog",
+    "app-type" : "END_USER",
+    "host": "https://{{ host }}",
+    "userbook-host": "https://{{ host }}",
+    "mode": "prod",
+    "use-explorer-folder-api": {{ blogUseExplorerApi | default('true') }},
+    "use-explorer-ui": {{ blogUseExplorerUi | default('true') }},
+    "searching-event": {{ blogSearchingEvent|default('true') }}
+  }
+}
