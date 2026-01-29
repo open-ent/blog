@@ -32,6 +32,7 @@
         <entCoreVersion>6.13.0</entCoreVersion>
         <junitVersion>4.13.2</junitVersion>
         <explorerVersion>2.5.0</explorerVersion>
+        <modMongoVersion>4.1.0</modMongoVersion>
     </properties>
 
     <dependencies>
