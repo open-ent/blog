@@ -12,7 +12,7 @@
 
     <groupId>org.entcore</groupId>
     <artifactId>blog</artifactId>
-    <version>5.4-SNAPSHOT</version>
+    <version>5.4.1</version>
 
     <scm>
         <connection>scm:git:https://github.com/edificeio/blog.git</connection>
@@ -29,10 +29,10 @@
     </repositories>
 
     <properties>
-        <entCoreVersion>6.13-SNAPSHOT</entCoreVersion>
+        <entCoreVersion>6.13.2</entCoreVersion>
         <junitVersion>4.13.2</junitVersion>
-        <explorerVersion>2.5-SNAPSHOT</explorerVersion>
-        <modMongoVersion>4.1-SNAPSHOT</modMongoVersion>
+        <explorerVersion>2.5.1</explorerVersion>
+        <modMongoVersion>4.1.0</modMongoVersion>
     </properties>
 
     <dependencies>
