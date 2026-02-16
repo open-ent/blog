@@ -148,8 +148,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 												.put("blogUri", resourceUri)
 												.put("postTitle", post.getString("title"))
 												.put("postUri", resourceUri + "/" + postId)
-												.put("resourceUri", resourceUri + "/" + postId)
-												.put("disableAntiFlood", true);
+												.put("resourceUri", resourceUri + "/" + postId);
 										notification.notifyTimeline(request, "blog.submit-post", user, recipients, blogId, postId, p);
 
 									}
@@ -226,8 +225,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.put("blogUri", resourceUri)
 									.put("postTitle", blog.getString("title"))
 									.put("postUri", resourceUri + "/" + postId)
-									.put("resourceUri", resourceUri + "/" + postId)
-									.put("disableAntiFlood", true);
+									.put("resourceUri", resourceUri + "/" + postId);
 							notification.notifyTimeline(request, "blog.publish-comment", user, recipients, blogId, postId, p);
 						}
 					}
