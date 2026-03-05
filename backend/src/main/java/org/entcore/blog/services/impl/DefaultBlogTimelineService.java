@@ -185,7 +185,7 @@ public class DefaultBlogTimelineService implements BlogTimelineService {
 									.put("resourceUri", resourceUri + "/" + postId)
 									.put("pushNotif", new JsonObject().put("title", "push.notif.blog.published.post").put("body", user.getUsername()+ " : "+ blog.getJsonObject("blog", new JsonObject()).getString("title")));
 							notification.notifyTimeline(request, "blog.publish-post", user, recipients,
-									blogId, postId, p, true,
+									blogId, postId, p, false,
 									NotificationUtils.jsonContentToPreview(blog.getJsonObject("jsonContent")));
 						}
 					}
