@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Card, Image } from '@edifice.io/react';
 import { Editor, EditorRef } from '@edifice.io/react/editor';
-import { getThumbnail } from '@edifice.io/utilities';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +10,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { Post } from '~/models/post';
 import { useBlog } from '~/services/queries';
 import { useBlogStore } from '~/store';
+import { extractMediaFromPost, JSONContent } from '~/utils/PostUtils';
 import { PostPreviewActionBar } from './PostPreviewActionBar';
 import { PostPreviewFooter } from './PostPreviewFooter';
 import { PostPreviewHeader } from './PostPreviewHeader';
@@ -43,7 +43,9 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   const editorRef = useRef<EditorRef>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const [summaryContent, setSummaryContent] = useState<string>('');
+  const [summaryContent, setSummaryContent] = useState<string | JSONContent>(
+    '',
+  );
   const [summaryContentPlain, setSummaryContentPlain] = useState<string>('');
   const [mediaURLs, setMediaURLs] = useState<string[]>([]);
 
@@ -70,27 +72,10 @@ export const PostPreview = ({ post, index }: PostPreviewProps) => {
   }, [sidebarHighlightedPost, post]);
 
   useEffect(() => {
-    let contentHTML = post.content;
-    if (contentHTML) {
-      const getMediaTags = /<(img|video|iframe|audio|embed)[^>]*>(<\/\1>)?/gim;
-      const getSrc = /src=(?:"|')([^"|']*)(?:"|')/;
-      const mediaTags = contentHTML.match(getMediaTags);
-      contentHTML = contentHTML.replace(getMediaTags, '');
-      if (mediaTags?.length) {
-        setMediaURLs(
-          mediaTags
-            .filter((tag) => tag.includes('img'))
-            .map((tag) => {
-              const srcMatch = getSrc.exec(tag);
-              if (srcMatch?.length) {
-                return getThumbnail(srcMatch[1], 0, 300);
-              }
-              return '';
-            }) || [],
-        );
-      }
-
-      setSummaryContent(contentHTML);
+    if (post.content) {
+      const { thumbnailURLs, cleanedContent } = extractMediaFromPost(post);
+      setMediaURLs(thumbnailURLs);
+      setSummaryContent(cleanedContent);
     }
   }, [post]);
 
