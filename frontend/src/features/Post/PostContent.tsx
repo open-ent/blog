@@ -224,7 +224,7 @@ export const PostContent = ({ blogId, post }: PostContentProps) => {
           <Editor
             id="postContent"
             ref={editorRef}
-            content={post?.content ?? ''}
+            content={post?.jsonContent ?? post?.content ?? ''}
             mode={mode}
             variant={variant}
             visibility={blog?.visibility === 'PUBLIC' ? 'public' : 'protected'}
