@@ -7,7 +7,7 @@
     <parent>
         <groupId>io.edifice</groupId>
         <artifactId>app-parent</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </parent>
 
     <groupId>org.entcore</groupId>
@@ -33,7 +33,7 @@
         <entCoreLibsVersion>6.14-separation-SNAPSHOT</entCoreLibsVersion>
         <junitVersion>4.13.2</junitVersion>
         <explorerVersion>2.5-separation-SNAPSHOT</explorerVersion>
-        <modMongoVersion>4.1-SNAPSHOT</modMongoVersion>
+        <modMongoVersion>4.1-separation-SNAPSHOT</modMongoVersion>
     </properties>
 
     <dependencies>
