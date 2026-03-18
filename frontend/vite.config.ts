@@ -7,6 +7,7 @@ import {
   hashEdificeBootstrap,
   queryHashVersion,
 } from './plugins/vite-plugin-edifice';
+import { externalLibs } from './plugins/vite-plugin-external-libs';
 
 export default ({ mode }: { mode: string }) => {
   // Checking environement files
@@ -92,6 +93,7 @@ export default ({ mode }: { mode: string }) => {
       hashEdificeBootstrap({
         hash: queryHashVersion,
       }),
+      externalLibs(),
     ],
 
     build: {
