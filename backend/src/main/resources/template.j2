@@ -4,8 +4,7 @@
     "main": "org.entcore.blog.Blog",
     "probes": [
       "org.entcore.common.http.health.Neo4jProbe",
-      "org.entcore.common.http.health.MongoProbe",
-      "fr.wseduc.webutils.metrics.EventBusProbe"
+      "org.entcore.common.http.health.MongoProbe"
     ],
     "csrf-token": {{ csrfToken | default('true') }},
     "port": 8018,
