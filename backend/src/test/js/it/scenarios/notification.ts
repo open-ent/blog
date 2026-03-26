@@ -1,4 +1,4 @@
-import chai, { describe } from 'https://jslib.k6.io/k6chaijs/4.3.4.2/index.js';
+import { describe } from "https://jslib.k6.io/k6chaijs/4.3.4.0/index.js";
 import {
   authenticateWeb,
   getUsersOfSchool,
@@ -9,16 +9,14 @@ import {
   getRandomUserWithProfile,
   assertCondition,
   assertOk,
-  lastNotifications,
   switchSession,
   getHeaders
-} from "https://raw.githubusercontent.com/juniorode/edifice-k6-commons/develop/dist/index.js";
+} from "../../node_modules/edifice-k6-commons/dist/index.js";
 import http from "k6/http";
-import { addShareToUser, createBlog, createPost, publishPost, deletePost } from '../utils.js';
+import { addShareToUser, createBlog, createPost, publishPost } from '../_utils.ts';
 import { check } from 'k6';
 const maxDuration = __ENV.MAX_DURATION || "1m";
 const gracefulStop = parseInt(__ENV.GRACEFUL_STOP || "2s");
-chai.config.logFailures = true;
 const rootUrl = __ENV.ROOT_URL;
 
 export const options = {
@@ -30,7 +28,6 @@ export const options = {
     notifyPost: {
       executor: "per-vu-iterations",
       vus: 1,
-      maxDuration: "30s",
       maxDuration: maxDuration,
       gracefulStop,
     },

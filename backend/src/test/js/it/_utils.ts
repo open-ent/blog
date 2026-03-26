@@ -4,7 +4,7 @@ import {sleep} from 'k6';
 import {
     getHeaders,
     assertOk
-  } from "https://raw.githubusercontent.com/juniorode/edifice-k6-commons/develop/dist/index.js";
+  } from "../node_modules/edifice-k6-commons/dist/index.js";
   
 const rootUrl = __ENV.ROOT_URL;
 

@@ -1,4 +1,4 @@
-import chai, { describe } from 'https://jslib.k6.io/k6chaijs/4.3.4.2/index.js';
+import { describe } from "https://jslib.k6.io/k6chaijs/4.3.4.0/index.js";
 import {
   checkStatus,
   authenticateWeb,
@@ -10,11 +10,10 @@ import {
   switchSession,
   getRandomUserWithProfile,
   assertCondition
-} from "https://raw.githubusercontent.com/juniorode/edifice-k6-commons/develop/dist/index.js";
-import { addShareToUser, createBlog, createPost, deletePost } from '../utils.js';
+} from "../../node_modules/edifice-k6-commons/dist/index.js";
+import { addShareToUser, createBlog, createPost, deletePost } from '../_utils.ts';
 const maxDuration = __ENV.MAX_DURATION || "1m";
 const gracefulStop = parseInt(__ENV.GRACEFUL_STOP || "2s");
-chai.config.logFailures = true;
 
 export const options = {
   setupTimeout: "1h",
@@ -25,7 +24,6 @@ export const options = {
     shareBlog: {
       executor: "per-vu-iterations",
       vus: 1,
-      maxDuration: "30s",
       maxDuration: maxDuration,
       gracefulStop,
     },
