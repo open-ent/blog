@@ -16,8 +16,12 @@ export function createBlog(blogName, session, commentType='NONE', publishType='R
     description: `Description de ${blogName}`,
     thumbnail: '/blog/public/img/blog.png',
     'comment-type': commentType,
-    'publish-type': publishType
-    });
+    'publish-type': publishType,
+    "visibility":"OWNER",
+    "trashed":false,
+    "slug":"",
+    "allowReplies":true}
+    );
     let res = http.post(`${rootUrl}/blog`, payload, {headers})
     assertOk(res, 'create blog')
     const blogId = JSON.parse(res.body)['_id']
