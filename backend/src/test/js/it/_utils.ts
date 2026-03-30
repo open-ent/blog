@@ -144,7 +144,7 @@ export function updateComment(blog, post, comment, text, session) {
 
 export function deleteComment(blog, post, comment, session) {
     console.log("Deleting comment.....")
-    const res = http.del(`${rootUrl}/blog/comment/${blog.id}/${post.id}/${comment.id}`, {headers: getHeaders(session)});
+    const res = http.del(`${rootUrl}/blog/comment/${blog.id}/${post.id}/${comment.id}`, {}, {headers: getHeaders(session)});
     assertOk(res, 'delete comment');
     return res;
 }
