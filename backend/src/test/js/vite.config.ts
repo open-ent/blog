@@ -7,7 +7,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'loadtest/index.ts'),
-      name: 'actualites-k6-tests',
+      name: 'blog-k6-tests',
       fileName: 'index',
     },
     rollupOptions: {
