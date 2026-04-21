@@ -2,7 +2,14 @@ import type { HtmlTagDescriptor, Plugin } from 'vite';
 
 const defaultConfig = {
   importMapPath: '/assets/importmap.json',
-  externals: ['@edifice.io/react', '@edifice.io/client', 'ode-explorer'],
+  externals: [
+    'react',
+    'react-dom',
+    'react/jsx-runtime',
+    '@edifice.io/react',
+    '@edifice.io/client',
+    'ode-explorer',
+  ],
 };
 
 export interface ExternalLibsOptions {
@@ -40,8 +47,8 @@ export function externalLibs({
                 );
                 if (!isSubPath) return id;
 
-                if (id === 'ode-explorer/lib') {
-                  return 'ode-explorer/index.js';
+                if (id === 'ode-explorer/lib' || id === 'ode-explorer') {
+                  return 'ode-explorer/dist/lib/index.js';
                 }
 
                 let resolved = id.replace('/dist/', '/');
