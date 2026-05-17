@@ -29,7 +29,7 @@
     </repositories>
 
     <properties>
-        <entCoreVersion>6.14-SNAPSHOT</entCoreVersion>
+        <entCoreVersion>6.14.9-patched</entCoreVersion>
         <junitVersion>4.13.2</junitVersion>
         <explorerVersion>2.5-SNAPSHOT</explorerVersion>
         <modMongoVersion>4.1-SNAPSHOT</modMongoVersion>
