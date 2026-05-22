@@ -114,7 +114,8 @@ public class DefaultBlogService implements BlogService{
 				.put("author", owner)
 				.put("comment-type", commentType.name())
 				.put("publish-type", publishType.name())
-				.put("shared", new JsonArray());
+				.put("shared", new JsonArray())
+				.put("allowReplies", blog.getBoolean("allowReplies", true));
 		// get and remove folder field
 		final Optional<Number> folderId = Optional.ofNullable(blog.getNumber("folder"));
 		blog.remove("folder");
