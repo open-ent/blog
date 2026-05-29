@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 
-import { useUser } from '@edifice.io/react';
-import { ACTION, ActionType, IAction } from '@edifice.io/client';
+import { useUser } from '@open-ent/react';
+import { ACTION, ActionType, IAction } from '@open-ent/client';
 
 import { Post, PostMetadata, PostState } from '~/models/post';
 import {

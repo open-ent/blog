@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
-import { useUser } from '@edifice.io/react';
-import { ACTION, ActionType, IAction, RightRole } from '@edifice.io/client';
+import { useUser } from '@open-ent/react';
+import { ACTION, ActionType, IAction, RightRole } from '@open-ent/client';
 import { useQuery } from '@tanstack/react-query';
 
 import { Post } from '~/models/post';

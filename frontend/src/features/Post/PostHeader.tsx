@@ -1,4 +1,4 @@
-import { AppHeader, Breadcrumb, useEdificeClient } from '@edifice.io/react';
+import { AppHeader, Breadcrumb, useEdificeClient } from '@open-ent/react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 

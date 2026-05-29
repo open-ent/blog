@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-import { useToast } from '@edifice.io/react';
-import { odeServices } from '@edifice.io/client';
+import { useToast } from '@open-ent/react';
+import { odeServices } from '@open-ent/client';
 import { useTranslation } from 'react-i18next';
 
 import { BlogLayer, IBlogError } from '~/utils/BlogEvent';

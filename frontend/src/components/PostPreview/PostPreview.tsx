@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Card, Image } from '@edifice.io/react';
-import { Editor, EditorRef } from '@edifice.io/react/editor';
-import { getThumbnail } from '@edifice.io/utilities';
+import { Card, Image } from '@open-ent/react';
+import { Editor, EditorRef } from '@open-ent/react/editor';
+import { getThumbnail } from '@open-ent/utilities';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';

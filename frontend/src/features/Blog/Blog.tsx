@@ -1,4 +1,4 @@
-import { LoadingScreen } from '@edifice.io/react';
+import { LoadingScreen } from '@open-ent/react';
 
 import { BlogHeader } from '~/features/Blog/BlogHeader';
 import BlogPostList from '~/features/Blog/BlogPostList';

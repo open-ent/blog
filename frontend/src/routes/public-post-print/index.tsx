@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { LoadingScreen } from '@edifice.io/react';
+import { LoadingScreen } from '@open-ent/react';
 import { useQuery } from '@tanstack/react-query';
 import { useParams, useRouteLoaderData } from 'react-router-dom';
 

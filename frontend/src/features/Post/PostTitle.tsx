@@ -1,9 +1,9 @@
-import { Avatar, Badge, Button, IconButton } from '@edifice.io/react';
+import { Avatar, Badge, Button, IconButton } from '@open-ent/react';
 import {
   IconArrowLeft,
   IconPrint,
   IconTextToSpeech,
-} from '@edifice.io/react/icons';
+} from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 
 import { Post, PostState } from '~/models/post';

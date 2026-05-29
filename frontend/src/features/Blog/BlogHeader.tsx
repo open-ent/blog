@@ -1,4 +1,4 @@
-import { AppHeader, Breadcrumb, useEdificeClient } from '@edifice.io/react';
+import { AppHeader, Breadcrumb, useEdificeClient } from '@open-ent/react';
 
 import { Blog } from '~/models/blog';
 import { BlogActionBar } from './BlogActionBar';

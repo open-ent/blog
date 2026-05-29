@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import { LoadingScreen } from '@edifice.io/react';
-import { Editor } from '@edifice.io/react/editor';
+import { LoadingScreen } from '@open-ent/react';
+import { Editor } from '@open-ent/react/editor';
 
 import { BlogHeader } from '~/features/Blog/BlogHeader';
 import { PostTitle } from '~/features/Post/PostTitle';

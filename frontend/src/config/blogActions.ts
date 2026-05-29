@@ -1,4 +1,4 @@
-import { ACTION } from '@edifice.io/client';
+import { ACTION } from '@open-ent/client';
 
 import { IActionDefinition } from '~/utils/types';
 import { workflows } from './workflows';

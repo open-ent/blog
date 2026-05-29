@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 
-import { Button, FormControl, Input, Label } from '@edifice.io/react';
-import { Editor, EditorRef } from '@edifice.io/react/editor';
-import { IconSave, IconSend } from '@edifice.io/react/icons';
+import { Button, FormControl, Input, Label } from '@open-ent/react';
+import { Editor, EditorRef } from '@open-ent/react/editor';
+import { IconSave, IconSend } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 

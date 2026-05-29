@@ -1,4 +1,4 @@
-import { CoreDate, useDate } from '@edifice.io/react';
+import { CoreDate, useDate } from '@open-ent/react';
 import clsx from 'clsx';
 
 // TODO Move to edifice-ui (don't forget css) css

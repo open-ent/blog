@@ -7,13 +7,13 @@ import {
   Input,
   Label,
   Loading,
-} from '@edifice.io/react';
-import { Editor, EditorRef } from '@edifice.io/react/editor';
-import { IconSave, IconSend } from '@edifice.io/react/icons';
+} from '@open-ent/react';
+import { Editor, EditorRef } from '@open-ent/react/editor';
+import { IconSave, IconSend } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { CommentProvider } from '@edifice.io/react/comments';
+import { CommentProvider } from '@open-ent/react/comments';
 import { useQuery } from '@tanstack/react-query';
 import { ButtonGroup } from '~/components/ButtonGroup/ButtonGroup';
 import OldFormatModal from '~/components/OldFormatModal/OldFormatModal';

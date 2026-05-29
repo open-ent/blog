@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 
-import { LoadingScreen, useTrashedResource } from '@edifice.io/react';
+import { LoadingScreen, useTrashedResource } from '@open-ent/react';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';
 
-import { Editor } from '@edifice.io/react/editor';
+import { Editor } from '@open-ent/react/editor';
 import { postContentActions } from '~/config/postContentActions';
 import { PostTitle } from '~/features/Post/PostTitle';
 import { PostMetadata } from '~/models/post';

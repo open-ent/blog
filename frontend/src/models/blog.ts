@@ -1,4 +1,4 @@
-import { ID } from '@edifice.io/client';
+import { ID } from '@open-ent/client';
 
 export type CommentType = 'NONE' | 'IMMEDIATE' | 'RESTRAINT';
 export type PublishType = 'IMMEDIATE' | 'RESTRAINT';

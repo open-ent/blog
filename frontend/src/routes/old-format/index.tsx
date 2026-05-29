@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { useEdificeTheme, useTrashedResource } from '@edifice.io/react';
+import { useEdificeTheme, useTrashedResource } from '@open-ent/react';
 import { QueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { LoaderFunctionArgs, useLoaderData, useParams } from 'react-router-dom';

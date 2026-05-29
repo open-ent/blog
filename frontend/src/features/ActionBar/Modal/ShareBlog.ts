@@ -1,3 +1,3 @@
-import { ShareBlog } from '@edifice.io/react/modals';
+import { ShareBlog } from '@open-ent/react/modals';
 
 export default ShareBlog;

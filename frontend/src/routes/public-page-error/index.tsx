@@ -1,4 +1,4 @@
-import { Button, EmptyScreen } from '@edifice.io/react';
+import { Button, EmptyScreen } from '@open-ent/react';
 import illuError from '@images/emptyscreen/illu-error.svg';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useRouteError } from 'react-router-dom';

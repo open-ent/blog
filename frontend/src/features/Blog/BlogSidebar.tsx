@@ -3,8 +3,8 @@ import {
   IconButton,
   Image,
   useEdificeClient,
-} from '@edifice.io/react';
-import { IconRafterDown } from '@edifice.io/react/icons';
+} from '@open-ent/react';
+import { IconRafterDown } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 
 import { SummaryList } from '~/components/SummaryList/SummaryList';

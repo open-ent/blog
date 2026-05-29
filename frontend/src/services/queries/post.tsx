@@ -1,4 +1,4 @@
-import { useToast } from '@edifice.io/react';
+import { useToast } from '@open-ent/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 

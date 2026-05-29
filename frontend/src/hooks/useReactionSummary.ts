@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 
-import { useReactions } from '@edifice.io/react/audience';
+import { useReactions } from '@open-ent/react/audience';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useBlogStore } from '~/store';

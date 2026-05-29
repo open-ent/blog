@@ -1,4 +1,4 @@
-import { checkUserRight, useTrashedResource } from '@edifice.io/react';
+import { checkUserRight, useTrashedResource } from '@open-ent/react';
 import { QueryClient } from '@tanstack/react-query';
 import { LoaderFunctionArgs, Outlet, useParams } from 'react-router-dom';
 

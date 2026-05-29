@@ -3,7 +3,7 @@ import {
   ErrorCode,
   LayerName,
   odeServices,
-} from '@edifice.io/client';
+} from '@open-ent/client';
 
 export interface IBlogError {
   code: ErrorCode;
