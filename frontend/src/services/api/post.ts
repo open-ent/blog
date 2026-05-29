@@ -1,4 +1,4 @@
-import { ViewsDetails, odeServices } from '@edifice.io/client';
+import { ViewsDetails, odeServices } from '@open-ent/client';
 
 import { Post, PostMetadata } from '~/models/post';
 import { checkHttpError } from '~/utils/BlogEvent';

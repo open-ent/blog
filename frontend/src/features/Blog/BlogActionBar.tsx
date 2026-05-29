@@ -1,8 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 
-import { Button, IconButton, useToggle } from '@edifice.io/react';
-import { IconOptions, IconPlus } from '@edifice.io/react/icons';
-import { ACTION, ActionType } from '@edifice.io/client';
+import { Button, IconButton, useToggle } from '@open-ent/react';
+import { IconOptions, IconPlus } from '@open-ent/react/icons';
+import { ACTION, ActionType } from '@open-ent/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';

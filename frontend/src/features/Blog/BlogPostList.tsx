@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { Button, EmptyScreen } from '@edifice.io/react';
+import { Button, EmptyScreen } from '@open-ent/react';
 import { useTranslation } from 'react-i18next';
 
 import illuBlog from '@images/emptyscreen/illu-blog.svg';

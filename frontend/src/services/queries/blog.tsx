@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 
-import { useToast } from '@edifice.io/react';
-import { IAction, odeServices } from '@edifice.io/client';
+import { useToast } from '@open-ent/react';
+import { IAction, odeServices } from '@open-ent/client';
 import {
   useInfiniteQuery,
   useMutation,

@@ -1,7 +1,7 @@
 import { Suspense, lazy, useState } from 'react';
 
-import { Button, IconButton, useToggle } from '@edifice.io/react';
-import { IconEdit, IconOptions, IconSend } from '@edifice.io/react/icons';
+import { Button, IconButton, useToggle } from '@open-ent/react';
+import { IconEdit, IconOptions, IconSend } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 
 import { Post, PostState } from '~/models/post';

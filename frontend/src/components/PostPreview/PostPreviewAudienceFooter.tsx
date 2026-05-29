@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 
-import { useToggle } from '@edifice.io/react';
+import { useToggle } from '@open-ent/react';
 import {
   ReactionModal,
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-} from '@edifice.io/react/audience';
-import { ViewsDetails } from '@edifice.io/client';
+} from '@open-ent/react/audience';
+import { ViewsDetails } from '@open-ent/client';
 import { useShallow } from 'zustand/react/shallow';
 
 import { useActionDefinitions } from '~/features/ActionBar/useActionDefinitions';

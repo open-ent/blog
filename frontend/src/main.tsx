@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 
-import { EdificeClientProvider, EdificeThemeProvider } from '@edifice.io/react';
-import { ERROR_CODE } from '@edifice.io/client';
+import { EdificeClientProvider, EdificeThemeProvider } from '@open-ent/react';
+import { ERROR_CODE } from '@open-ent/client';
 import {
   QueryCache,
   QueryClient,
@@ -15,7 +15,9 @@ import './i18n';
 import { router } from './routes';
 import './styles/index.css';
 
-import '@edifice.io/bootstrap/dist/index.css';
+// Le bootstrap openent n'est plus bundlé : il est chargé au runtime via
+// <link href="/assets/themes/openent-bootstrap/index.css"> dans index.html
+// (cf. README-THEME). Permet de changer le look sans recompiler le module.
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement!);

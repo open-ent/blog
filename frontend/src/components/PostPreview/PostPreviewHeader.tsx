@@ -1,5 +1,5 @@
-import { Avatar, Badge } from '@edifice.io/react';
-import { IconPinOn } from '@edifice.io/react/icons';
+import { Avatar, Badge } from '@open-ent/react';
+import { IconPinOn } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 

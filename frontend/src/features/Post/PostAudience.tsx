@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { ReactionType, ViewsDetails } from '@edifice.io/client';
+import { ReactionType, ViewsDetails } from '@open-ent/client';
 import {
   ReactionChoice,
   ReactionModal,
   ReactionSummary,
   ViewsCounter,
   ViewsModal,
-} from '@edifice.io/react/audience';
+} from '@open-ent/react/audience';
 
 import useReactionModal from '~/hooks/useReactionModal';
 import useReactionSummary from '~/hooks/useReactionSummary';

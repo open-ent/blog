@@ -1,4 +1,4 @@
-import { useDate } from '@edifice.io/react';
+import { useDate } from '@open-ent/react';
 import { useTranslation } from 'react-i18next';
 
 import { Post, PostState } from '~/models/post';

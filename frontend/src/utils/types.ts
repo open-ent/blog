@@ -1,4 +1,4 @@
-import { IAction } from '@edifice.io/client';
+import { IAction } from '@open-ent/client';
 
 /**
  * Definition of an action the user may accomplish,

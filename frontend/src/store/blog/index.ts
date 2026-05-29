@@ -1,4 +1,4 @@
-import { ReactionSummaryData, ViewsCounters } from '@edifice.io/client';
+import { ReactionSummaryData, ViewsCounters } from '@open-ent/client';
 import { create } from 'zustand';
 
 import { Post } from '~/models/post';
