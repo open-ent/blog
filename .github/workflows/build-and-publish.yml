@@ -46,6 +46,10 @@ jobs:
 
       - name: Install frontend dependencies
         working-directory: frontend
+        env:
+          # @open-ent/* publiés sur GitHub Packages par le repo privé openent-frontend-framework.
+          # Le GITHUB_TOKEN du repo blog ne peut pas les lire (cross-repo) -> PAT read:packages.
+          NODE_AUTH_TOKEN: ${{ secrets.OPENENT_PACKAGES_TOKEN }}
         run: pnpm install
 
       - name: Build frontend
