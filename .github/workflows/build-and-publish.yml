@@ -50,6 +50,10 @@ jobs:
           # @open-ent/* publiés sur GitHub Packages par le repo privé openent-frontend-framework.
           # Le GITHUB_TOKEN du repo blog ne peut pas les lire (cross-repo) -> PAT read:packages.
           NODE_AUTH_TOKEN: ${{ secrets.OPENENT_PACKAGES_TOKEN }}
+          # Doivent être définies (même vides) sinon le .npmrc échoue à se parser
+          # (${NPM_TOKEN}/${TIPTAP_PRO_TOKEN} non substitués) et le routage @open-ent est ignoré.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
         run: pnpm install
 
       - name: Build frontend
