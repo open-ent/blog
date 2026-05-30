@@ -3,7 +3,7 @@ import { RouteObject, createBrowserRouter } from 'react-router-dom';
 
 import PageError from './page-error';
 import PublicPageError from './public-page-error';
-import { Explorer } from 'ode-explorer/lib';
+import { Explorer } from '@open-ent/explorer/lib';
 import { explorerConfig } from '~/config';
 
 const routes = (queryClient: QueryClient): RouteObject[] => [
@@ -167,7 +167,10 @@ const routes = (queryClient: QueryClient): RouteObject[] => [
 export const basename = import.meta.env.PROD ? '/blog' : '/';
 export const baseUrl = `${location.origin}${basename.replace(/\/$/g, '')}`;
 
-export const router = (queryClient: QueryClient) =>
+export const router = (
+  queryClient: QueryClient,
+  basenameArg: string = basename,
+) =>
   createBrowserRouter(routes(queryClient), {
-    basename: basename,
+    basename: basenameArg,
   });

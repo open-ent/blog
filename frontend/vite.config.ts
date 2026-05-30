@@ -57,6 +57,14 @@ export default ({ mode }: { mode: string }) => {
         '@react-spring/web',
         'react-hook-form',
         'react-router-dom',
+        // @open-ent/explorer embarque ses propres copies de @open-ent/{client,react} → instance
+        // dupliquée et NON initialisée par EdificeClientProvider (→ Explorer plante « blog n'existe
+        // pas »). On force une instance unique (équivalent du `shared` singleton qu'on avait en MF).
+        '@open-ent/client',
+        '@open-ent/react',
+        '@open-ent/explorer',
+        '@open-ent/bootstrap',
+        '@open-ent/utilities',
       ],
       alias: {
         '@images': resolve(
