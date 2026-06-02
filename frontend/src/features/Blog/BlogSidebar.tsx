@@ -1,9 +1,4 @@
-import {
-  AppIcon,
-  IconButton,
-  Image,
-  useEdificeClient,
-} from '@open-ent/react';
+import { AppIcon, IconButton, Image, useEdificeClient } from '@open-ent/react';
 import { IconRafterDown } from '@open-ent/react/icons';
 import { useTranslation } from 'react-i18next';
 
