@@ -39,11 +39,11 @@
     ]
   },
   "dependencies": {
-    "@open-ent/bootstrap": "^2.5.25",
-    "@open-ent/client": "^2.5.25",
-    "@open-ent/explorer": "^2.5.25",
-    "@open-ent/react": "^2.5.25",
-    "@open-ent/utilities": "^2.5.25",
+    "@open-ent/bootstrap": "^2.5.26",
+    "@open-ent/client": "^2.5.26",
+    "@open-ent/explorer": "^2.5.26",
+    "@open-ent/react": "^2.5.26",
+    "@open-ent/utilities": "^2.5.26",
     "@react-spring/web": "9.7.5",
     "@tanstack/react-query": "5.62.7",
     "clsx": "2.1.1",
