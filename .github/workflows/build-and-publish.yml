@@ -54,7 +54,7 @@ jobs:
           # (${NPM_TOKEN}/${TIPTAP_PRO_TOKEN} non substitués) et le routage @open-ent est ignoré.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build frontend
         working-directory: frontend
