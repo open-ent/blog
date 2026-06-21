@@ -1,8 +1,13 @@
 {
-    "timeline.blog.in.blog": "in blog",
-    "timeline.blog.published.comment": "Comment post",
-    "timeline.blog.published.post": "published post",
-    "timeline.blog.shared.blog": "gave you access to blog",
-    "timeline.blog.submitted.post": "a soumis un billet",
-    "timeline.blog.updated.blog": "amended the blog"
+  "timeline.blog.in.blog": "in blog",
+  "timeline.blog.published.comment": "Comment post",
+  "timeline.blog.published.post": "published post",
+  "timeline.blog.shared.blog": "gave you access to blog",
+  "timeline.blog.submitted.post": "submitted a post",
+  "timeline.blog.updated.blog": "amended the blog",
+  "blog.publish-comment": "Comment on a blog post (only for the post author and the blog managers)",
+  "blog.publish-post": "Publication of a blog post",
+  "blog.share": "Sharing of a blog",
+  "blog.submit-post": "Submission of a blog post",
+  "push.notif.blog.published.post": "New blog post "
 }
