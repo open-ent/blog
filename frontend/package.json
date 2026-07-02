@@ -39,7 +39,7 @@
     ]
   },
   "dependencies": {
-    "@open-ent/bootstrap": "^2.5.29",
+    "@open-ent/bootstrap": "2.5.30-patched",
     "@open-ent/client": "^2.5.29",
     "@open-ent/explorer": "^2.5.26",
     "@open-ent/react": "^2.5.29",
