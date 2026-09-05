@@ -49,6 +49,8 @@ import org.entcore.common.events.EventStoreFactory;
 import org.entcore.common.http.filter.ResourceFilter;
 import org.entcore.common.neo4j.Neo;
 import org.entcore.common.user.UserInfos;
+import org.entcore.common.utils.OpeningHoursGuard;
+import org.entcore.common.utils.SpaceOpeningHours;
 import org.entcore.common.user.UserUtils;
 import org.entcore.common.utils.StringUtils;
 import org.vertx.java.core.http.RouteMatcher;
@@ -97,16 +99,11 @@ public class PostController extends BaseController {
 		}
 		RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
 			public void handle(final JsonObject data) {
-				UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-					@Override
-					public void handle(final UserInfos user) {
-						if (user != null) {
-							final Handler<Either<String, JsonObject>> handler = eventHelper.onCreateResource(request, RESOURCE_NAME, defaultResponseHandler(request));
-							post.create(blogId, data, user, handler, request);
-						} else {
-							unauthorized(request);
-						}
-					}
+				// Horaires d'utilisation : hors plage, un élève relit le blog mais n'y écrit
+				// plus (403 opening.hours.closed). Les autres profils ne sont jamais gardés.
+				OpeningHoursGuard.ifWriteAllowed(eb, request, SpaceOpeningHours.SCOPE_BLOG, user -> {
+					final Handler<Either<String, JsonObject>> handler = eventHelper.onCreateResource(request, RESOURCE_NAME, defaultResponseHandler(request));
+					post.create(blogId, data, user, handler, request);
 				});
 			}
 		});
@@ -121,20 +118,12 @@ public class PostController extends BaseController {
 			return;
 		}
 
-		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-			@Override
-			public void handle(final UserInfos user) {
-				if (user != null) {
-					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-						public void handle(final JsonObject data) {
-							post.update(postId, data, user, defaultResponseHandler(request), request);
-						}
-					});
-				} else {
-					unauthorized(request);
-				}
-			}
-		});
+		OpeningHoursGuard.ifWriteAllowed(eb, request, SpaceOpeningHours.SCOPE_BLOG, user ->
+				RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+					public void handle(final JsonObject data) {
+						post.update(postId, data, user, defaultResponseHandler(request), request);
+					}
+				}));
 	}
 
 	@Delete("/post/:blogId/:postId")
@@ -273,31 +262,27 @@ public class PostController extends BaseController {
 			badRequest(request);
 			return;
 		}
-		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
+		OpeningHoursGuard.ifWriteAllowed(eb, request, SpaceOpeningHours.SCOPE_BLOG, new Handler<UserInfos>() {
 			@Override
 			public void handle(final UserInfos user) {
-				if (user != null) {
-					post.submit(blogId, postId, user, new Handler<Either<String, JsonObject>>() {
-						@Override
-						public void handle(Either<String, JsonObject> event) {
-							if (event.isRight()) {
-								if ("PUBLISHED".equals(event.right().getValue().getString("state"))) {
-									timelineService.notifyPublishPost(request, blogId, postId, user,
-											pathPrefix + "#/view/" + blogId);
-								} else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
-									timelineService.notifySubmitPost(request, blogId, postId, user,
-											pathPrefix + "#/view/" + blogId);
-								}
-								renderJson(request, event.right().getValue());
-							} else {
-								JsonObject error = new JsonObject().put("error", event.left().getValue());
-								renderJson(request, error, 400);
+				post.submit(blogId, postId, user, new Handler<Either<String, JsonObject>>() {
+					@Override
+					public void handle(Either<String, JsonObject> event) {
+						if (event.isRight()) {
+							if ("PUBLISHED".equals(event.right().getValue().getString("state"))) {
+								timelineService.notifyPublishPost(request, blogId, postId, user,
+										pathPrefix + "#/view/" + blogId);
+							} else if ("SUBMITTED".equals(event.right().getValue().getString("state"))) {
+								timelineService.notifySubmitPost(request, blogId, postId, user,
+										pathPrefix + "#/view/" + blogId);
 							}
+							renderJson(request, event.right().getValue());
+						} else {
+							JsonObject error = new JsonObject().put("error", event.left().getValue());
+							renderJson(request, error, 400);
 						}
-					});
-				} else {
-					unauthorized(request);
-				}
+					}
+				});
 			}
 		});
 	}
@@ -359,22 +344,17 @@ public class PostController extends BaseController {
 			// replyTo is the ID of the comment to which the new comment is a reply
 			final String replyTo = body.getString("replyTo", null);
 
-			UserUtils.getUserInfos(eb, request, user -> {
-				if (user != null) {
-					post.addComment(blogId, postId, comment, replyTo, user, event -> {
-						if (event.isRight()) {
-							timelineService.notifyPublishComment(request, blogId, postId, user,
-									pathPrefix + "#/view/" + blogId);
-							renderJson(request, event.right().getValue());
-						} else {
-							JsonObject error = new JsonObject().put("error", event.left().getValue());
-							renderJson(request, error, 400);
-						}
-					});
-				} else {
-					unauthorized(request);
-				}
-			});
+			OpeningHoursGuard.ifWriteAllowed(eb, request, SpaceOpeningHours.SCOPE_BLOG, user ->
+				post.addComment(blogId, postId, comment, replyTo, user, event -> {
+					if (event.isRight()) {
+						timelineService.notifyPublishComment(request, blogId, postId, user,
+								pathPrefix + "#/view/" + blogId);
+						renderJson(request, event.right().getValue());
+					} else {
+						JsonObject error = new JsonObject().put("error", event.left().getValue());
+						renderJson(request, error, 400);
+					}
+				}));
 		}
 		);
 	}
@@ -390,20 +370,12 @@ public class PostController extends BaseController {
 			return;
 		}
 
-		UserUtils.getUserInfos(eb, request, new Handler<UserInfos>() {
-			@Override
-			public void handle(final UserInfos user) {
-				if (user != null) {
-					RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
-						public void handle(final JsonObject data) {
-							post.updateComment(postId, commentId, data.getString("comment"), user, defaultResponseHandler(request));
-						}
-					});
-				} else {
-					unauthorized(request);
-				}
-			}
-		});
+		OpeningHoursGuard.ifWriteAllowed(eb, request, SpaceOpeningHours.SCOPE_BLOG, user ->
+				RequestUtils.bodyToJson(request, new Handler<JsonObject>() {
+					public void handle(final JsonObject data) {
+						post.updateComment(postId, commentId, data.getString("comment"), user, defaultResponseHandler(request));
+					}
+				}));
 	}
 
 	@Delete("/comment/:blogId/:postId/:commentId")
