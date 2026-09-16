@@ -41,8 +41,15 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-store-
+          # Le suffixe "open-ent-<n>" doit être incrémenté à chaque republication d'une
+          # version -patched de @open-ent/* (fork openent-frontend-framework) : sinon,
+          # même après refresh-open-ent-lock.mjs, ce cache contient encore le tarball
+          # physique de l'ancien contenu sous l'ancien hash d'intégrité (le lockfile,
+          # donc la clé de cache, n'a pas changé) et l'install le sert sans jamais
+          # toucher le réseau — le correctif ne part alors jamais réellement en prod.
+          # Même patron que modules/schoolbook (même dépendance @open-ent/*, même piège).
+          key: ${{ runner.os }}-pnpm-store-open-ent-2-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-open-ent-2-
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -54,7 +61,22 @@ jobs:
           # (${NPM_TOKEN}/${TIPTAP_PRO_TOKEN} non substitués) et le routage @open-ent est ignoré.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
-        run: pnpm install --no-frozen-lockfile
+        run: |
+          # Les @open-ent/* sont publiés sur un tag MOBILE (2.5.30-patched) : le lock
+          # fige une URL de tarball contenant le SHA du blob d'alors, que GitHub
+          # Packages rejette en 409 après republication. On re-résout ces paquets.
+          # Purger PUIS geler est contradictoire : le lock amputé fait échouer le gel sur
+          # « Broken lockfile: no entry for @open-ent/... ». On tente donc l'install gelée
+          # telle quelle — un écart package.json/lock doit casser le build, pas être résolu
+          # en silence — et on ne re-résout qu'en repli, quand elle échoue.
+          # (Même patron que modules/schoolbook.)
+          if pnpm install --frozen-lockfile; then
+            echo "Install reproductible : lockfile respecté tel quel."
+          else
+            echo "Install gelée en échec — re-résolution des @open-ent/* (tag mobile republié)."
+            node scripts/refresh-open-ent-lock.mjs
+            pnpm install --no-frozen-lockfile
+          fi
 
       - name: Build frontend
         working-directory: frontend
