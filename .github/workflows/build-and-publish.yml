@@ -48,8 +48,8 @@ jobs:
           # donc la clé de cache, n'a pas changé) et l'install le sert sans jamais
           # toucher le réseau — le correctif ne part alors jamais réellement en prod.
           # Même patron que modules/schoolbook (même dépendance @open-ent/*, même piège).
-          key: ${{ runner.os }}-pnpm-store-open-ent-2-${{ hashFiles('frontend/pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-store-open-ent-2-
+          key: ${{ runner.os }}-pnpm-store-open-ent-3-${{ hashFiles('frontend/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-open-ent-3-
 
       - name: Install frontend dependencies
         working-directory: frontend
