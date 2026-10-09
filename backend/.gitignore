@@ -34,3 +34,7 @@ src/main/resources/public/*
 !src/main/resources/public/js
 !src/main/resources/public/template
 # src/main/resources/view
+
+# Vues générées par build.sh depuis frontend/dist (hash de bundle à chaque build)
+src/main/resources/view/blog.html
+src/main/resources/view/index.html
