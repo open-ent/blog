@@ -33,7 +33,10 @@
     }
   },
   "lint-staged": {
-    "**/*.{ts,tsx}": ["prettier --write", "eslint --fix --no-warn-ignored"]
+    "**/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --no-warn-ignored"
+    ]
   },
   "dependencies": {
     "@open-ent/bootstrap": "2.5.30-patched",
@@ -46,7 +49,6 @@
     "clsx": "2.1.1",
     "i18next": "23.8.1",
     "i18next-http-backend": "2.4.2",
-    "ode-explorer": "2.5.7",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-error-boundary": "4.0.13",
