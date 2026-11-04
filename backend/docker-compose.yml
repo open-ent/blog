@@ -1,6 +1,6 @@
 services:
   maven:
-    image: maven:3.9-eclipse-temurin-21
+    image: maven:3.9-eclipse-temurin-25
     user: "$DEFAULT_DOCKER_USER"
     working_dir: /usr/src/maven
     volumes:
@@ -12,7 +12,10 @@ services:
       GIT_DIR: /usr/src/.git
 
   node:
-    image: opendigitaleducation/node:16-alpine-pnpm
+    image: node:26-alpine
+    # Node ≥ 25 n'embarque plus corepack : pnpm (version du packageManager) est installé au
+    # démarrage, à la place de l'image opendigitaleducation/node:*-pnpm.
+    entrypoint: ["sh", "-c", "npm i -g --prefix /tmp/pnpm \"$$(node -p \"require('./package.json').packageManager.split('+')[0]\")\" >/dev/null && PATH=/tmp/pnpm/bin:$$PATH exec \"$$@\"", "--"]
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
